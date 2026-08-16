@@ -1,0 +1,203 @@
+/* css/controls.css - Contains interactive UI components: player dice zones, dice styling, and the doubling cube. */
+
+/* ==========================================
+   TACTILE DOUBLING CUBE
+   ========================================== */
+
+/* Make all trays valid positioning containers for absolute children */
+.vertical-tray,
+#doubling-cube-tray,
+#bar,
+#home-bar {
+    position: relative;
+    height: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
+}
+
+.doubling-cube {
+    width: 34px;
+    height: 34px;
+    background: #d32f2f;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: 2px solid #b71c1c;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 -2px 3px rgba(0,0,0,0.4), inset 0 2px 2px rgba(255,255,255,0.3);
+    cursor: pointer;
+    user-select: none;
+    padding-top: 2px; /* Optical centering for numbers */
+    z-index: 15;
+    
+    /* Universal centering relative to parent tray */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+}
+
+/* Active State - trigger via JS */
+.doubling-cube.active {
+    background: #d32f2f;
+    color: #ffffff;
+    border-color: #b71c1c;
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 -2px 3px rgba(0,0,0,0.4), inset 0 2px 2px rgba(255,255,255,0.3);
+}
+
+.doubling-cube.active:active {
+    transform: translate(-50%, -50%) scale(0.95);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.5);
+}
+
+/* Dim & Disable Cube During Opening Roll Phase */
+body.opening-roll-phase .doubling-cube, 
+.doubling-cube.disabled {
+    background: #7f2323;
+    color: #b0b0b0;
+    border: 2px solid #992a2a;
+    cursor: not-allowed;
+    pointer-events: auto;
+    box-shadow: none;
+}
+
+/* ==========================================
+   PLAYER DICE ZONES
+   ========================================== */
+.player-dice-zone {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100; /* Sit above board quadrants */
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.player-dice-zone:active .die {
+    transform: scale(0.95);
+}
+
+.player-dice-zone.swappable {
+    cursor: pointer;
+}
+
+.player-dice-zone.swappable:hover .die {
+    transform: translateY(-2px);
+    transition: transform 0.15s ease;
+}
+
+/* Hide the second die during opening roll phase */
+body.opening-roll-phase #white-die-2,
+body.opening-roll-phase #black-die-2 {
+    display: none !important;
+}
+
+
+/* ==========================================
+   DICE STYLING & PIP GRIDS
+   ========================================== */
+.die {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    user-select: none;
+    box-sizing: border-box;
+    /* pointer-events: none; Let parent zone capture click */
+    pointer-events: auto;
+    cursor: pointer;
+    
+    /* Flex layout for centering text codes like 'R' */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 -2px 2px rgba(0,0,0,0.1);
+}
+
+/* Shift text codes down 2px for optical vertical centering */
+.die:not([data-value]) {
+    padding-top: 2px;
+}
+
+/* Switch to Grid only when rendering numeric pips (data-value="1" through "6") */
+.die[data-value] {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    padding: 3px;
+}
+
+/* Individual Dot Element */
+.pip {
+    display: block;
+    width: 6px;
+    height: 6px;    
+    border-radius: 50%;
+    margin: auto;
+}
+
+/* White Player Dice: White body, Dark text & pips */
+#white-dice-zone .die {
+    width: 36px;
+    height: 36px;
+    background: #fbfbfb;
+    color: #222;
+    font-weight: 700;
+    border: 2px solid #ccc;
+}
+#white-dice-zone .die .pip {
+    background: #222;
+}
+
+/* Black Player Dice: Dark body, White text & pips, Grey border */
+#black-dice-zone .die {
+    width: 38px;
+    height: 38px;
+    background: #1e1e1e;
+    color: #fbfbfb;
+    font-weight: 500;
+    border: 2px solid #111111;
+}
+#black-dice-zone .die .pip {
+    background: #fbfbfb;
+}
+
+/* Pip Grid Placements */
+.die[data-value="1"] .pip:nth-child(1) { grid-area: 2 / 2; }
+
+.die[data-value="2"] .pip:nth-child(1) { grid-area: 1 / 1; }
+.die[data-value="2"] .pip:nth-child(2) { grid-area: 3 / 3; }
+
+.die[data-value="3"] .pip:nth-child(1) { grid-area: 1 / 1; }
+.die[data-value="3"] .pip:nth-child(2) { grid-area: 2 / 2; }
+.die[data-value="3"] .pip:nth-child(3) { grid-area: 3 / 3; }
+
+.die[data-value="4"] .pip:nth-child(1) { grid-area: 1 / 1; }
+.die[data-value="4"] .pip:nth-child(2) { grid-area: 1 / 3; }
+.die[data-value="4"] .pip:nth-child(3) { grid-area: 3 / 1; }
+.die[data-value="4"] .pip:nth-child(4) { grid-area: 3 / 3; }
+
+.die[data-value="5"] .pip:nth-child(1) { grid-area: 1 / 1; }
+.die[data-value="5"] .pip:nth-child(2) { grid-area: 1 / 3; }
+.die[data-value="5"] .pip:nth-child(3) { grid-area: 2 / 2; }
+.die[data-value="5"] .pip:nth-child(4) { grid-area: 3 / 1; }
+.die[data-value="5"] .pip:nth-child(5) { grid-area: 3 / 3; }
+
+.die[data-value="6"] .pip:nth-child(1) { grid-area: 1 / 1; }
+.die[data-value="6"] .pip:nth-child(2) { grid-area: 1 / 3; }
+.die[data-value="6"] .pip:nth-child(3) { grid-area: 2 / 1; }
+.die[data-value="6"] .pip:nth-child(4) { grid-area: 2 / 3; }
+.die[data-value="6"] .pip:nth-child(5) { grid-area: 3 / 1; }
+.die[data-value="6"] .pip:nth-child(6) { grid-area: 3 / 3; }

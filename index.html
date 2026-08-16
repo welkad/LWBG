@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,
+        <svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22>
+            <text y=%22.9em%22 font-size=%2290%22>🎲</text>
+        </svg>">
+    <title>BGammonLite</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="js/main.js"></script>
+</head>
+<body>
+    <header class="header-container">
+        <div class="scoreboard" id="scoreboard-black">
+            <div class="score-line">Black: <span id="pip-black">167</span></div>
+            <div class="score-line">Score: <span id="score-black">0</span></div>
+        </div>
+        <h1>Backgammon</h1>
+        <div class="scoreboard" id="scoreboard-black">
+            <div class="score-line">White: <span id="pip-white">167</span></div>
+            <div class="score-line">Score: <span id="score-white">0</span></div>
+        </div>
+    </header>
+    
+    <div class="master-board">
+        <!-- Left Border Number Strip -->
+        <div class="border-number-strip">
+            <div></div>
+            <div class="number-row"><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span></div>
+            <div></div>
+            <div class="number-row"><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span></div>
+            <div></div>
+        </div>
+
+        <!-- Main Playing Field Layer -->
+        <div class="playing-field-layer">
+            <!-- Left-Hand Tray -->
+            <div class="vertical-tray" id="doubling-cube-tray"></div>
+
+            <!-- LEFT PLAY FIELD (With Black Player Dice Zone) -->
+            <div class="quadrant-column" style="position: relative;">
+                <div class="board-half top" id="top-left"></div>
+                
+                <!-- Floating Interactive Dice for Black Player -->
+                <div id="black-dice-zone" class="player-dice-zone left-dice">
+                    <span id="black-die-1" class="die">R</span>
+                    <span id="black-die-2" class="die">R</span>
+                </div>
+
+                <div class="board-half bottom" id="bottom-left"></div>
+            </div>
+            
+            <!-- Central Bar Partition -->
+            <div class="vertical-tray" id="bar" style="position: relative;">
+                <div class="hinge top-hinge"></div>
+
+                <!-- Top Bar Container (Black checkers) -->
+                <div id="bar-black" class="bar-half top"></div>
+
+                <!-- Doubling cube centered on the bar -->
+                <div class="doubling-cube disabled" id="doubling-cube" data-owner="center">64</div>
+
+                <!-- Bottom Bar Container (White checkers) -->
+                <div id="bar-white" class="bar-half bottom"></div>
+
+                <div class="hinge bottom-hinge"></div>
+            </div>
+            
+            <!-- RIGHT PLAY FIELD (With White Player Dice Zone) -->
+            <div class="quadrant-column" style="position: relative;">
+                <div class="board-half top" id="top-right"></div>
+                
+                <!-- Floating Interactive Dice for White Player -->
+                <div id="white-dice-zone" class="player-dice-zone right-dice">
+                    <span id="white-die-1" class="die">R</span>
+                    <span id="white-die-2" class="die">R</span>
+                </div>
+
+                <div class="board-half bottom" id="bottom-right"></div>
+            </div>
+            
+            <!-- Right Bear-Off Home Bar -->
+            <div class="vertical-tray" id="home-bar">
+                <div class="bear-off-pocket top-pocket" id="home-top-pocket"></div>
+                <div class="bear-off-pocket bottom-pocket" id="home-bottom-pocket"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Border Number Strip -->
+        <div class="border-number-strip">
+            <div></div>
+            <div class="number-row"><span>12</span><span>11</span><span>10</span><span>9</span><span>8</span><span>7</span></div>
+            <div></div>
+            <div class="number-row"><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span></div>
+            <div></div>
+        </div>
+    </div>
+
+    <!-- Game Message Status Bar -->
+    <div id="game-status-bar" class="status-bar">
+        Both sides roll one die. Player with the highest roll moves first.
+    </div>
+
+    <!-- Dice Action Legend -->
+    <div class="dice-legend">
+        <span><strong>R</strong> : Roll</span>
+        <span><strong>U</strong> : Undo</span>
+        <span><strong>D</strong> : Done</span>
+    </div>
+    
+</body>
+</html>

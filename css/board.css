@@ -1,0 +1,324 @@
+/* css/board.css - Contains base page setup, wood frame layouts, triangle point geometry, and grid structures. */
+
+/* Base Page Reset */
+body { 
+    font-family: sans-serif; 
+    background: #222; 
+    color: #fff; 
+    text-align: center; 
+}
+
+/* Master Wood Frame Container */
+.master-board {
+    display: flex;
+    flex-direction: column;
+    background: #4a3728; 
+    padding: 0 12px;
+    max-width: 840px; 
+    margin: 15px auto;
+    border: 4px solid #2d2016;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+
+/* Dedicated Number Strips along the wood trim */
+.border-number-strip {
+    display: grid;
+    grid-template-columns: 40px 6fr 40px 6fr 40px; 
+    align-items: center;
+    min-height: 28px;
+}
+
+/* Symmetrical Layout for the Playable Board Layer */
+.playing-field-layer {
+    display: grid;
+    grid-template-columns: 40px 6fr 40px 6fr 40px; 
+    min-height: 440px; 
+}
+
+/* Continuous, solid vertical bars running cleanly top-to-bottom */
+.vertical-tray {
+    background: #3a2a1e;
+    box-shadow: inset 2px 0 5px rgba(0,0,0,0.4), inset -2px 0 5px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;
+}
+
+/* Play Areas holding the stacked triangles */
+.quadrant-column {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    row-gap: 40px;
+}
+
+/* 6 columns for the individual triangles inside each half */
+.board-half { 
+    display: grid; 
+    grid-template-columns: repeat(6, 1fr); 
+    gap: 2px; 
+}
+
+/* Structural rules for the triangle shapes */
+.point { 
+    position: relative;
+    min-height: 200px; 
+    display: flex; 
+    align-items: center; 
+    padding: 0; 
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+/* The visual triangle layer behind the pieces */
+.point::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1;
+}
+
+/* Alternating triangle wood colors */
+.point.point-odd::before { background: #cd853f; }
+.point.point-even::before { background: #8b5a2b; }
+
+/* Top Triangles: stack pieces starting immediately at the very top edge */
+.top .point { 
+    flex-direction: column; 
+    justify-content: flex-start; 
+}
+.top .point::before {
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+}
+
+/* Bottom Triangles: stack pieces starting immediately at the very bottom edge */
+.bottom .point { 
+    flex-direction: column-reverse; 
+    justify-content: flex-start; 
+}
+.bottom .point::before {
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+/* Number row text styling */
+.number-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #cca47c;
+    user-select: none;
+}
+
+.number-row span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Update the main center bar to force elements into the absolute center axis */
+#bar {
+    position: relative;
+    background: linear-gradient(90deg, #3a2a1e 46%, #150d08 46%, #150d08 54%, #3a2a1e 54%);
+}
+
+/* Elongated Multi-Knuckle Segmented Hinges */
+.hinge {
+    position: absolute;
+    width: 4px; 
+    height: 48px;
+    z-index: 1;
+    left: 50%;
+    background: 
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0px,
+            transparent 11px,
+            #3a2a1e 11px,
+            #3a2a1e 12px
+        ),
+        linear-gradient(90deg, #b58d3d 0%, #f1d779 50%, #b58d3d 100%);
+    border: 1px solid #7c5d21;
+    border-radius: 1px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+.top-hinge {
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.bottom-hinge {
+    top: 75%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Center seam through wooden border */
+.border-number-strip > div:nth-child(3) {
+    background: linear-gradient(90deg, transparent 46%, #150d08 46%, #150d08 54%, transparent 54%);
+    min-height: 100%;
+}
+
+.status-bar {
+    max-width: 840px;
+    margin: 10px auto;
+    padding: 10px 16px;
+    background: #2d2016;
+    border: 2px solid #4a3728;
+    border-radius: 6px;
+    color: #f1d779; /* Warm gold text */
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+/* ==========================================
+    SCORE BOARDS (LEFT & RIGHT)
+   ========================================== */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto 0 auto;
+    padding-top: 10px;
+}
+
+.header-container h1 {
+    margin: 0;
+    line-height: 1;
+    padding-top: 5px;
+}
+
+.scoreboard {
+    display: flex;
+    flex-direction: column;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #d4d4d4;
+    min-width: 110px;
+}
+
+#scoreboard-black {
+    text-align: left;
+    padding-left: 20px;
+}
+
+#scoreboard-white {
+    text-align: right;
+}
+
+.score-line {
+    line-height: 1.3;
+}
+
+/* ====================
+    Dice Action Legend
+   ==================== */
+
+.dice-legend {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #cccccc;
+    letter-spacing: 0.5px;
+}
+
+.dice-legend strong {
+    color: #fbfbfb;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    font-family: monospace;
+    margin-right: 4px;
+
+    /* Enforce a fixed square badge with centered text */
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 22px;
+    height: 22px;
+    padding: 0; /* Clear variable horizontal padding */
+}
+
+/* Extra space ONLY after the first item (Roll) */
+.dice-legend span:first-child {
+    margin-right: 6px; /* Adjust this value to add more distance between Roll and Undo */
+}
+
+/* =====================================
+   POINT INTERACTION & HIGHLIGHT STYLES
+   ===================================== */
+
+/* Elevate checkers above point pseudoelements */
+.point {
+  z-index: 2;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Selected Point & Bar Section Highlight */
+.point.selected,
+.bar-section.selected {
+  background-color: rgba(255, 235, 59, 0.28) !important;
+  box-shadow: inset 0 0 0 2px #ffeb3b;
+}
+
+/* Highlight the top checker on a selected point */
+.point.selected .checker:last-child {
+  box-shadow: 0 0 8px 3px #ffeb3b;
+  transform: scale(1.05);
+}
+
+/* Valid Destination Target Highlight */
+.point.valid-target {
+  background-color: rgba(76, 175, 80, 0.22) !important;
+  box-shadow: inset 0 0 0 2px #4caf50;
+  cursor: pointer;
+}
+
+/* Glowing green dot indicator inside valid target points */
+.point.valid-target::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #4caf50;
+  pointer-events: none;
+  z-index: 10;
+  animation: pulse-target 1.5s infinite alternate;
+}
+
+/* Position green dots near the tip of top vs bottom triangles */
+.top .point.valid-target::after {
+  bottom: 12px; /* Near bottom tip of top triangles */
+}
+
+.bottom .point.valid-target::after {
+  top: 12px; /* Near top tip of bottom triangles */
+}
+
+/* Pulsing animation for target indicators */
+@keyframes pulse-target {
+  from {
+    transform: translateX(-50%) scale(0.85);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateX(-50%) scale(1.15);
+    opacity: 1;
+  }
+}
