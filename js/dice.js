@@ -36,15 +36,74 @@ export function setDieValue(element, value) {
 
 export function renderDiceUI() {
     const player = state.currentPlayer;
-    const die1El = document.getElementById(`${player}-die-1`);
-    const die2El = document.getElementById(`${player}-die-2`);
+    // const die1El = document.getElementById(`${player}-die-1`);
+    // const die2El = document.getElementById(`${player}-die-2`);
+    // if (!die1El || !die2El) return;
 
-    if (!die1El || !die2El) return;
+    // Helper to get create die elements dynamically (up to 4)
+    function getOrCreateDie(playerColor, index) {
+        let dieEl = document.getElementById(`${playerColor}-die-${index + 1}`);
+        if (!dieEl) {
+            const targetZone = document.getElementById(`${playerColor}-dice-zone`);
+            if (!targetZone) return;
 
-    // Before roll
+            dieEl = document.createElement('span');
+            dieEl.id = `${playerColor}-die-${index + 1}`;
+            dieEl.className = 'die';
+            dieEl.onclick = () => handleDieClick(playerColor, index + 1);
+            targetZone.appendChild(dieEl);
+        }
+        return dieEl;
+    }
+
+    // ==========================================
+    //  OPENING ROLL PHASE
+    // ==========================================
+    if (state.gamePhase === 'opening_roll') {
+        ['white', 'black'].forEach(p => {
+            const d1 = getOrCreateDie(p, 0);
+            const d2 = getOrCreateDie(p, 1);
+
+            // Hide second die for both players during opening roll
+            if (d2) d2.style.display = 'none';
+
+            if (d1) {
+                d1.style.display = '';
+                // If this player hasn't rolled yet, show 'R'
+                if (state.openingRolls[p] === null) {
+                    setDieValue(d1, 'R');
+                } else {
+                    // Show their rolled value
+                    setDieValue(d1, state.openingRolls[p]);
+                }
+            }
+        });
+        return;
+    }
+
+    // ==========================================
+    //  REGULAR TURNS
+    // ==========================================
+    const zone = document.getElementById(`${player}-dice-zone`);
+    if (!zone) return;
+
+    // Clean up extra die elements (> 2) when returning to non-double state
+    const extraDiceCount = zone.children.length;
+    if (!state.hasRolled || state.currentRoll.length <= 2) {
+        for (let i = 3; i <= extraDiceCount; i++) {
+            const extra = document.getElementById(`${player}-die-${i}`);
+            if (extra) extra.remove();
+        }
+    }
+
+    const die1El = getOrCreateDie(player, 0);
+    const die2El = getOrCreateDie(player, 1);
+
+    // Before roll -> show 'R' 'R'
     if (!state.hasRolled) {
         setDieValue(die1El, 'R');
         setDieValue(die2El, 'R');
+        die1El.style.display = '';
         die2El.style.display = '';
         return;
     }
@@ -52,28 +111,71 @@ export function renderDiceUI() {
     const movesMade = state.moveHistory ? state.moveHistory.length : 0;
     const movesLeft = state.currentRoll.length;
 
-    // Condition 1: All moves completed (or no valid moves left) -> Show 'U' and 'D'
+    // All moves completed -> Show 'U' and 'D' on the first two dice
     if (movesLeft === 0 && movesMade > 0) {
-        die2El.style.display = '';
+        // Clean up dice 3 & 4 if present
+        for (let i = 3; i <= 4; i++) {
+            const extra = document.getElementById(`${player}-die-${i}`);
+            if (extra) extra.remove();
+        }        
         setDieValue(die1El, 'U');
         setDieValue(die2El, 'D');
+        die1El.style.display = '';
+        die2El.style.display = '';
         return;
+    }
+
+    // Doubles rolled (4 dice total)
+    if (state.currentRoll.length > 2 || (movesMade > 0 && (movesMade + movesLeft === 4))) {
+        const totalInitialDice = movesMade + movesLeft; // 4 for doubles
+
+        for (let i = 0; i < totalInitialDice; i++) {
+            const dieEl = getOrCreateDie(player, i);
+            dieEl.style.display = '';
+
+            if (i < movesMade) {
+                // Used die: shows 'U' for undoing that move
+                setDieValue(dieEl, 'U');
+                dieEl.classList.add('used');
+            } else {
+                // Remaining die: shows pip value
+                const rollIndex = i - movesMade;
+                setDieValue(dieEl, state.currentRoll[rollIndex]);
+                dieEl.classList.remove('used');
+            }
+        }
+        return;
+    }
+
+    // Standard Non-Doubles Roll (2 dice)
+    if (movesMade > 0 && movesLeft > 0) {
+        // 1 move made, 1 remaining
+        setDieValue(die1El, 'U');
+        setDieValue(die2El, state.currentRoll[0]);
+        die1El.style.display = '';
+        die2El.style.display = '';
+    } else {
+        // Initial 2-dice roll view
+        setDieValue(die1El, state.currentRoll[0]);
+        setDieValue(die2El, state.currentRoll[1]);
+        die1El.style.display = '';
+        die2El.style.display = '';
     }
 
     // Condition 2: Moves made, but remaining dice available
-    if (movesMade > 0 && movesLeft > 0) {
-        die2El.style.display = '';
-        setDieValue(die1El, 'U');
-        setDieValue(die2El, state.currentRoll[0]); // Remaining move value
-        return;
-    }
+    // if (movesMade > 0 && movesLeft > 0) {
+    //     die2El.style.display = '';
+    //     setDieValue(die1El, 'U');
+    //     setDieValue(die2El, state.currentRoll[0]); // Remaining move value
+    //     return;
+    // }
 
     // Condition 3: Just rolled, no moves made yet
-    if (movesMade === 0 && movesLeft > 0) {
-        die2El.style.display = '';
-        setDieValue(die1El, state.currentRoll[0]);
-        setDieValue(die2El, state.currentRoll[1] ?? state.currentRoll[0]);
-    }
+    // if (movesMade === 0 && movesLeft > 0) {
+    //     die2El.style.display = '';
+    //     setDieValue(die1El, state.currentRoll[0]);
+    //     setDieValue(die2El, state.currentRoll[1] ?? state.currentRoll[0]);
+    // }
 }
 
 export function handleDieClick(player, dieNumber) {
@@ -86,17 +188,20 @@ export function handleDieClick(player, dieNumber) {
     // Only current player can act during regular turns
     if (player !== state.currentPlayer) return;
 
-    const die1El = document.getElementById(`${player}-die-1`);
-    const die2El = document.getElementById(`${player}-die-2`);
-    const targetEl = dieNumber === 1 ? die1El : die2El;
-
+    // const die1El = document.getElementById(`${player}-die-1`);
+    // const die2El = document.getElementById(`${player}-die-2`);
+    // const targetEl = dieNumber === 1 ? die1El : die2El;
+    const targetEl = document.getElementById(`${player}-die-${dieNumber}`);
     if (!targetEl) return;
+
+    // Retrieve displayed code ('R', 'U', 'D') or inspect pips
     const content = targetEl.textContent.trim();
 
     if (content === 'R' && !state.hasRolled) {
         handleDiceRoll(player);
     } else if (content === 'U') {
         undoLastMove();
+        renderDiceUI();
     } else if (content === 'D') {
         switchTurn();
     } else if (state.hasRolled && state.currentRoll.length === 2 && state.moveHistory.length === 0) {
@@ -107,13 +212,13 @@ export function handleDieClick(player, dieNumber) {
 
 // Attach event listeners to dice elements once DOM is ready
 export function initDiceListeners() {
-    ['white', 'black'].forEach(player => {
-        const d1 = document.getElementById(`${player}-die-1`);
-        const d2 = document.getElementById(`${player}-die-2`);
+    // ['white', 'black'].forEach(player => {
+    //     const d1 = document.getElementById(`${player}-die-1`);
+    //     const d2 = document.getElementById(`${player}-die-2`);
 
-        if (d1) d1.onclick = () => handleDieClick(player, 1);
-        if (d2) d2.onclick = () => handleDieClick(player, 2);
-    });
+    //     if (d1) d1.onclick = () => handleDieClick(player, 1);
+    //     if (d2) d2.onclick = () => handleDieClick(player, 2);
+    // });
 
     // Attach Doubling Cube handler
     const cubeEl = document.getElementById('doubling-cube');
@@ -288,24 +393,28 @@ function evaluateOpeningRoll() {
         state.currentRoll = [white, black];
         state.gamePhase = 'turns';
         state.hasRolled = true;
-        logStatus(`White wins opening roll (${white} vs ${black}) and plays first!`);
 
+        updateTurnUI();
+        renderDiceUI();
         // Display the opening move dice on the  winning player's board zone
         renderWinnerOpeningDice('white', white, black);
         updateCubePositionUI();
-        updateTurnUI();
+
+        logStatus(`White wins opening roll (${white} vs ${black}) and plays first!`);
 
     } else if (black > white) {
         state.currentPlayer = 'black';
         state.currentRoll = [black, white];
         state.gamePhase = 'turns';
-        state.hasRolled = true;
-        logStatus(`Black wins opening roll (${black} vs ${white}) and plays first!`);
+        state.hasRolled = true;        
 
+        updateTurnUI();
+        renderDiceUI();
         // Display the opening move dice on the winning player's board zone
         renderWinnerOpeningDice('black', black, white);
         updateCubePositionUI();
-        updateTurnUI();
+        
+        logStatus(`Black wins opening roll (${black} vs ${white}) and plays first!`);
 
     } else {
         logStatus(`Tie roll (${white} vs ${black}) - Try again!`);        
@@ -322,8 +431,14 @@ function renderWinnerOpeningDice(winner, higherVal, lowerVal) {
     const die1El = document.getElementById(`${winner}-die-1`);
     const die2El = document.getElementById(`${winner}-die-2`);
     // Display winning roll
-    setDieValue(die1El, higherVal);
-    setDieValue(die2El, lowerVal);   
+    if (die1El) {
+        die1El.style.display = '';
+        setDieValue(die1El, higherVal);
+    }
+    if (die2El) {
+        die2El.style.display = '';
+        setDieValue(die2El, lowerVal);
+    } 
 }
 
 // ==========================================

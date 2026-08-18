@@ -18,13 +18,13 @@ function initApp() {
         logStatus(statusBar.textContent.trim());
     }
 
-    // Attach click handlers for cube, opening/normal rolls, Undo, Done & Swap
-     initDiceListeners();
-
     // Initial UI render
     renderBoard();
     renderDiceUI();
     updateTurnUI();
+
+    // Attach click handlers for cube, opening/normal rolls, Undo, Done & Swap
+     initDiceListeners();
 }
 
 // Run setup after DOM is fully loaded

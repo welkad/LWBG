@@ -95,7 +95,7 @@ export function calculatePipCount(player) {
 
     // Checkers on the bar (max distance = 25 pips)
     if (state.bar[player] > 0) {
-        pips =+ state.bar[player] * 25;
+        pips += state.bar[player] * 25;
     }
 
     return pips;

@@ -82,6 +82,7 @@ body.opening-roll-phase .doubling-cube,
     z-index: 100; /* Sit above board quadrants */
     cursor: pointer;
     pointer-events: auto;
+    min-height: 40px;
 }
 
 .player-dice-zone:active .die {
@@ -98,10 +99,10 @@ body.opening-roll-phase .doubling-cube,
 }
 
 /* Hide the second die during opening roll phase */
-body.opening-roll-phase #white-die-2,
+/* body.opening-roll-phase #white-die-2,
 body.opening-roll-phase #black-die-2 {
     display: none !important;
-}
+} */
 
 
 /* ==========================================
@@ -126,6 +127,19 @@ body.opening-roll-phase #black-die-2 {
     box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 -2px 2px rgba(0,0,0,0.1);
 }
 
+/* Die that has been played or used */
+.die.used {
+    background-color: #4a4a4a;
+    color: #d1d1d1;
+    cursor: pointer; /* Clickable to undo move */
+    opacity: 0.8;
+}
+
+.die.used:hover {
+    background-color: #d32f2f; /* Highlight red on hover to indicate undo */
+    color: #ffffff;
+}
+
 /* Shift text codes down 2px for optical vertical centering */
 .die:not([data-value]) {
     padding-top: 2px;
@@ -146,6 +160,22 @@ body.opening-roll-phase #black-die-2 {
     height: 6px;    
     border-radius: 50%;
     margin: auto;
+}
+
+/* Update CSS to target the IDs directly */
+#white-dice-zone,
+#black-dice-zone {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    min-height: 40px;
+    pointer-events: auto;
 }
 
 /* White Player Dice: White body, Dark text & pips */

@@ -144,19 +144,30 @@ export function handlePointClick(pointIndex) {
  * and updates board state and turn flow.
  */
 export function executeMove(fromIndex, toIndex) {
-  // Record history snapshot before mutating state
-  recordMoveSnapshot();
-
   const player = state.currentPlayer;
   const targetPoint = state.boardState[toIndex];
 
-  // Calculate distance moved and remove checker from origin
+  // Calculate distance moved
   let distance;
   if (fromIndex === 'bar') {
     distance = player === 'white' ? toIndex + 1 : 24 - toIndex;
-    state.bar[player]--;  // Decerement bar count
   } else {
-    distance = Math.abs(toIndex - fromIndex); // Calculate distance
+    distance = Math.abs(toIndex - fromIndex);
+  }
+
+  // Determine consumed die value(s) for this move
+  const consumedDice = getConsumedDiceForDistance(distance);
+
+  // Assign a unique checker ID to track this specific piece across multi-step moves
+  const checkerId = `${player}-${fromIndex}`;
+
+  // Record history snapshot including checkerId and consumed dice
+  recordMoveSnapshot(checkerId, consumedDice);
+
+  // Remove checker from origin
+  if (fromIndex === 'bar') {
+    state.bar[player]--;
+  } else {
     state.boardState[fromIndex].count--;
     if (state.boardState[fromIndex].count === 0) {
       state.boardState[fromIndex].player = null;
@@ -168,7 +179,6 @@ export function executeMove(fromIndex, toIndex) {
     const opponent = targetPoint.player;
     state.bar[opponent]++;
     logStatus(`${player} hit ${opponent}'s blot on Point ${toIndex + 1}!`);
-    // Point taken over by hitting player
     targetPoint.player = player;
     targetPoint.count = 1;
   } else {
@@ -177,14 +187,44 @@ export function executeMove(fromIndex, toIndex) {
     targetPoint.count++;
   }
 
-  // Consume corresponding die value(s)
-  consumeDiceForDistance(distance);
+  // Consume die values from state.currentRoll
+  consumedDice.forEach(val => {
+    const idx = state.currentRoll.indexOf(val);
+    if (idx !== -1) {
+      state.currentRoll.splice(idx, 1);
+    }
+  });
 
   // Clear selection and re-render
   state.selectedPoint = null;
   state.validMoves = [];
   renderBoard();
-  renderDiceUI(); // Update dice to display remaining values / U / D
+  renderDiceUI();
+}
+
+/**
+ * Calculates which die value(s) match the requested move distance.
+ */
+function getConsumedDiceForDistance(distance) {
+  // Check exact match on a single die first
+  const exactIndex = state.currentRoll.indexOf(distance);
+  if (exactIndex !== -1) {
+    return [state.currentRoll[exactIndex]];
+  }
+
+  // Composite move: find smallest combination of dice summing to distance
+  let sum = 0;
+  const usedVals = [];
+
+  for (let i = 0; i < state.currentRoll.length; i++) {
+    sum += state.currentRoll[i];
+    usedVals.push(state.currentRoll[i]);
+    if (sum === distance) {
+      return usedVals;
+    }
+  }
+
+  return usedVals;
 }
 
 /**
@@ -193,12 +233,10 @@ export function executeMove(fromIndex, toIndex) {
 function hasAnyLegalMoves() {
   const player = state.currentPlayer;
 
-  // If on bar, check if bar piece can enter
   if (state.bar[player] > 0) {
     return getValidMovesForPoint('bar').length > 0;
   }
 
-  // Otherwise, check all points on the board
   for (let i = 0; i < 24; i++) {
     if (state.boardState[i].player === player) {
       if (getValidMovesForPoint(i).length > 0) {
@@ -210,58 +248,55 @@ function hasAnyLegalMoves() {
   return false;
 }
 
-/**
- * Consume exact die value or sequence of die values matching the distance moved.
- */
-function consumeDiceForDistance(distance) {
-  // Exact match on a single die
-  const exactIndex = state.currentRoll.indexOf(distance);
-  if (exactIndex !== -1) {
-    state.currentRoll.splice(exactIndex, 1);
-    return;
-  }
-
-  // Composite/combination moves: consume smallest combination that sums to distance
-  let sum = 0;
-  const usedIndices = [];
-
-  for (let i = 0; i < state.currentRoll.length; i++) {
-    sum += state.currentRoll[i];
-    usedIndices.push(i);
-    if (sum === distance) break;
-  }
-
-  // Remove consumed dice starting from largest index to maintain array stability
-  usedIndices.sort((a, b) => b - a).forEach(idx => state.currentRoll.splice(idx, 1));
-}
-
 // ==================================
 //  MOVE HISTORY / DONE / UNDO LOGIC
 // ==================================
 
-// Helper function to deep copy board state & arrays for undo history
-function recordMoveSnapshot() {
+/**
+ * Saves state snapshot along with checker identification.
+ */
+function recordMoveSnapshot(checkerId, consumedDice) {
   state.moveHistory.push({
+    checkerId: checkerId,
+    consumedDice: consumedDice,
     boardState: JSON.parse(JSON.stringify(state.boardState)),
     bar: { ...state.bar },
     currentRoll: [...state.currentRoll]
   });
 }
 
+/**
+ * Reverts all steps taken by the most recently moved checker.
+ */
 export function undoLastMove() {
   if (!state.moveHistory || state.moveHistory.length === 0) {
     logStatus("No moves to undo.");
     return;
   }
 
-  const lastState = state.moveHistory.pop();
-  state.boardState = lastState.boardState;
-  state.bar = lastState.bar;
-  state.currentRoll = lastState.currentRoll;
-  state.selectedPoint = null;
-  state.validMoves = [];
+  // Get the checker ID of the last move made
+  const lastSnapshot = state.moveHistory[state.moveHistory.length - 1];
+  const targetCheckerId = lastSnapshot.checkerId;
 
-  logStatus("Move undone.");
-  renderBoard();
-  renderDiceUI();
+  let targetState = null;
+
+  // Roll back all contiguous move steps associated with this exact checker
+  while (
+    state.moveHistory.length > 0 &&
+    state.moveHistory[state.moveHistory.length - 1].checkerId === targetCheckerId
+  ) {
+    targetState = state.moveHistory.pop();
+  }
+
+  if (targetState) {
+    state.boardState = targetState.boardState;
+    state.bar = targetState.bar;
+    state.currentRoll = targetState.currentRoll;
+    state.selectedPoint = null;
+    state.validMoves = [];
+
+    logStatus("Move undone.");
+    renderBoard();
+    renderDiceUI();
+  }
 }
