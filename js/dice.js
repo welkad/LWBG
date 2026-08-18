@@ -36,146 +36,196 @@ export function setDieValue(element, value) {
 
 export function renderDiceUI() {
     const player = state.currentPlayer;
-    // const die1El = document.getElementById(`${player}-die-1`);
-    // const die2El = document.getElementById(`${player}-die-2`);
-    // if (!die1El || !die2El) return;
+    if (!player) return;
 
-    // Helper to get create die elements dynamically (up to 4)
+    const zone = document.getElementById(`${player}-dice-zone`);
+    if (!zone) return;
+
+    // ==========================================
+    // Helper: get or create a die
+    // ==========================================
     function getOrCreateDie(playerColor, index) {
-        let dieEl = document.getElementById(`${playerColor}-die-${index + 1}`);
+        const dieId = `${playerColor}-die-${index + 1}`;
+        let dieEl = document.getElementById(dieId);
+
         if (!dieEl) {
             const targetZone = document.getElementById(`${playerColor}-dice-zone`);
-            if (!targetZone) return;
+            if (!targetZone) return null;
 
             dieEl = document.createElement('span');
-            dieEl.id = `${playerColor}-die-${index + 1}`;
+            dieEl.id = dieId;
             dieEl.className = 'die';
-            dieEl.onclick = () => handleDieClick(playerColor, index + 1);
+
+            dieEl.addEventListener('click', () => {
+                handleDieClick(playerColor, index + 1);
+            });
+
             targetZone.appendChild(dieEl);
         }
+
         return dieEl;
     }
 
     // ==========================================
-    //  OPENING ROLL PHASE
+    // Helper: remove dice above requested count
     // ==========================================
-    if (state.gamePhase === 'opening_roll') {
-        ['white', 'black'].forEach(p => {
-            const d1 = getOrCreateDie(p, 0);
-            const d2 = getOrCreateDie(p, 1);
+    function removeExtraDice(playerColor, count) {
+        const targetZone = document.getElementById(`${playerColor}-dice-zone`);
+        if (!targetZone) return;
 
-            // Hide second die for both players during opening roll
-            if (d2) d2.style.display = 'none';
+        const dice = targetZone.querySelectorAll('.die');
 
-            if (d1) {
-                d1.style.display = '';
-                // If this player hasn't rolled yet, show 'R'
-                if (state.openingRolls[p] === null) {
-                    setDieValue(d1, 'R');
-                } else {
-                    // Show their rolled value
-                    setDieValue(d1, state.openingRolls[p]);
-                }
+        dice.forEach(die => {
+            const match = die.id.match(/-die-(\d+)$/);
+            if (!match) return;
+
+            const dieNumber = Number(match[1]);
+            if (dieNumber > count) {
+                die.remove();
             }
         });
+    }
+
+    // ==========================================
+    //  OPENING ROLL
+    // ==========================================
+    if (state.gamePhase === 'opening_roll') {
+        ['white', 'black'].forEach(playerColor => {
+            const die1 = getOrCreateDie(playerColor, 0);
+            const die2 = getOrCreateDie(playerColor, 1);
+
+            // Only one die is needed during opening roll
+            if (die2) die2.style.display = 'none';
+
+            if (die1) {
+                die1.style.display = '';
+                // If this player hasn't rolled yet, show 'R'
+                if (state.openingRolls[playerColor] === null) {
+                    setDieValue(die1, 'R');
+                } else {
+                    // Show their rolled value
+                    setDieValue(die1, state.openingRolls[playerColor]);
+                }
+            }
+
+            // Opening roll should never have dice 3/4
+            removeExtraDice(playerColor, 2);
+        });
+
         return;
     }
 
     // ==========================================
-    //  REGULAR TURNS
+    // CURRENT PLAYER's DICE
     // ==========================================
-    const zone = document.getElementById(`${player}-dice-zone`);
-    if (!zone) return;
+    const die1 = getOrCreateDie(player, 0);
+    const die2 = getOrCreateDie(player, 1);
 
-    // Clean up extra die elements (> 2) when returning to non-double state
-    const extraDiceCount = zone.children.length;
-    if (!state.hasRolled || state.currentRoll.length <= 2) {
-        for (let i = 3; i <= extraDiceCount; i++) {
-            const extra = document.getElementById(`${player}-die-${i}`);
-            if (extra) extra.remove();
-        }
-    }
+    if (!die1 || !die2) return;
 
-    const die1El = getOrCreateDie(player, 0);
-    const die2El = getOrCreateDie(player, 1);
-
-    // Before roll -> show 'R' 'R'
+    // ==========================================
+    // BEFORE ROLL
+    // ==========================================
     if (!state.hasRolled) {
-        setDieValue(die1El, 'R');
-        setDieValue(die2El, 'R');
-        die1El.style.display = '';
-        die2El.style.display = '';
+        removeExtraDice(player, 2);
+
+        setDieValue(die1, 'R');
+        setDieValue(die2, 'R');
+        die1.classList.remove('used');
+        die2.classList.remove('used');
+        die1.style.display = '';
+        die2.style.display = '';
+
         return;
     }
 
-    const movesMade = state.moveHistory ? state.moveHistory.length : 0;
+    // ==========================================
+    // HOW MANY MOVES HAVE BEEN MADE
+    // ==========================================
+    const movesMade = state.moveHistory.length;
     const movesLeft = state.currentRoll.length;
 
-    // All moves completed -> Show 'U' and 'D' on the first two dice
+    // ==========================================
+    // ALL MOVES COMPLETED
+    // ==========================================
     if (movesLeft === 0 && movesMade > 0) {
-        // Clean up dice 3 & 4 if present
-        for (let i = 3; i <= 4; i++) {
-            const extra = document.getElementById(`${player}-die-${i}`);
-            if (extra) extra.remove();
-        }        
-        setDieValue(die1El, 'U');
-        setDieValue(die2El, 'D');
-        die1El.style.display = '';
-        die2El.style.display = '';
+        removeExtraDice(player, 2);
+
+        setDieValue(die1, 'U');
+        setDieValue(die2, 'D');
+        die1.classList.add('used');
+        die2.classList.remove('used');
+        die1.style.display = '';
+        die2.style.display = '';
+
         return;
     }
 
-    // Doubles rolled (4 dice total)
-    if (state.currentRoll.length > 2 || (movesMade > 0 && (movesMade + movesLeft === 4))) {
-        const totalInitialDice = movesMade + movesLeft; // 4 for doubles
+    // ==========================================
+    // DETERMINE ORIGINAL NUMBER OF DICE
+    // ==========================================
+    // Normal roll: movesMade + movesLeft = 2
+    // Doubles: movesMade + movesLeft = 4
+    //
+    const totalDice = movesMade + movesLeft;
 
-        for (let i = 0; i < totalInitialDice; i++) {
+    // ==========================================
+    // DOUBLES
+    // ==========================================
+    if (totalDice === 4) {
+        // Ensure four dice exist
+        for (let i = 0; i < 4; i++) {
             const dieEl = getOrCreateDie(player, i);
+            if (!dieEl) continue;
+
             dieEl.style.display = '';
 
             if (i < movesMade) {
-                // Used die: shows 'U' for undoing that move
+                // This die represents a completed move
                 setDieValue(dieEl, 'U');
                 dieEl.classList.add('used');
             } else {
-                // Remaining die: shows pip value
+                // This die represents a remaining playable die
                 const rollIndex = i - movesMade;
                 setDieValue(dieEl, state.currentRoll[rollIndex]);
                 dieEl.classList.remove('used');
             }
         }
+
+        // Make sure there are never any stale die beyond 4
+        removeExtraDice(player, 4);
+
         return;
     }
 
-    // Standard Non-Doubles Roll (2 dice)
-    if (movesMade > 0 && movesLeft > 0) {
-        // 1 move made, 1 remaining
-        setDieValue(die1El, 'U');
-        setDieValue(die2El, state.currentRoll[0]);
-        die1El.style.display = '';
-        die2El.style.display = '';
-    } else {
-        // Initial 2-dice roll view
-        setDieValue(die1El, state.currentRoll[0]);
-        setDieValue(die2El, state.currentRoll[1]);
-        die1El.style.display = '';
-        die2El.style.display = '';
+    // ==========================================
+    // NORMAL TWO-DICE ROLL
+    // ==========================================
+    removeExtraDice(player, 2);
+
+    // No moves made yet
+    if (movesMade === 0) {
+        setDieValue(die1, state.currentRoll[0]);
+        setDieValue(die2, state.currentRoll[1]);
+        die1.classList.remove('used');
+        die2.classList.remove('used');
+        die1.style.display = '';
+        die2.style.display = '';
+
+        return;
     }
 
-    // Condition 2: Moves made, but remaining dice available
-    // if (movesMade > 0 && movesLeft > 0) {
-    //     die2El.style.display = '';
-    //     setDieValue(die1El, 'U');
-    //     setDieValue(die2El, state.currentRoll[0]); // Remaining move value
-    //     return;
-    // }
+    // One move made, one die remains
+    if (movesMade > 0 && movesLeft > 0) {
+        setDieValue(die1, 'U');
+        setDieValue(die2, state.currentRoll[0]);
+        die1.classList.add('used');
+        die2.classList.remove('used');
+        die1.style.display = '';
+        die2.style.display = '';
 
-    // Condition 3: Just rolled, no moves made yet
-    // if (movesMade === 0 && movesLeft > 0) {
-    //     die2El.style.display = '';
-    //     setDieValue(die1El, state.currentRoll[0]);
-    //     setDieValue(die2El, state.currentRoll[1] ?? state.currentRoll[0]);
-    // }
+        return;
+    }
 }
 
 export function handleDieClick(player, dieNumber) {
@@ -188,9 +238,6 @@ export function handleDieClick(player, dieNumber) {
     // Only current player can act during regular turns
     if (player !== state.currentPlayer) return;
 
-    // const die1El = document.getElementById(`${player}-die-1`);
-    // const die2El = document.getElementById(`${player}-die-2`);
-    // const targetEl = dieNumber === 1 ? die1El : die2El;
     const targetEl = document.getElementById(`${player}-die-${dieNumber}`);
     if (!targetEl) return;
 
@@ -212,14 +259,6 @@ export function handleDieClick(player, dieNumber) {
 
 // Attach event listeners to dice elements once DOM is ready
 export function initDiceListeners() {
-    // ['white', 'black'].forEach(player => {
-    //     const d1 = document.getElementById(`${player}-die-1`);
-    //     const d2 = document.getElementById(`${player}-die-2`);
-
-    //     if (d1) d1.onclick = () => handleDieClick(player, 1);
-    //     if (d2) d2.onclick = () => handleDieClick(player, 2);
-    // });
-
     // Attach Doubling Cube handler
     const cubeEl = document.getElementById('doubling-cube');
     if (cubeEl) {
@@ -356,6 +395,8 @@ function animateDiceRoll(dieConfigs, onComplete) {
 export function handleOpeningRoll(player) {
     // Ignore click if player has already rolled or is currently rolling
     const die1El = document.getElementById(`${player}-die-1`);
+    if (!die1El) return;
+
     if (state.openingRolls[player] !== null || die1El.dataset.animating === 'true') {
         return;
     }
@@ -502,9 +543,15 @@ export function handleDiceRoll(player) {
         
         // Indicate that non-doubles can now be swapped by clicking
         const diceZone = document.getElementById(`${player}-dice-zone`);
+
         if (diceZone && finalD1 !== finalD2) {
             diceZone.classList.add('swappable');
+        } else if (diceZone) {
+            diceZone.classList.remove('swappable');
         }
+
+        // Render 2 or 4 dice based on the new state.currentRoll
+        renderDiceUI();
 
         logStatus(`${player} rolled: ${state.currentRoll.join(', ')}`);
     });
@@ -527,16 +574,39 @@ export function resetDiceUI() {
 
         if (player === state.currentPlayer) {            
             // Reset die elements back to 'R' state
-            if (die1) setDieValue(die1, 'R');
-            if (die2) setDieValue(die2, 'R');
-
-            // Show die 2 in case it was hidden or altered
-            if (die2) die2.style.display = '';
+            if (die1) {
+                setDieValue(die1, 'R');
+                die1.classList.remove('used');
+                die1.style.display = '';
+            }
+            if (die2) {
+                setDieValue(die2, 'R');
+                die2.classList.remove('used');
+                die2.style.display = '';
+            }
         } else {
-            // Clear pips/text from inactive player's dice
-            if (die1) setDieValue(die1, '');
-            if (die2) setDieValue(die2, '');
+            // Clear inactive player's dice
+            if (die1) {
+                setDieValue(die1, '');
+                die1.classList.remove('used');
+                die1.style.display = '';
+            }
+            if (die2) {
+                setDieValue(die2, '');
+                die2.classList.remove('used');
+                die2.style.display = '';
+            }
         }
+
+        // Remove dice 3 and 4 form previous doubles
+        const extraDice = zone.querySelectorAll('.die');
+        extraDice.forEach(die => {
+            const match = die.id.match(/-die-(\d+)$/);
+
+            if (match && Number(match[1]) > 2) {
+                die.remove();
+            }
+        });
     });
 
     updateCubePositionUI(); // Refresh cube clickable state for new player
