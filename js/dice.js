@@ -34,11 +34,8 @@ export function setDieValue(element, value) {
 //  DYNAMIC DICE & UNDO / DONE UI
 // ================================
 
-export function renderDiceUI() {
-
-    // ==========================================
+export function renderDiceUI() {    
     // Helper: get or create a die
-    // ==========================================
     function getOrCreateDie(playerColor, index) {
         const dieId = `${playerColor}-die-${index + 1}`;
         let dieEl = document.getElementById(dieId);
@@ -54,16 +51,12 @@ export function renderDiceUI() {
             dieEl.addEventListener('click', () => {
                 handleDieClick(playerColor, index + 1);
             });
-
             targetZone.appendChild(dieEl);
         }
-
         return dieEl;
     }
 
-    // ==========================================
-    // Helper: remove dice above requested count
-    // ==========================================
+    // Helper: remove dice above requested count    
     function removeExtraDice(playerColor, count) {
         const targetZone = document.getElementById(`${playerColor}-dice-zone`);
         if (!targetZone) return;
@@ -81,9 +74,7 @@ export function renderDiceUI() {
         });
     }
 
-    // ==========================================
-    //  OPENING ROLL
-    // ==========================================
+    // Opening Roll
     if (state.gamePhase === 'opening_roll') {
         ['white', 'black'].forEach(playerColor => {
             const die1 = getOrCreateDie(playerColor, 0);
@@ -110,26 +101,20 @@ export function renderDiceUI() {
         return;
     }
 
-    // ==========================================
-    //  REGULAR TURN
-    // ==========================================
+    // Regular turn
     const player = state.currentPlayer;
     if (!player) return;
 
     const zone = document.getElementById(`${player}-dice-zone`);
     if (!zone) return;
 
-    // ==========================================
-    //  CURRENT PLAYER's DICE
-    // ==========================================
+    // Current player's dice    
     const die1 = getOrCreateDie(player, 0);
     const die2 = getOrCreateDie(player, 1);
 
     if (!die1 || !die2) return;
 
-    // ==========================================
-    // BEFORE ROLL
-    // ==========================================
+    // Before roll
     if (!state.hasRolled) {
         removeExtraDice(player, 2);
 
@@ -143,15 +128,11 @@ export function renderDiceUI() {
         return;
     }
 
-    // ==========================================
-    // HOW MANY MOVES HAVE BEEN MADE
-    // ==========================================
+    // Store how many moves have been made
     const movesMade = state.moveHistory.length;
     const movesLeft = state.currentRoll.length;
 
-    // ==========================================
-    // ALL MOVES COMPLETED
-    // ==========================================
+    // When all moves are completed
     if (movesLeft === 0 && movesMade > 0) {
         removeExtraDice(player, 2);
 
@@ -173,9 +154,7 @@ export function renderDiceUI() {
     //
     const totalDice = movesMade + movesLeft;
 
-    // ==========================================
-    // DOUBLES
-    // ==========================================
+    // Doubles
     if (totalDice === 4) {
         // Ensure four dice exist
         for (let i = 0; i < 4; i++) {
@@ -202,9 +181,7 @@ export function renderDiceUI() {
         return;
     }
 
-    // ==========================================
-    // NORMAL TWO-DICE ROLL
-    // ==========================================
+    // Normal two-dice roll
     removeExtraDice(player, 2);
 
     // No moves made yet
@@ -215,7 +192,6 @@ export function renderDiceUI() {
         die2.classList.remove('used');
         die1.style.display = '';
         die2.style.display = '';
-
         return;
     }
 
@@ -227,7 +203,6 @@ export function renderDiceUI() {
         die2.classList.remove('used');
         die1.style.display = '';
         die2.style.display = '';
-
         return;
     }
 }
@@ -320,8 +295,7 @@ export function handleCubeClick(player) {
 // Helper function if mouse  pointer leaves cube during opening
 function handleCubeMouseLeave() {
     // Restore any previous status message immediately when cursor exits
-    resetStatusToDefault(1000);
-    
+    resetStatusToDefault(1000);    
 }
 
 // Helper function to update positioning in CSS 
@@ -392,7 +366,6 @@ function animateDiceRoll(dieConfigs, onComplete) {
             }, finalPause); // Pause so result is clear before callback
         }
     }
-
     tick(); // Start the recursive animation loop
 }
 
@@ -605,7 +578,6 @@ export function resetDiceUI() {
         const extraDice = zone.querySelectorAll('.die');
         extraDice.forEach(die => {
             const match = die.id.match(/-die-(\d+)$/);
-
             if (match && Number(match[1]) > 2) {
                 die.remove();
             }
