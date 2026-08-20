@@ -107,3 +107,42 @@ function renderBar(player) {
         }
     };
 }
+
+/**
+ * Updates or clears the border point numbers depending on game state and current player.
+ * @param {string|null} currentPlayer - 'black', 'white', or null/undefined for opening roll.
+ */
+export function updatePointLabels(currentPlayer) {
+    const topLeft = document.querySelector('.top-left-numbers');
+    const topRight = document.querySelector('.top-right-numbers');
+    const bottomLeft = document.querySelector('.bottom-left-numbers');
+    const bottomRight = document.querySelector('.bottom-right-numbers');
+
+    // Clear numbers if opening roll (no turn assigned yet)
+    if (!currentPlayer) {
+        topLeft.innerHTML = '';
+        topRight.innerHTML = '';
+        bottomLeft.innerHTML = '';
+        bottomRight.innerHTML = '';
+        return;
+    }
+
+    // Helper to build span HTML array
+    const createSpans = (arr) => arr.map(n => `<span>${n}</span>`).join('');
+
+    if (currentPlayer === 'black') {  // Counter-clockwise
+        // Black moves top-right (19-24) -> top-left (13-18) 
+        topRight.innerHTML = createSpans([19, 20, 21, 22, 23, 24]);
+        topLeft.innerHTML = createSpans([13, 14, 15, 16, 17, 18]);
+        // Black moves bottom-left (12-7) -> bottom-right (6-1)
+        bottomLeft.innerHTML = createSpans([12, 12, 10, 9, 8, 7]);
+        bottomRight.innerHTML = createSpans([6, 5, 4, 3, 2, 1]);
+    } else if (currentPlayer === 'white') {  // Clockwise
+        // White moves bottom-right (19-24) -> bottom-left (13-18)
+        bottomRight.innerHTML = createSpans([19, 20, 21, 22, 23, 24]);
+        bottomLeft.innerHTML = createSpans([13, 14, 15, 16, 17, 18]);
+        // White moves top-left (12-7) -> top-right (6-1)
+        topLeft.innerHTML = createSpans([12, 12, 10, 9, 8, 7]);
+        topRight.innerHTML = createSpans([6, 5, 4, 3, 2, 1]);
+    }
+}

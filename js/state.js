@@ -4,7 +4,7 @@
 // js/state.js - Centralizes all global mutable game state in one place so modules can import and modify it predictably.
 
 import { updateTurnUI, resetDiceUI } from "./dice.js";
-import { renderBoard } from './board.js';
+import { renderBoard, updatePointLabels } from './board.js';
 import { logStatus } from './ui.js';
 
 export const state = {
@@ -29,6 +29,7 @@ export const state = {
 
 export function initBoardState() {
     state.boardState = Array(24).fill(null).map(() => ({ player: null, count: 0 }));
+    updatePointLabels(null);
 
     // Reset board states
     state.bar = { white: 0, black: 0 };
@@ -59,6 +60,7 @@ export function initBoardState() {
 export function switchTurn() {
     // Toggle active player
     state.currentPlayer = state.currentPlayer === 'white' ? 'black' : 'white';
+    updatePointLabels(state.currentPlayer);
 
     // Reset turn flags so new active player can double BEFORE rolling
     state.hasRolled = false;    // Keep track for doubling situations

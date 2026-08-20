@@ -1,6 +1,7 @@
 // js/dice.js - Contains all doubling cube and dice rolling logic, turn UI toggling, and roll animations.
 import { state, switchTurn } from './state.js';
 import { logStatus, resetStatusToDefault } from './ui.js';
+import { updatePointLabels } from './board.js';
 import { undoLastMove } from './moves.js';
 
 // ==========================
@@ -414,6 +415,7 @@ function evaluateOpeningRoll() {
 
         updateTurnUI();
         renderDiceUI();
+        updatePointLabels(state.currentPlayer);
         // Display the opening move dice on the  winning player's board zone
         renderWinnerOpeningDice('white', white, black);
         updateCubePositionUI();
@@ -428,6 +430,7 @@ function evaluateOpeningRoll() {
 
         updateTurnUI();
         renderDiceUI();
+        updatePointLabels(state.currentPlayer);
         // Display the opening move dice on the winning player's board zone
         renderWinnerOpeningDice('black', black, white);
         updateCubePositionUI();
