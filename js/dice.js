@@ -35,11 +35,6 @@ export function setDieValue(element, value) {
 // ================================
 
 export function renderDiceUI() {
-    const player = state.currentPlayer;
-    if (!player) return;
-
-    const zone = document.getElementById(`${player}-dice-zone`);
-    if (!zone) return;
 
     // ==========================================
     // Helper: get or create a die
@@ -116,7 +111,16 @@ export function renderDiceUI() {
     }
 
     // ==========================================
-    // CURRENT PLAYER's DICE
+    //  REGULAR TURN
+    // ==========================================
+    const player = state.currentPlayer;
+    if (!player) return;
+
+    const zone = document.getElementById(`${player}-dice-zone`);
+    if (!zone) return;
+
+    // ==========================================
+    //  CURRENT PLAYER's DICE
     // ==========================================
     const die1 = getOrCreateDie(player, 0);
     const die2 = getOrCreateDie(player, 1);
@@ -269,9 +273,9 @@ export function initDiceListeners() {
     }
 }
 
-// ===============
+// ======================================
 //  DOUBLING CUBE
-// ===============
+// ======================================
 
 export function handleCubeClick(player) {
     // Disable cube during opening roll phase
@@ -459,11 +463,10 @@ function evaluateOpeningRoll() {
 
     } else {
         logStatus(`Tie roll (${white} vs ${black}) - Try again!`);        
-        // Reset for reroll after 1 second delay
+        // Reset for re-roll after 1 second delay
         setTimeout(() => {
             state.openingRolls = { white: null, black: null};
-            setDieValue(document.getElementById('white-die-1'), 'R');
-            setDieValue(document.getElementById('black-die-1'), 'R');            
+            renderDiceUI();           
         }, 1000);
     }
 }
