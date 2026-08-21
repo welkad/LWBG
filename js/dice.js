@@ -495,10 +495,8 @@ export function handleDiceRoll(player) {
     if (player !== state.currentPlayer || state.isRolling || state.hasRolled) return;
 
     state.isRolling = true;
-
     const die1El = document.getElementById(`${player}-die-1`);
     const die2El = document.getElementById(`${player}-die-2`);
-
     const raw1 = Math.floor(Math.random() * 6) + 1;
     const raw2 = Math.floor(Math.random() * 6) + 1;
 
@@ -511,8 +509,10 @@ export function handleDiceRoll(player) {
         { element: die1El, finalValue: finalD1 },
         { element: die2El, finalValue: finalD2 }
     ], () => {
+        const isDouble = finalD1 === finalD2;
+
         // Double rolls generate 4 playable moves in backgammon
-        state.currentRoll = (finalD1 === finalD2) 
+        state.currentRoll = isDouble 
             ? [finalD1, finalD1, finalD1, finalD1] 
             : [finalD1, finalD2];
 
@@ -532,7 +532,12 @@ export function handleDiceRoll(player) {
         // Render 2 or 4 dice based on the new state.currentRoll
         renderDiceUI();
 
-        logStatus(`${player} rolled: ${state.currentRoll.join(', ')}`);
+        // Format message: "Black rolled: Double 4s!" or "White rolled: 5, 3"
+        const rollMessage = isDouble
+            ? `Double ${finalD1}s!`
+            : `${finalD1}, ${finalD2}`;
+
+        logStatus(`${player} rolled: ${rollMessage}`);
     });
 }
 
