@@ -35,7 +35,8 @@ export function setDieValue(element, value) {
 //  DYNAMIC DICE & UNDO / DONE UI
 // ================================
 
-export function renderDiceUI() {    
+export function renderDiceUI() {
+
     // Helper: get or create a die
     function getOrCreateDie(playerColor, index) {
         const dieId = `${playerColor}-die-${index + 1}`;
@@ -75,7 +76,7 @@ export function renderDiceUI() {
         });
     }
 
-    // Opening Roll
+    // Opening Roll Phase
     if (state.gamePhase === 'opening_roll') {
         ['white', 'black'].forEach(playerColor => {
             const die1 = getOrCreateDie(playerColor, 0);
@@ -109,81 +110,87 @@ export function renderDiceUI() {
     const zone = document.getElementById(`${player}-dice-zone`);
     if (!zone) return;
 
-    // Current player's dice    
+    // Primary dice elements
     const die1 = getOrCreateDie(player, 0);
     const die2 = getOrCreateDie(player, 1);
 
     if (!die1 || !die2) return;
 
-    // Before roll
+    // Before roll state
     if (!state.hasRolled) {
         removeExtraDice(player, 2);
-
         setDieValue(die1, 'R');
         setDieValue(die2, 'R');
         die1.classList.remove('used');
         die2.classList.remove('used');
         die1.style.display = '';
         die2.style.display = '';
-
         return;
     }
 
-    // Store how many moves have been made
+    // Store how many moves/dice remain
     const movesMade = state.moveHistory.length;
     const movesLeft = state.currentRoll.length;
 
-    // When all moves are completed
-    if (movesLeft === 0 && movesMade > 0) {
-        removeExtraDice(player, 2);
+    // If doubles rolled
+    if (state.isDouble) {
+        // Total individual dice consumed across snapshots
+        const usedCount = state.moveHistory.reduce((total, snapshot) => {
+            return total + (snapshot.consumedDice ? snapshot.consumedDice.length : 1);
+        }, 0);
 
+        // When all 4 moves are finished -> show U U U D
+        if (movesLeft === 0 && movesMade > 0) {
+            for (let i = 0; i < 4; i++) {
+                const dieEl = getOrCreateDie(player, i);
+                if (!dieEl) continue;
+                dieEl.style.display = '';
+
+                if (i < 3) {
+                    setDieValue(dieEl, 'U');
+                    dieEl.classList.add('used');
+                } else {
+                    setDieValue(dieEl, 'D');
+                    dieEl.classList.remove('used');
+                }
+            }
+            removeExtraDice(player, 4);
+            return;
+        }
+
+        // Active playing phase -> show 'U' for spent dice, number for remaining
+        for (let i = 0; i < 4; i++) {
+            const dieEl = getOrCreateDie(player, i);
+            if (!dieEl) continue;
+            dieEl.style.display = '';
+
+            if (i < usedCount) {
+                setDieValue(dieEl, 'U');
+                dieEl.classList.add('used');
+            } else {
+                const rollIndex = i - usedCount;
+                setDieValue(dieEl, state.currentRoll[rollIndex]);
+                dieEl.classList.remove('used');
+            }
+        }
+
+        removeExtraDice(player, 4);
+        return;
+    }
+
+    // Normal two-dice roll
+    removeExtraDice(player, 2);
+
+    // When all moves are completed on a normal roll -> Show U D
+    if (movesLeft === 0 && movesMade > 0) {
         setDieValue(die1, 'U');
         setDieValue(die2, 'D');
         die1.classList.add('used');
         die2.classList.remove('used');
         die1.style.display = '';
         die2.style.display = '';
-
         return;
     }
-
-    // ==========================================
-    // DETERMINE ORIGINAL NUMBER OF DICE
-    // ==========================================
-    // Normal roll: movesMade + movesLeft = 2
-    // Doubles: movesMade + movesLeft = 4
-    //
-    const totalDice = movesMade + movesLeft;
-
-    // Doubles
-    if (totalDice === 4) {
-        // Ensure four dice exist
-        for (let i = 0; i < 4; i++) {
-            const dieEl = getOrCreateDie(player, i);
-            if (!dieEl) continue;
-
-            dieEl.style.display = '';
-
-            if (i < movesMade) {
-                // This die represents a completed move
-                setDieValue(dieEl, 'U');
-                dieEl.classList.add('used');
-            } else {
-                // This die represents a remaining playable die
-                const rollIndex = i - movesMade;
-                setDieValue(dieEl, state.currentRoll[rollIndex]);
-                dieEl.classList.remove('used');
-            }
-        }
-
-        // Make sure there are never any stale die beyond 4
-        removeExtraDice(player, 4);
-
-        return;
-    }
-
-    // Normal two-dice roll
-    removeExtraDice(player, 2);
 
     // No moves made yet
     if (movesMade === 0) {
@@ -509,10 +516,9 @@ export function handleDiceRoll(player) {
         { element: die1El, finalValue: finalD1 },
         { element: die2El, finalValue: finalD2 }
     ], () => {
-        const isDouble = finalD1 === finalD2;
-
+        state.isDouble = finalD1 === finalD2;
         // Double rolls generate 4 playable moves in backgammon
-        state.currentRoll = isDouble 
+        state.currentRoll = state.isDouble 
             ? [finalD1, finalD1, finalD1, finalD1] 
             : [finalD1, finalD2];
 
@@ -533,7 +539,7 @@ export function handleDiceRoll(player) {
         renderDiceUI();
 
         // Format message: "Black rolled: Double 4s!" or "White rolled: 5, 3"
-        const rollMessage = isDouble
+        const rollMessage = state.isDouble
             ? `Double ${finalD1}s!`
             : `${finalD1}, ${finalD2}`;
 

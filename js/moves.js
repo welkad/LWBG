@@ -230,23 +230,23 @@ function getConsumedDiceForDistance(distance) {
 /**
  * Check if current player can make any move with remaining die/dice.
  */
-function hasAnyLegalMoves() {
-  const player = state.currentPlayer;
+// function hasAnyLegalMoves() {
+//   const player = state.currentPlayer;
 
-  if (state.bar[player] > 0) {
-    return getValidMovesForPoint('bar').length > 0;
-  }
+//   if (state.bar[player] > 0) {
+//     return getValidMovesForPoint('bar').length > 0;
+//   }
 
-  for (let i = 0; i < 24; i++) {
-    if (state.boardState[i].player === player) {
-      if (getValidMovesForPoint(i).length > 0) {
-        return true;
-      }
-    }
-  }
+//   for (let i = 0; i < 24; i++) {
+//     if (state.boardState[i].player === player) {
+//       if (getValidMovesForPoint(i).length > 0) {
+//         return true;
+//       }
+//     }
+//   }
 
-  return false;
-}
+//   return false;
+// }
 
 // ==================================
 //  MOVE HISTORY / DONE / UNDO LOGIC

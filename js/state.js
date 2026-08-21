@@ -22,6 +22,7 @@ export const state = {
     currentPlayer: null,                        // Set dynamically by opening roll
     openingRolls: { white: null, black: null },
     currentRoll: [],                            // e.g., [5, 3] or [4, 4, 4, 4]
+    isDouble: false,                            // Track if current turn started with doubles
     activeRoller: null,
     isRolling: false,
     hasRolled: false,
@@ -44,6 +45,7 @@ export function initBoardState() {
     state.openingRolls = { white: null, black: null };
     state.isRolling = false;
     state.hasRolled = false;
+    state.isDouble = false;
 
     // Official Standard Backgammon Starting Setup
     state.boardState[0]  = { player: 'white', count: 2 }; // Point 1
@@ -67,6 +69,7 @@ export function switchTurn() {
     state.currentRoll = [];
     state.selectedPoint = null;
     state.validMoves = [];
+    state.isDouble = false;
 
     logStatus(`Turn switched. It is now ${state.currentPlayer}'s turn.`);
 
