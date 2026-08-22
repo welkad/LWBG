@@ -1,7 +1,7 @@
 // js/moves.js
-import { state, switchTurn } from './state.js';
+import { state } from './state.js';
 import { renderBoard } from './board.js';
-import { resetDiceUI, renderDiceUI } from './dice.js';
+import { renderDiceUI } from './dice.js';
 import { logStatus } from './ui.js';
 
 // Direction vectors
@@ -131,7 +131,8 @@ export function handlePointClick(pointIndex) {
     const formattedMoves = sortedMoves.length > 0
       ? sortedMoves.join(', ') : 'None';
 
-    logStatus(`Point selected ${pointIndex === 'bar'
+    // Log move options to console only
+    console.log(`Point selected ${pointIndex === 'bar'
       ? 'BAR' : pointIndex + 1}. Valid moves: [ ${ formattedMoves } ]`);
   }
 
@@ -253,20 +254,20 @@ function getConsumedDiceForDistance(distance) {
 // ==================================
 
 /**
- * Saves state snapshot along with checker identification.
+ * Save a pre-move state snapshot so each individual step can be reverted independently
  */
 function recordMoveSnapshot(checkerId, consumedDice) {
-  state.moveHistory.push({
-    checkerId: checkerId,
+  state.moveHistory.push({    
     consumedDice: consumedDice,
     boardState: JSON.parse(JSON.stringify(state.boardState)),
     bar: { ...state.bar },
+    borneOff: {...state.borneOff},
     currentRoll: [...state.currentRoll]
   });
 }
 
 /**
- * Reverts all steps taken by the most recently moved checker.
+ * Revert exactly one individual step taken during current turn
  */
 export function undoLastMove() {
   if (!state.moveHistory || state.moveHistory.length === 0) {
@@ -274,29 +275,19 @@ export function undoLastMove() {
     return;
   }
 
-  // Get the checker ID of the last move made
-  const lastSnapshot = state.moveHistory[state.moveHistory.length - 1];
-  const targetCheckerId = lastSnapshot.checkerId;
+  // Pop only the most recent single-step snapshot
+  const previousState = state.moveHistory.pop();
 
-  let targetState = null;
+  // Restore state to what it was before single step made
+  state.boardState = previousState.boardState;
+  state.bar = previousState.bar;
+  state.borneOff = previousState.borneOff;
+  state.currentRoll = previousState.currentRoll;
 
-  // Roll back all contiguous move steps associated with this exact checker
-  while (
-    state.moveHistory.length > 0 &&
-    state.moveHistory[state.moveHistory.length - 1].checkerId === targetCheckerId
-  ) {
-    targetState = state.moveHistory.pop();
-  }
+  state.selectedPoint = null;
+  state.validMoves = [];
 
-  if (targetState) {
-    state.boardState = targetState.boardState;
-    state.bar = targetState.bar;
-    state.currentRoll = targetState.currentRoll;
-    state.selectedPoint = null;
-    state.validMoves = [];
-
-    logStatus("Move undone.");
-    renderBoard();
-    renderDiceUI();
-  }
+  console.log("Last move undone.");
+  renderBoard();
+  renderDiceUI();  
 }
