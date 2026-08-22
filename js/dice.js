@@ -148,7 +148,7 @@ export function renderDiceUI() {
 
                 if (i < 3) {
                     setDieValue(dieEl, 'U');
-                    dieEl.classList.add('used');
+                    dieEl.classList.remove('used');
                 } else {
                     setDieValue(dieEl, 'D');
                     dieEl.classList.remove('used');
@@ -166,7 +166,7 @@ export function renderDiceUI() {
 
             if (i < usedCount) {
                 setDieValue(dieEl, 'U');
-                dieEl.classList.add('used');
+                dieEl.classList.remove('used');
             } else {
                 const rollIndex = i - usedCount;
                 setDieValue(dieEl, state.currentRoll[rollIndex]);
@@ -185,7 +185,7 @@ export function renderDiceUI() {
     if (movesLeft === 0 && movesMade > 0) {
         setDieValue(die1, 'U');
         setDieValue(die2, 'D');
-        die1.classList.add('used');
+        die1.classList.remove('used');
         die2.classList.remove('used');
         die1.style.display = '';
         die2.style.display = '';
@@ -207,7 +207,7 @@ export function renderDiceUI() {
     if (movesMade > 0 && movesLeft > 0) {
         setDieValue(die1, 'U');
         setDieValue(die2, state.currentRoll[0]);
-        die1.classList.add('used');
+        die1.classList.remove('used');
         die2.classList.remove('used');
         die1.style.display = '';
         die2.style.display = '';
