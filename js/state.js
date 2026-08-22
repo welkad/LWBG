@@ -3,7 +3,7 @@
 // ==========================================
 // js/state.js - Centralizes all global mutable game state in one place so modules can import and modify it predictably.
 
-import { updateTurnUI, resetDiceUI } from "./dice.js";
+import { updateTurnUI, resetDiceUI, updateCubePositionUI } from "./dice.js";
 import { renderBoard, updatePointLabels } from './board.js';
 import { logStatus } from './ui.js';
 
@@ -18,19 +18,23 @@ export const state = {
 
     cubeValue: 1,                               // Default starting multiplier
     cubeOwner: 'center',                        // 'center', 'white', of 'black'
+    isCubeOffered: false,                       // True when decision is pending
+    cubeOfferedBy: null,                        // Cube offered by 'black' or 'white'
     gamePhase:  'opening_roll',                 // 'opening_roll' or 'turns'
     currentPlayer: null,                        // Set dynamically by opening roll
+
     openingRolls: { white: null, black: null },
     currentRoll: [],                            // e.g., [5, 3] or [4, 4, 4, 4]
-    isDouble: false,                            // Track if current turn started with doubles
+    isDouble: false,                            // Track if current turn started with double dice
     activeRoller: null,
     isRolling: false,
     hasRolled: false,
 };
 
 export function initBoardState() {
-    state.boardState = Array(24).fill(null).map(() => ({ player: null, count: 0 }));
+    state.boardState = Array(24).fill(null).map(() => ({ player: null, count: 0 }));    
     updatePointLabels(null);
+    updateCubePositionUI();
 
     // Reset board states
     state.bar = { white: 0, black: 0 };
@@ -46,6 +50,12 @@ export function initBoardState() {
     state.isRolling = false;
     state.hasRolled = false;
     state.isDouble = false;
+
+    // Reset doubling cube
+    state.cubeValue = 1;
+    state.cubeOwner = 'center';
+    state.isCubeOffered = false;
+    state.cubeOfferedBy = null;
 
     // Official Standard Backgammon Starting Setup
     state.boardState[0]  = { player: 'white', count: 2 }; // Point 1
@@ -70,10 +80,13 @@ export function switchTurn() {
     state.selectedPoint = null;
     state.validMoves = [];
     state.isDouble = false;
+    state.isCubeOffered = false;
+    state.cubeOfferedBy = null;
 
     logStatus(`Turn switched. It is now ${state.currentPlayer}'s turn.`);
 
     // Clear dice DOM elements, update status, and re-render board
+    updateCubePositionUI(); // Refresh cube UI based on currentPlayer & ownership
     resetDiceUI();
     updateTurnUI();
     renderBoard();

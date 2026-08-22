@@ -1,6 +1,6 @@
 // js/dice.js - Contains all doubling cube and dice rolling logic, turn UI toggling, and roll animations.
 import { state, switchTurn } from './state.js';
-import { logStatus, resetStatusToDefault } from './ui.js';
+import { logStatus, resetStatusToDefault, renderCubeOfferModal } from './ui.js';
 import { updatePointLabels } from './board.js';
 import { undoLastMove } from './moves.js';
 
@@ -266,6 +266,11 @@ export function handleCubeClick(player) {
         logStatus("Doubling cube is disabled during the opening roll.", 1000);
         return;
     }
+    // Disable if a cube offer is already pending
+    if (state.isCubeOffered) {
+        logStatus("A cube decision is currently pending.", 1000);
+        return;
+    }
     // Disable if not player's turn or after rolling
     if (player !== state.currentPlayer || state.isRolling) {
         logStatus("You can only double on your turn.", 1000);
@@ -282,22 +287,55 @@ export function handleCubeClick(player) {
         return;
     }
 
-    // Increment cube value
-    if (state.cubeValue === 1) {
-        state.cubeValue = 2;
-    } else if (state.cubeValue < 64) {
-        state.cubeValue *= 2;
+    // Determine proposed next value
+    const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
+    if (targetValue > 64) {
+        logStatus("Cube value cannot exceed 64.", 1000);
+        return;
     }
 
-    // Opposing player who accepts the double now 'owns' the cube
+    // Set pending offer state
+    state.isCubeOffered = true;
+    state.offeredBy = player;
+
     const opponent = player === 'white' ? 'black' : 'white';
-    state.cubeOwner = opponent;
-    
-    // Update UI element text
-    const cubeEl = document.getElementById('doubling-cube');
-    if (cubeEl) cubeEl.textContent = state.cubeValue;
-    logStatus(`${player} doubled to ${state.cubeValue}. ${opponent} accepted and now owns the cube.`, 1500);
-    updateCubePositionUI(); // Move cube to owner's side
+    logStatus(`${player} offered to double the cube to ${targetValue}. Waiting for ${opponent}...`);
+
+    // Render interactive modal for opponent
+    renderCubeOfferModal(player, targetValue, (accepted) => {
+        resolveCubeOffer(accepted, targetValue);
+    });
+}
+
+/**
+ * Handles the opponent's accept or decline decision.
+ */
+function resolveCubeOffer(accepted, targetValue) {
+    const offeringPlayer = state.offeredBy;
+    const opponent = offeringPlayer === 'white' ? 'black' : 'white';
+
+    state.isCubeOffered = false;
+    state.offeredBy = null;
+
+    if (accepted) {
+        // Update cube value
+        state.cubeValue = targetValue;
+
+        // Opponent who accepts now owns the cube
+        state.cubeOwner = opponent;
+
+        logStatus(`${opponent} accepted the cube! Value is now ${state.cubeValue}. ${opponent} now owns the cube.`, 2000);
+        updateCubePositionUI();
+    } else {
+        // Opponent declined -> Resign current game
+        logStatus(`${opponent} declined the cube and resigned! ${offeringPlayer} wins the game (${state.cubeValue} pts).`, 3000);
+        
+        // Award points equal to current cube value before the declined double
+        state.scores[offeringPlayer] += state.cubeValue;
+        
+        // Trigger your game over routine here
+        endGame(offeringPlayer);
+    }
 }
 
 // Helper function if mouse  pointer leaves cube during opening

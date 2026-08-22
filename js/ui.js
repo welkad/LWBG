@@ -108,3 +108,44 @@ function processQueue() {
         processQueue();
     }, DISPLAY_DELAY_MS);
 }
+
+// =======================================================
+//  DECLINE OR ACCEPT DOUBLES
+// =======================================================
+
+/**
+ * Renders an inline modal/banner allowing the opponent to Accept or Decline a cube offer.
+ */
+export function renderCubeOfferModal(offeringPlayer, targetValue, onRespond) {
+  const opponent = offeringPlayer === 'white' ? 'black' : 'white';
+  
+  // Remove existing prompt if present
+  const existing = document.getElementById('cube-offer-modal');
+  if (existing) existing.remove();
+
+  const container = document.createElement('div');
+  container.id = 'cube-offer-modal';
+  container.className = 'cube-offer-modal';
+  container.innerHTML = `
+    <div class="cube-offer-content">
+      <p><strong>${offeringPlayer.toUpperCase()}</strong> offers to double the cube to <strong>${targetValue}</strong>.</p>
+      <p>${opponent.toUpperCase()}, do you accept or decline?</p>
+      <div class="cube-offer-actions">
+        <button id="btn-accept-cube" class="btn-cube-accept">Accept</button>
+        <button id="btn-decline-cube" class="btn-cube-decline">Decline (Resign)</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(container);
+
+  document.getElementById('btn-accept-cube').addEventListener('click', () => {
+    container.remove();
+    onRespond(true);
+  });
+
+  document.getElementById('btn-decline-cube').addEventListener('click', () => {
+    container.remove();
+    onRespond(false);
+  });
+}
