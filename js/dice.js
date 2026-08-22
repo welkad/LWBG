@@ -396,7 +396,7 @@ export function handleOpeningRoll(player) {
         delete die1El.dataset.animating; // Clear animation flag
 
         // Log the individual opening roll result
-        logStatus(`${player} rolled a ${finalVal}.`, 1000);
+        // logStatus(`${player} rolled a ${finalVal}.`, 1000);
 
         // Check if both players have finished rolling before evaluating winner
         if (state.openingRolls.white !== null && state.openingRolls.black !== null) {
