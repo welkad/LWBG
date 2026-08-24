@@ -1,6 +1,6 @@
 // js/dice.js - Contains all doubling cube and dice rolling logic, turn UI toggling, and roll animations.
 import { state, switchTurn } from './state.js';
-import { logStatus, resetStatusToDefault, renderCubeOfferModal } from './ui.js';
+import { logStatus, resetStatusToDefault, updateLegendUI, clearStatusQueue } from './ui.js';
 import { updatePointLabels } from './board.js';
 import { undoLastMove } from './moves.js';
 
@@ -46,7 +46,7 @@ export function renderDiceUI() {
             const targetZone = document.getElementById(`${playerColor}-dice-zone`);
             if (!targetZone) return null;
 
-            dieEl = document.createElement('span');
+            dieEl = document.createElement('div');
             dieEl.id = dieId;
             dieEl.className = 'die';
 
@@ -55,6 +55,8 @@ export function renderDiceUI() {
             });
             targetZone.appendChild(dieEl);
         }
+        // Reset className to 'die' every time it gets used
+        dieEl.className = 'die';
         return dieEl;
     }
 
@@ -76,6 +78,30 @@ export function renderDiceUI() {
         });
     }
 
+    // --- CUBE OFFER PENDING STATE ---
+    if (state.isCubeOffered) {
+        const respondingPlayer = state.cubeOfferedBy === 'white' ? 'black' : 'white';
+        const die1 = getOrCreateDie(respondingPlayer, 0);
+        const die2 = getOrCreateDie(respondingPlayer, 1);
+
+        if (die1 && die2) {
+            die1.style.display = '';
+            die2.style.display = '';
+            setDieValue(die1, 'Y');
+            setDieValue(die2, 'N');
+            die1.classList.remove('used');
+            die2.classList.remove('used');
+        }
+
+        removeExtraDice(respondingPlayer, 2);
+        updateTurnUI()
+        updateLegendUI();
+        return;
+    }
+
+    // Update legend back to  standard controls when cube offer is resolved
+    updateLegendUI();
+
     // Opening Roll Phase
     if (state.gamePhase === 'opening_roll') {
         ['white', 'black'].forEach(playerColor => {
@@ -95,11 +121,9 @@ export function renderDiceUI() {
                     setDieValue(die1, state.openingRolls[playerColor]);
                 }
             }
-
             // Opening roll should never have dice 3/4
             removeExtraDice(playerColor, 2);
         });
-
         return;
     }
 
@@ -222,6 +246,25 @@ export function handleDieClick(player, dieNumber) {
         return;
     }
 
+    // --- CUBE DECISION HANDLING ---
+    if (state.isCubeOffered) {
+        const respondingPlayer = state.cubeOfferedBy === 'white' ? 'black' : 'white';
+        if (player !== respondingPlayer) return;
+
+        const targetEl = document.getElementById(`${player}-die-${dieNumber}`);
+        if (!targetEl) return;
+
+        const content = targetEl.textContent.trim();
+        const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
+
+        if (content === 'Y') {
+            resolveCubeOffer(true, targetValue);
+        } else if (content === 'N') {
+            resolveCubeOffer(false, targetValue);
+        }
+        return;
+    }
+
     // Only current player can act during regular turns
     if (player !== state.currentPlayer) return;
 
@@ -263,26 +306,31 @@ export function initDiceListeners() {
 export function handleCubeClick(player) {
     // Disable cube during opening roll phase
     if (state.gamePhase === 'opening_roll') {
+        console.log('dice.js:307');
         logStatus("Doubling cube is disabled during the opening roll.", 1000);
         return;
     }
     // Disable if a cube offer is already pending
     if (state.isCubeOffered) {
+        console.log('dice.js:313');
         logStatus("A cube decision is currently pending.", 1000);
         return;
     }
     // Disable if not player's turn or after rolling
     if (player !== state.currentPlayer || state.isRolling) {
+        console.log('dice.js:319');
         logStatus("You can only double on your turn.", 1000);
         return;
     }
     // Cannot double after rolling the dice
     if (state.hasRolled) {
+        console.log('dice.js:325');
         logStatus("You cannot double after rolling the dice!", 1000);
         return;
     }
     // Cube must be in center or 'owned' by the current player
     if (state.cubeOwner !== 'center' && state.cubeOwner !== player) {
+        console.log('dice.js:331');
         logStatus(`You cannot double - ${state.cubeOwner} owns the doubling cube!`, 1000);
         return;
     }
@@ -290,51 +338,59 @@ export function handleCubeClick(player) {
     // Determine proposed next value
     const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
     if (targetValue > 64) {
+        console.log('dice.js:339');
         logStatus("Cube value cannot exceed 64.", 1000);
         return;
     }
 
     // Set pending offer state
     state.isCubeOffered = true;
-    state.offeredBy = player;
+    state.cubeOfferedBy = player;
+    const respondingPlayer = player === 'white' ? 'black' : 'white';
 
-    const opponent = player === 'white' ? 'black' : 'white';
-    logStatus(`${player} offered to double the cube to ${targetValue}. Waiting for ${opponent}...`);
-
-    // Render interactive modal for opponent
-    renderCubeOfferModal(player, targetValue, (accepted) => {
-        resolveCubeOffer(accepted, targetValue);
-    });
+    // Clear stale queued messages (e.g. "Turn switched") so Doubles prompt can render
+    clearStatusQueue();
+    console.log('dice.js:351');
+    logStatus(`${player} offered to double the cube to ${targetValue}. Waiting for ${respondingPlayer}...`);
+    // Render interactive dice for opponent
+    renderDiceUI();
 }
 
 /**
  * Handles the opponent's accept or decline decision.
  */
 function resolveCubeOffer(accepted, targetValue) {
-    const offeringPlayer = state.offeredBy;
+    const offeringPlayer = state.cubeOfferedBy;
     const opponent = offeringPlayer === 'white' ? 'black' : 'white';
 
+    // Clear flags and wipe any stale status messages
     state.isCubeOffered = false;
-    state.offeredBy = null;
+    state.cubeOfferedBy = null;
+    clearStatusQueue();
 
     if (accepted) {
-        // Update cube value
-        state.cubeValue = targetValue;
-
-        // Opponent who accepts now owns the cube
+        // Update cube value and assign ownership to accepting player
+        state.cubeValue = targetValue;        
         state.cubeOwner = opponent;
 
+        console.log('dice.js:376');
         logStatus(`${opponent} accepted the cube! Value is now ${state.cubeValue}. ${opponent} now owns the cube.`, 2000);
+        console.log('dice.js:378');
+        logStatus(`${offeringPlayer}'s turn to play.`);
+        // Move cube element to owner's tray
         updateCubePositionUI();
+        // Restore normal turn UI (switch active dice zone back to active player)
+        updateTurnUI();
+        renderDiceUI();
     } else {
         // Opponent declined -> Resign current game
-        logStatus(`${opponent} declined the cube and resigned! ${offeringPlayer} wins the game (${state.cubeValue} pts).`, 3000);
-        
+        console.log('dice.js:384');
+        logStatus(`${opponent} declined the cube and resigned! ${offeringPlayer} wins the game (${state.cubeValue} pts).`, 3000);        
         // Award points equal to current cube value before the declined double
         state.scores[offeringPlayer] += state.cubeValue;
-        
-        // Trigger your game over routine here
-        endGame(offeringPlayer);
+
+        updateTurnUI();
+        renderDiceUI();
     }
 }
 
@@ -645,6 +701,21 @@ export function updateTurnUI() {
 
     if (!whiteZone || !blackZone) return;
 
+    if (state.isCubeOffered) {
+        // Only show the responding player's dice zone during cube offer decisions
+        const respondingPlayer = state.cubeOfferedBy === 'white' ? 'black' : 'white';
+
+        if (respondingPlayer === 'white') {
+            whiteZone.style.display = 'flex';
+            blackZone.style.display = 'none';
+        } else {
+            whiteZone.style.display = 'none';
+            blackZone.style.display = 'flex';
+        }
+        return;
+    }
+
+    // Standard turn UI logic
     if (state.gamePhase === 'opening_roll') {
         document.body.classList.add('opening-roll-phase');
         // Both dice zones must be visible so white and black can each roll 1 die

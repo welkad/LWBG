@@ -1,6 +1,8 @@
 // ============================================
 // js/ui.js - Display messages in status banner
 // ============================================
+import { state } from './state.js';
+
 let messageQueue = [];
 let isDisplaying = false;
 let currentMessage = '';    // Track active message in status bar
@@ -109,43 +111,37 @@ function processQueue() {
     }, DISPLAY_DELAY_MS);
 }
 
-// =======================================================
-//  DECLINE OR ACCEPT DOUBLES
-// =======================================================
+/**
+ *  Update the dice control legend dynamically between regular play and cube decisions
+ */
+export function updateLegendUI() {
+    const legendEl = document.querySelector('.dice-legend');
+    if (!legendEl) return;
+
+    if (state.isCubeOffered) {
+        legendEl.innerHTML = `
+            <span><strong>Y</strong> : Accept</span>
+            <span><strong>N</strong> : Resign</span>
+        `;    
+    } else {
+        legendEl.innerHTML = `
+            <span><strong>R</strong> : Roll</span>
+            <span><strong>U</strong> : Undo</span>
+            <span><strong>D</strong> : Done</span>
+        `;
+    }
+}
 
 /**
- * Renders an inline modal/banner allowing the opponent to Accept or Decline a cube offer.
+ *  Clear any pending queued messages when a cube offer is initiated.
+ *  The doubling prompt will overwrite the status bar immediately.
  */
-export function renderCubeOfferModal(offeringPlayer, targetValue, onRespond) {
-  const opponent = offeringPlayer === 'white' ? 'black' : 'white';
-  
-  // Remove existing prompt if present
-  const existing = document.getElementById('cube-offer-modal');
-  if (existing) existing.remove();
+export function clearStatusQueue() {
+    messageQueue = [];  // Empty any pending messages
+    isDisplaying = false;
 
-  const container = document.createElement('div');
-  container.id = 'cube-offer-modal';
-  container.className = 'cube-offer-modal';
-  container.innerHTML = `
-    <div class="cube-offer-content">
-      <p><strong>${offeringPlayer.toUpperCase()}</strong> offers to double the cube to <strong>${targetValue}</strong>.</p>
-      <p>${opponent.toUpperCase()}, do you accept or decline?</p>
-      <div class="cube-offer-actions">
-        <button id="btn-accept-cube" class="btn-cube-accept">Accept</button>
-        <button id="btn-decline-cube" class="btn-cube-decline">Decline (Resign)</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(container);
-
-  document.getElementById('btn-accept-cube').addEventListener('click', () => {
-    container.remove();
-    onRespond(true);
-  });
-
-  document.getElementById('btn-decline-cube').addEventListener('click', () => {
-    container.remove();
-    onRespond(false);
-  });
+    if (temporaryMessageTimer) {
+        clearTimeout(temporaryMessageTimer);
+        temporaryMessageTimer = null;
+    }
 }

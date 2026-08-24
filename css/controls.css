@@ -98,13 +98,6 @@ body.opening-roll-phase .doubling-cube,
     transition: transform 0.15s ease;
 }
 
-/* Hide the second die during opening roll phase */
-/* body.opening-roll-phase #white-die-2,
-body.opening-roll-phase #black-die-2 {
-    display: none !important;
-} */
-
-
 /* ==========================================
    DICE STYLING & PIP GRIDS
    ========================================== */
