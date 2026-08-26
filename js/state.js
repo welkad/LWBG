@@ -3,7 +3,8 @@
 // ==========================================
 // js/state.js - Centralizes all global mutable game state in one place so modules can import and modify it predictably.
 
-import { updateTurnUI, resetDiceUI, updateCubePositionUI } from "./dice.js";
+import { updateTurnUI, resetDiceUI } from './dice.js';
+import { updateCubePositionUI } from './doubling-cube.js'
 import { renderBoard, updatePointLabels } from './board.js';
 import { logStatus } from './ui.js';
 

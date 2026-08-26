@@ -1,0 +1,139 @@
+// js/doubling-cube.js - Contains all doubling cube logic.
+import { state } from './state.js';
+import { logStatus, resetStatusToDefault, clearStatusQueue } from './ui.js';
+import { renderDiceUI } from './dice-renderer.js';
+
+export function handleCubeClick(player) {
+    // Disable cube during opening roll phase
+    if (state.gamePhase === 'opening_roll') {
+        console.log('dice.js:307');
+        logStatus("Doubling cube is disabled during the opening roll.", 1000);
+        return;
+    }
+    // Disable if a cube offer is already pending
+    if (state.isCubeOffered) {
+        console.log('dice.js:313');
+        logStatus("A cube decision is currently pending.", 1000);
+        return;
+    }
+    // Disable if not player's turn or after rolling
+    if (player !== state.currentPlayer || state.isRolling) {
+        console.log('dice.js:319');
+        logStatus("You can only double on your turn.", 1000);
+        return;
+    }
+    // Cannot double after rolling the dice
+    if (state.hasRolled) {
+        console.log('dice.js:325');
+        logStatus("You cannot double after rolling the dice!", 1000);
+        return;
+    }
+    // Cube must be in center or 'owned' by the current player
+    if (state.cubeOwner !== 'center' && state.cubeOwner !== player) {
+        console.log('dice.js:331');
+        logStatus(`You cannot double - ${state.cubeOwner} owns the doubling cube!`, 1000);
+        return;
+    }
+
+    // Determine proposed next value
+    const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
+    if (targetValue > 64) {
+        console.log('dice.js:339');
+        logStatus("Cube value cannot exceed 64.", 1000);
+        return;
+    }
+
+    // Set pending offer state
+    state.isCubeOffered = true;
+    state.cubeOfferedBy = player;
+    const respondingPlayer = player === 'white' ? 'black' : 'white';
+
+    // Clear stale queued messages (e.g. "Turn switched") so Doubles prompt can render
+    clearStatusQueue();
+    console.log('dice.js:351');
+    logStatus(`${player} offered to double the cube to ${targetValue}. Waiting for ${respondingPlayer}...`);
+    // Render interactive dice for opponent
+    renderDiceUI();
+}
+
+/**
+ * Handles the opponent's accept or decline decision.
+ */
+export function resolveCubeOffer(accepted, targetValue) {
+    const offeringPlayer = state.cubeOfferedBy;
+    const opponent = offeringPlayer === 'white' ? 'black' : 'white';
+
+    // Clear flags and wipe any stale status messages
+    state.isCubeOffered = false;
+    state.cubeOfferedBy = null;
+    clearStatusQueue();
+
+    if (accepted) {
+        // Update cube value and assign ownership to accepting player
+        state.cubeValue = targetValue;        
+        state.cubeOwner = opponent;
+
+        console.log('dice.js:376');
+        logStatus(`${opponent} accepted the cube! Value is now ${state.cubeValue}. ${opponent} now owns the cube.`, 2000);
+        console.log('dice.js:378');
+        logStatus(`${offeringPlayer}'s turn to play.`);
+        // Move cube element to owner's tray
+        updateCubePositionUI();
+        // Restore normal turn UI (switch active dice zone back to active player)
+        updateTurnUI();
+        renderDiceUI();
+    } else {
+        // Opponent declined -> Resign current game
+        console.log('dice.js:384');
+        logStatus(`${opponent} declined the cube and resigned! ${offeringPlayer} wins the game (${state.cubeValue} pts).`, 3000);        
+        // Award points equal to current cube value before the declined double
+        state.scores[offeringPlayer] += state.cubeValue;
+
+        updateTurnUI();
+        renderDiceUI();
+    }
+}
+
+// Helper function if mouse  pointer leaves cube during opening
+export function handleCubeMouseLeave() {
+    // Restore any previous status message immediately when cursor exits
+    resetStatusToDefault(1000);    
+}
+
+// Helper function to update positioning in CSS 
+export function updateCubePositionUI() {
+    const cubeEl = document.getElementById('doubling-cube');
+    if (!cubeEl) return;
+
+    // Move cube to appropriate container based on owner
+    let targetContainerId = 'bar';  // default center position
+    if (state.cubeOwner === 'black') {
+        targetContainerId = 'doubling-cube-tray';        
+    } else if (state.cubeOwner === 'white') {
+        targetContainerId = 'home-bar';
+    }
+
+    const targetContainer = document.getElementById(targetContainerId);
+    if (targetContainer && cubeEl.parentElement !== targetContainer) {
+        targetContainer.appendChild(cubeEl);
+    }
+
+    // Display 64 when value is 1 (standard physical set display)
+    cubeEl.textContent = state.cubeValue === 1 ? 64 : state.cubeValue;
+
+    // Set data attribute for CSS targeting
+    cubeEl.setAttribute('data-owner', state.cubeOwner);
+
+    // Determine if the cube should be visually active/clickable
+    const isOpening = state.gamePhase === 'opening_roll';    
+    const isOwnedByOpponent = state.cubeOwner !== 'center' && state.cubeOwner !== state.currentPlayer;
+
+    // Disable cube for opening roll, player already rolled, or opponent owns it
+    if (!isOpening && (state.hasRolled || isOwnedByOpponent)) {
+        cubeEl.classList.add('disabled');
+        cubeEl.classList.remove('active');
+    } else {
+        cubeEl.classList.add('active');
+        cubeEl.classList.remove('disabled');
+    }
+}

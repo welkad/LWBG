@@ -1,7 +1,7 @@
 // js/moves.js
 import { state } from './state.js';
 import { renderBoard } from './board.js';
-import { renderDiceUI } from './dice.js';
+import { renderDiceUI } from './dice-renderer.js';
 import { logStatus } from './ui.js';
 
 // Direction vectors

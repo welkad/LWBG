@@ -1,7 +1,8 @@
 // js/main.js - The application entry point. Imports functions, sets up event listeners on DOM elements, and triggers initial renders.
-import { state, initBoardState } from './state.js';
+import { initBoardState } from './state.js';
 import { renderBoard } from './board.js';
-import { updateTurnUI, renderDiceUI, initDiceListeners } from './dice.js';
+import { updateTurnUI, initDiceListeners } from './dice.js';
+import { renderDiceUI } from './dice-renderer.js';
 import { logStatus } from './ui.js';
 
 // test-moves.js
