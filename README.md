@@ -4,21 +4,24 @@ A lightweight, vanilla JavaScript implementation of Backgammon designed to run e
 
 ## File Architecture
 
-```text
 /
 ├── index.html
 ├── style.css
 ├── README.md
 ├── css/
-│   ├── board.css       # Base page setup, wood frame layouts, point geometry, and grid structures
-│   ├── pieces.css      # Styling for checkers, bear-off home pockets, and bar piece placements
-│   └── controls.css    # Interactive UI components: player dice zones, dice styling, and doubling cube
+│   ├── board.css            # Board layout, wood frame, point geometry, and grid structures
+│   ├── pieces.css           # Checker pieces, bear-off pockets, bar pieces, and piece positioning
+│   └── controls.css         # Dice zones, dice appearance, interactive controls, and doubling cube
 └── js/
-    ├── state.js        # Global game state, initial board setup, and turn switching (`switchTurn`)
-    ├── board.js        # Board creation, point rendering, and DOM updates
-    ├── dice.js         # Rolling logic, progressive slowing roll animations, and doubling cube rules
-    ├── main.js         # Application entry point, initial DOM setup, and global event listeners    
-    ├── moves.js        # A dedicated module to compute valid moves for a selected origin point
-    ├── ui.js           # To display information messages in status banner (echos console.log)
-    └── test-moves.js   # Automated move validation test harness
-```
+    ├── main.js              # Application entry point; initializes game state, board, dice UI, and event listeners
+    ├── state.js             # Central game state, initial board setup, turn switching, and game-phase management
+    ├── board.js             # Board creation, point rendering, checker placement, and board DOM updates
+    ├── moves.js             # Move validation, legal destination calculation, move execution, and undo history
+    │
+    ├── dice.js              # Dice interaction controller; handles die clicks, turn UI, dice reset, and dice listeners
+    ├── dice-rolling.js      # Dice rolling logic, opening rolls, animated rolling, and generation of roll values
+    ├── dice-renderer.js     # Creates and updates dice DOM elements, pip rendering, and dice state display
+    │
+    ├── doubling-cube.js     # Doubling cube offers, accept/decline handling, cube ownership, and cube positioning
+    ├── ui.js                # Status messages, game notifications, legend updates, and general UI feedback
+    └── test-moves.js        # Automated move-validation test harness
