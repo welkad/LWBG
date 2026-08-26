@@ -73,6 +73,20 @@ export function renderDiceUI() {
     });
   }
 
+  // Helper: remove Cube offer when no longer needed
+  function clearInactiveDice() {
+    ['black', 'white'].forEach(player => {
+      if (player === state.currentPlayer) return;
+
+      const zone = document.getElementById(`${player}-dice-zone`);
+      if (!zone) return;
+
+      zone.querySelectorAll('.die').forEach(die => {
+        die.remove();
+      });
+    });
+  }
+
   // --- CUBE OFFER PENDING STATE ---
   if (state.isCubeOffered) {
     const respondingPlayer =
@@ -90,10 +104,22 @@ export function renderDiceUI() {
     }
 
     removeExtraDice(respondingPlayer, 2);
-    
+    // Show the responding player's dice zone
+    const blackZone = document.getElementById('black-dice-zone');
+    const whiteZone = document.getElementById('white-dice-zone');    
+
+    if (respondingPlayer === 'black') {
+      if (blackZone) blackZone.style.display = 'flex';
+      if (whiteZone) whiteZone.style.display = 'none';
+    } else {
+      if (blackZone) blackZone.style.display = 'none';
+      if (whiteZone) whiteZone.style.display = 'flex';
+    }    
     updateLegendUI();
     return;
   }
+  // Cube offer has ended - remove old Y/N dice
+  clearInactiveDice();
 
   // Update legend back to  standard controls when cube offer is resolved
   updateLegendUI();
@@ -240,15 +266,33 @@ export function renderDiceUI() {
 // ========================================
 
 export function renderWinnerOpeningDice(winner, higherVal, lowerVal) {
-    const die1El = document.getElementById(`${winner}-die-1`);
-    const die2El = document.getElementById(`${winner}-die-2`);
-    // Display winning roll
-    if (die1El) {
-        die1El.style.display = '';
-        setDieValue(die1El, higherVal);
-    }
-    if (die2El) {
-        die2El.style.display = '';
-        setDieValue(die2El, lowerVal);
-    } 
+  const loser = winner === 'black' ? 'white' : 'black';
+  
+  // Clear the losing player's dice (but keep DOM elements)
+  const loserDie1 = document.getElementById(`${loser}-die-1`);
+  const loserDie2 = document.getElementById(`${loser}-die-2`);
+
+  if (loserDie1) {
+    setDieValue(loserDie1, '');
+    loserDie1.classList.remove('used');
+    loserDie1.style.display = 'none';
+  }
+  if (loserDie2) {
+    setDieValue(loserDie2, '');
+    loserDie2.classList.remove('used');
+    loserDie2.style.display = 'none';
+  }
+  
+  // Display winning playe's roll
+  const winnerDie1 = document.getElementById(`${winner}-die-1`);
+  const winnerDie2 = document.getElementById(`${winner}-die-2`);
+  
+  if (winnerDie1) {
+      winnerDie1.style.display = '';
+      setDieValue(winnerDie1, higherVal);
+  }
+  if (winnerDie2) {
+      winnerDie2.style.display = '';
+      setDieValue(winnerDie2, lowerVal);
+  } 
 }

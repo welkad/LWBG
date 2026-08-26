@@ -1,6 +1,6 @@
 // js/dice.js - Contains dice rolling logic and turn UI toggling.
 import { state, switchTurn } from './state.js';
-import { handleCubeClick, handleCubeMouseLeave, updateCubePositionUI } from './doubling-cube.js';
+import { handleCubeClick, handleCubeMouseLeave, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, handleOpeningRoll, toggleDiceOrder } from './dice-rolling.js';
 import { renderDiceUI, setDieValue } from './dice-renderer.js';
 import { undoLastMove } from './moves.js';
@@ -176,4 +176,9 @@ export function updateTurnUI() {
             blackZone.style.display = 'flex';
         }
     }
+}
+
+export function refreshDiceForNewTurn() {
+    resetDiceUI();
+    renderDiceUI();
 }

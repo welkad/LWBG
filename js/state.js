@@ -3,7 +3,7 @@
 // ==========================================
 // js/state.js - Centralizes all global mutable game state in one place so modules can import and modify it predictably.
 
-import { updateTurnUI, resetDiceUI } from './dice.js';
+import { updateTurnUI, refreshDiceForNewTurn } from './dice.js';
 import { updateCubePositionUI } from './doubling-cube.js'
 import { renderBoard, updatePointLabels } from './board.js';
 import { logStatus } from './ui.js';
@@ -87,9 +87,9 @@ export function switchTurn() {
     logStatus(`Turn switched. It is now ${state.currentPlayer}'s turn.`);
 
     // Clear dice DOM elements, update status, and re-render board
-    updateCubePositionUI(); // Refresh cube UI based on currentPlayer & ownership
-    resetDiceUI();
+    updateCubePositionUI(); // Refresh cube UI based on currentPlayer & ownership    
     updateTurnUI();
+    refreshDiceForNewTurn();
     renderBoard();
 }
 

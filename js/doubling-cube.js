@@ -5,44 +5,36 @@ import { renderDiceUI } from './dice-renderer.js';
 
 export function handleCubeClick(player) {
     // Disable cube during opening roll phase
-    if (state.gamePhase === 'opening_roll') {
-        console.log('dice.js:307');
+    if (state.gamePhase === 'opening_roll') {        
         logStatus("Doubling cube is disabled during the opening roll.", 1000);
         return;
     }
     // Disable if a cube offer is already pending
-    if (state.isCubeOffered) {
-        console.log('dice.js:313');
+    if (state.isCubeOffered) {        
         logStatus("A cube decision is currently pending.", 1000);
         return;
     }
     // Disable if not player's turn or after rolling
-    if (player !== state.currentPlayer || state.isRolling) {
-        console.log('dice.js:319');
+    if (player !== state.currentPlayer || state.isRolling) {        
         logStatus("You can only double on your turn.", 1000);
         return;
     }
     // Cannot double after rolling the dice
-    if (state.hasRolled) {
-        console.log('dice.js:325');
+    if (state.hasRolled) {    
         logStatus("You cannot double after rolling the dice!", 1000);
         return;
     }
     // Cube must be in center or 'owned' by the current player
-    if (state.cubeOwner !== 'center' && state.cubeOwner !== player) {
-        console.log('dice.js:331');
+    if (state.cubeOwner !== 'center' && state.cubeOwner !== player) {       
         logStatus(`You cannot double - ${state.cubeOwner} owns the doubling cube!`, 1000);
         return;
     }
-
     // Determine proposed next value
     const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
-    if (targetValue > 64) {
-        console.log('dice.js:339');
+    if (targetValue > 64) {       
         logStatus("Cube value cannot exceed 64.", 1000);
         return;
     }
-
     // Set pending offer state
     state.isCubeOffered = true;
     state.cubeOfferedBy = player;
@@ -50,8 +42,8 @@ export function handleCubeClick(player) {
 
     // Clear stale queued messages (e.g. "Turn switched") so Doubles prompt can render
     clearStatusQueue();
-    console.log('dice.js:351');
     logStatus(`${player} offered to double the cube to ${targetValue}. Waiting for ${respondingPlayer}...`);
+
     // Render interactive dice for opponent
     renderDiceUI();
 }
@@ -72,24 +64,30 @@ export function resolveCubeOffer(accepted, targetValue) {
         // Update cube value and assign ownership to accepting player
         state.cubeValue = targetValue;        
         state.cubeOwner = opponent;
+        state.currentPlayer = offeringPlayer; // Player who offered Cube continues their turn
 
-        console.log('dice.js:376');
-        logStatus(`${opponent} accepted the cube! Value is now ${state.cubeValue}. ${opponent} now owns the cube.`, 2000);
-        console.log('dice.js:378');
+        logStatus(
+            `${opponent} accepted the cube! Value is now ${state.cubeValue}. ${opponent} now owns the cube.`,
+            2000
+        );
         logStatus(`${offeringPlayer}'s turn to play.`);
-        // Move cube element to owner's tray
+        
+        // Move cube to new owner's tray
         updateCubePositionUI();
-        // Restore normal turn UI (switch active dice zone back to active player)
-        updateTurnUI();
+
+        // Show offering player's dice zone again
+        const currentZone = document.getElementById(`${offeringPlayer}-dice-zone`);
+        if (currentZone) {
+            currentZone.style.display = 'flex';
+        }
+
+        // Restore normal dice UI for the player whose turn it is
         renderDiceUI();
     } else {
-        // Opponent declined -> Resign current game
-        console.log('dice.js:384');
+        // Opponent declined -> Resign current game        
         logStatus(`${opponent} declined the cube and resigned! ${offeringPlayer} wins the game (${state.cubeValue} pts).`, 3000);        
         // Award points equal to current cube value before the declined double
-        state.scores[offeringPlayer] += state.cubeValue;
-
-        updateTurnUI();
+        state.scores[offeringPlayer] += state.cubeValue;       
         renderDiceUI();
     }
 }
@@ -112,7 +110,6 @@ export function updateCubePositionUI() {
     } else if (state.cubeOwner === 'white') {
         targetContainerId = 'home-bar';
     }
-
     const targetContainer = document.getElementById(targetContainerId);
     if (targetContainer && cubeEl.parentElement !== targetContainer) {
         targetContainer.appendChild(cubeEl);
