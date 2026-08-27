@@ -4,9 +4,9 @@
 // js/state.js - Centralizes all global mutable game state in one place so modules can import and modify it predictably.
 
 import { updateTurnUI, refreshDiceForNewTurn } from './dice.js';
-import { updateCubePositionUI } from './doubling-cube.js'
-import { renderBoard, updatePointLabels } from './board.js';
-import { logStatus } from './ui.js';
+import { renderBoard, updatePointLabels, updateScoreBoardUI } from './board.js';
+import { updateCubePositionUI } from './doubling-cube.js';
+import { logStatus, clearStatusQueue } from './ui.js';
 
 export const state = {
     boardState: Array(24).fill(null).map(() => ({ player: null, count: 0 })),
@@ -21,8 +21,10 @@ export const state = {
     cubeOwner: 'center',                        // 'center', 'white', of 'black'
     isCubeOffered: false,                       // True when decision is pending
     cubeOfferedBy: null,                        // Cube offered by 'black' or 'white'
-    gamePhase:  'opening_roll',                 // 'opening_roll' or 'turns'
+    gamePhase:  'opening_roll',                 // 'opening_roll', 'turns', or 'game_over'
     currentPlayer: null,                        // Set dynamically by opening roll
+    isResignOffered: false,                     // Resignation state
+    resignOfferedBy: null,                      // Resigning player
 
     openingRolls: { white: null, black: null },
     currentRoll: [],                            // e.g., [5, 3] or [4, 4, 4, 4]
@@ -52,11 +54,13 @@ export function initBoardState() {
     state.hasRolled = false;
     state.isDouble = false;
 
-    // Reset doubling cube
+    // Reset doubling cube and resignation state
     state.cubeValue = 1;
     state.cubeOwner = 'center';
     state.isCubeOffered = false;
     state.cubeOfferedBy = null;
+    state.isResignOffered = false;
+    state.resignOfferedBy = null;
 
     // Official Standard Backgammon Starting Setup
     state.boardState[0]  = { player: 'white', count: 2 }; // Point 1
@@ -69,10 +73,36 @@ export function initBoardState() {
     state.boardState[23] = { player: 'black', count: 2 }; // Point 24
 }
 
+// Game victory by resignation
+export function handleResignation(resigningPlayer) {
+  const winner = resigningPlayer === 'black' ? 'white' : 'black';
+
+  // Points won equal current doubling cube value
+  state.scores[winner] += state.cubeValue;
+
+  // Lock down phase and reset flags
+  state.gamePhase = 'game_over';
+  state.isResignOffered = false;
+  state.resignOfferedBy = null;
+  state.hasRolled = false;
+
+  // Update DOM display elements
+  updatePointLabels(null);  // Remove point numbers from the board
+  updateScoreBoardUI();     // Update score displayed on the page
+  // calculatePipCount();      // Reset the pip count
+  
+  clearStatusQueue();  
+  const cube = state.cubeValue;
+  const message = cube > 1 ? `${cube} points` : 'the game';
+  logStatus(`${resigningPlayer} resigned. ${winner} wins ${message}!`);
+}
+
 // Reset hasRolled on Turn Change
 export function switchTurn() {
+    if (state.gamePhase === 'game_over') return;
+
     // Toggle active player
-    state.currentPlayer = state.currentPlayer === 'white' ? 'black' : 'white';
+    state.currentPlayer = state.currentPlayer === 'black' ? 'white' : 'black';
     updatePointLabels(state.currentPlayer);
 
     // Reset turn flags so new active player can double BEFORE rolling
@@ -83,6 +113,8 @@ export function switchTurn() {
     state.isDouble = false;
     state.isCubeOffered = false;
     state.cubeOfferedBy = null;
+    state.isResignOffered = false;
+    state.resignOfferedBy = null;
 
     logStatus(`Turn switched. It is now ${state.currentPlayer}'s turn.`);
 
@@ -99,6 +131,10 @@ export function switchTurn() {
  *  Black moves from index 23 -> 0 (bears off past 0).
  */
 export function calculatePipCount(player) {
+    if (state.gamePhase === 'game_over') {
+      return 167; // Reset pip count when game ends
+    }
+
     let pips = 0;
 
     // Checkers on the board

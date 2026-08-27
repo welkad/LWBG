@@ -1,12 +1,39 @@
 // js/dice.js - Contains dice rolling logic and turn UI toggling.
-import { state, switchTurn } from './state.js';
+import { handleResignation, state, switchTurn } from './state.js';
 import { handleCubeClick, handleCubeMouseLeave, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, handleOpeningRoll, toggleDiceOrder } from './dice-rolling.js';
 import { renderDiceUI, setDieValue } from './dice-renderer.js';
 import { undoLastMove } from './moves.js';
+import { logStatus } from './ui.js';
 
 export function handleDieClick(player, dieNumber) {
-    // Handle opening rolll phase (any player can click their initial die)
+    // Prevent any clicks if the game has ended
+    if (state.gamePhase === 'game_over') return;
+
+    // Handle resign decision phase (Y/N)
+    if (state.isResignOffered) {
+        if (player !== state.resignOfferedBy) return;
+
+        const targetEl = document.getElementById(`${player}-die-${dieNumber}`);
+        if (!targetEl) return;
+
+        const content = targetEl.textContent.trim();
+
+        if (content === 'Y') {
+          // Player confirmed resignation
+          handleResignation(player);
+          renderDiceUI();
+        } else if (content === 'N') {
+          // Player canceled resignation
+          state.isResignOffered = false;
+          state.resignOfferedBy = null;
+          logStatus(`${player}'s turn. Roll or Resign.`);
+          renderDiceUI();
+        }
+        return;
+    }
+
+    // Handle opening roll phase (any player can click their initial die)
     if (state.gamePhase === 'opening_roll') {
         handleOpeningRoll(player);
         return;
@@ -19,10 +46,8 @@ export function handleDieClick(player, dieNumber) {
 
         const targetEl = document.getElementById(`${player}-die-${dieNumber}`);
         if (!targetEl) return;
-
         const content = targetEl.textContent.trim();
         const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
-
         if (content === 'Y') {
             resolveCubeOffer(true, targetValue);
         } else if (content === 'N') {
@@ -39,9 +64,14 @@ export function handleDieClick(player, dieNumber) {
 
     // Retrieve displayed code ('R', 'U', 'D') or inspect pips
     const content = targetEl.textContent.trim();
-
     if (content === 'R' && !state.hasRolled) {
         handleDiceRoll(player);
+    } else if (content === 'Q' && !state.hasRolled) {
+      // Trigger resign confirmation
+      state.isResignOffered = true;
+      state.resignOfferedBy = player;
+      logStatus("Are you sure you want to resign?");
+      renderDiceUI();
     } else if (content === 'U') {
         undoLastMove();
         renderDiceUI();
@@ -108,7 +138,7 @@ export function resetDiceUI() {
                 die1.style.display = '';
             }
             if (die2) {
-                setDieValue(die2, 'R');
+                setDieValue(die2, 'Q');
                 die2.classList.remove('used');
                 die2.style.display = '';
             }

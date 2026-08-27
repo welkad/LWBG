@@ -26,12 +26,12 @@ export function renderBoard() {
     renderBar('white');
     renderBar('black');
 
-    // Update PIP count and Scors in the header
+    // Update PIP count and Scores in the header
     updateScoreBoardUI();
 }
 
 // Refresh scoreboard elements in DOM when invoking renderBoard()
-function updateScoreBoardUI() {
+export function updateScoreBoardUI() {
     const blackPipEl = document.getElementById('pip-black');
     const whitePipEl = document.getElementById('pip-white');
     const blackScoreEl = document.getElementById('score-black');
@@ -119,7 +119,7 @@ export function updatePointLabels(currentPlayer) {
     const bottomRight = document.querySelector('.bottom-right-numbers');
 
     // Clear numbers if opening roll (no turn assigned yet)
-    if (!currentPlayer) {
+    if (!currentPlayer || state.gamePhase === 'game_over') {
         topLeft.innerHTML = '';
         topRight.innerHTML = '';
         bottomLeft.innerHTML = '';

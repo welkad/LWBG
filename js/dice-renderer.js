@@ -34,6 +34,12 @@ export function setDieValue(element, value) {
 // ================================
 
 export function renderDiceUI() {
+  // --- GAME OVER STATE ---
+  if (state.gamePhase === "game_over") {
+    clearInactiveDice();  // Remove remaining dice DOM elementts
+    updateLegendUI();
+    return;
+  }
 
   // Helper: get or create a die
   function getOrCreateDie(playerColor, index) {
@@ -43,11 +49,9 @@ export function renderDiceUI() {
     if (!dieEl) {
       const targetZone = document.getElementById(`${playerColor}-dice-zone`);
       if (!targetZone) return null;
-
       dieEl = document.createElement("div");
       dieEl.id = dieId;
-      dieEl.className = "die";
-      
+      dieEl.className = "die";      
       targetZone.appendChild(dieEl);
     }
     // Reset className to 'die' every time it gets used
@@ -59,13 +63,10 @@ export function renderDiceUI() {
   function removeExtraDice(playerColor, count) {
     const targetZone = document.getElementById(`${playerColor}-dice-zone`);
     if (!targetZone) return;
-
     const dice = targetZone.querySelectorAll(".die");
-
     dice.forEach((die) => {
       const match = die.id.match(/-die-(\d+)$/);
       if (!match) return;
-
       const dieNumber = Number(match[1]);
       if (dieNumber > count) {
         die.remove();
@@ -76,7 +77,8 @@ export function renderDiceUI() {
   // Helper: remove Cube offer when no longer needed
   function clearInactiveDice() {
     ['black', 'white'].forEach(player => {
-      if (player === state.currentPlayer) return;
+      // Clear both players if game over; otherwise leave active player
+      if (state.gamePhase !== 'game_over' && player === state.currentPlayer) return;
 
       const zone = document.getElementById(`${player}-dice-zone`);
       if (!zone) return;
@@ -93,7 +95,6 @@ export function renderDiceUI() {
       state.cubeOfferedBy === "white" ? "black" : "white";
     const die1 = getOrCreateDie(respondingPlayer, 0);
     const die2 = getOrCreateDie(respondingPlayer, 1);
-
     if (die1 && die2) {
       die1.style.display = "";
       die2.style.display = "";
@@ -102,12 +103,10 @@ export function renderDiceUI() {
       die1.classList.remove("used");
       die2.classList.remove("used");
     }
-
     removeExtraDice(respondingPlayer, 2);
     // Show the responding player's dice zone
     const blackZone = document.getElementById('black-dice-zone');
-    const whiteZone = document.getElementById('white-dice-zone');    
-
+    const whiteZone = document.getElementById('white-dice-zone');
     if (respondingPlayer === 'black') {
       if (blackZone) blackZone.style.display = 'flex';
       if (whiteZone) whiteZone.style.display = 'none';
@@ -118,7 +117,28 @@ export function renderDiceUI() {
     updateLegendUI();
     return;
   }
-  // Cube offer has ended - remove old Y/N dice
+
+  // -- RESIGN OFFER PENDING STATE ---
+  if (state.isResignOffered) {
+    const resigningPlayer = state.resignOfferedBy;
+    const die1 = getOrCreateDie(resigningPlayer, 0);
+    const die2 = getOrCreateDie(resigningPlayer, 1);
+
+    if (die1 && die2) {
+      die1.style.display = "";
+      die2.style.display = "";
+      setDieValue(die1, "Y");
+      setDieValue(die2, "N");
+      die1.classList.remove("used");
+      die2.classList.remove("used");
+    }
+
+    removeExtraDice(resigningPlayer, 2);
+    updateLegendUI();
+    return;
+  }
+
+  // Cube or resign offer has ended - remove old Y/N dice
   clearInactiveDice();
 
   // Update legend back to  standard controls when cube offer is resolved
@@ -166,7 +186,7 @@ export function renderDiceUI() {
   if (!state.hasRolled) {
     removeExtraDice(player, 2);
     setDieValue(die1, "R");
-    setDieValue(die2, "R");
+    setDieValue(die2, "Q");
     die1.classList.remove("used");
     die2.classList.remove("used");
     die1.style.display = "";
