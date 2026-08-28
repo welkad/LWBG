@@ -89,7 +89,7 @@ export function handleResignation(resigningPlayer) {
   // Update DOM display elements
   updatePointLabels(null);  // Remove point numbers from the board
   updateScoreBoardUI();     // Update score displayed on the page
-  // calculatePipCount();      // Reset the pip count
+  // calculatePipCount();   // Don't reset the pip count until board init !!!
   
   clearStatusQueue();  
   const cube = state.cubeValue;
