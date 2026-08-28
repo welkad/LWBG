@@ -132,7 +132,7 @@ export function switchTurn() {
  */
 export function calculatePipCount(player) {
     if (state.gamePhase === 'game_over') {
-      return 167; // Reset pip count when game ends
+      return; // Don't reset pip count when game ends!
     }
 
     let pips = 0;

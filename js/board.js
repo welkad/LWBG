@@ -52,6 +52,10 @@ function createPointDOM(index) {
     pointEl.className = `point ${pointColorClass}`; // Board triangle color class
     pointEl.dataset.index = index;
 
+    // Adjust Z-Index so point stacks overflow on top of adjacent triangles
+    // Top row (12-23) & bottom row (11-0) layering order
+    pointEl.style.zIndex = index >= 12 ? (30 - index) : (index + 10);
+
     // Apply selection and valid move target highlights
     if (state.selectedPoint === index) {
         pointEl.classList.add('selected');
@@ -64,12 +68,40 @@ function createPointDOM(index) {
     if (pointData && pointData.count > 0) {
         // Checker piece color class
         const pieceColorClass = pointData.player === 'white' ? 'white-piece' : 'black-piece';
+        const isTopRow = index >= 12; // Top points: 12-23, Bottom points: 0-11
         
-        let piecesHTML = '';
         for (let i = 0; i < pointData.count; i++) {
-            piecesHTML += `<div class="checker ${pieceColorClass}"></div>`;
+          const checkerEl = document.createElement('div');
+          checkerEl.className = `checker ${pieceColorClass}`;
+
+          // Mini-column overflow logic (up to 5 checkers per column)
+          if (i >= 5) {
+            const colIndex = Math.floor(i / 5); // Col 1 for pieces 5-9, Col 2 for pieces 10-14
+            const rowIndex = i % 5;             // Row height position (0 to 4) inside new column
+
+            // Horizontal shift: 12px right per extra column (tune as needed)
+            const offsetX = colIndex * 6;
+
+            // Staggered vertical base offset + standard spacing
+            const colStaggerY = colIndex * 10;  // up/down PX per column
+            const rowSpacingY = rowIndex * 36;   // overlap per checker
+            const totalOffsetY = colStaggerY + rowSpacingY;
+
+            checkerEl.classList.add('stacked');
+            checkerEl.style.transform = `translateX(calc(-50% + ${offsetX}px))`;
+
+            if (isTopRow) {
+              // Top triangles: Shift down away from top board frame
+              checkerEl.style.top = `${totalOffsetY}px`;
+            } else {
+              // Bottom triangles: Shift up away from bottom board frame
+              checkerEl.style.bottom = `${totalOffsetY}px`;
+            }
+            // Keep layered  checkers above the base stack
+            checkerEl.style.zIndex = 10 + i;
+          }
+          pointEl.appendChild(checkerEl);
         }
-        pointEl.innerHTML = piecesHTML;
     }
 
     // Direct event listener invoking move handling logic

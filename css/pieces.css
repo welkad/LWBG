@@ -87,3 +87,23 @@
     z-index: 10;
     cursor: pointer;
 }
+
+/* ==========================================
+   CHECKER OVERFLOW & STACKING RULES
+   ========================================== */
+
+/* Absolute alignment for 2nd and 3rd column checkers on a point */
+.checker.stacked {
+    position: absolute;
+    left: 50%;
+}
+
+/* Anchor stacked checkers to top base on upper triangles */
+.top .point .checker.stacked {
+    top: 0;
+}
+
+/* Anchor stacked checkers to bottom base on lower triangles */
+.bottom .point .checker.stacked {
+    bottom: 0;
+}
