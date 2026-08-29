@@ -2,9 +2,9 @@
 import { state } from './state.js';
 import { updateLegendUI } from './ui.js';
 
-// ==========================
+// ===============================
 //  RENDER PIPS & TEXT CODES
-// ==========================
+// ===============================
 
 export function setDieValue(element, value) {
   if (!element) return;
@@ -29,59 +29,63 @@ export function setDieValue(element, value) {
   }
 }
 
+// ====================================
+//  DOM HELPERS (module-scoped)
+// ====================================
+
+// Helper: get or create a die
+function getOrCreateDie(playerColor, index) {
+  const dieId = `${playerColor}-die-${index + 1}`;
+  let dieEl = document.getElementById(dieId);
+
+  if (!dieEl) {
+    const targetZone = document.getElementById(`${playerColor}-dice-zone`);
+    if (!targetZone) return null;
+    dieEl = document.createElement("div");
+    dieEl.id = dieId;
+    dieEl.className = "die";      
+    targetZone.appendChild(dieEl);
+  }
+  // Reset className to 'die' every time it gets used
+  dieEl.className = "die";
+  return dieEl;
+}
+
+// Helper: remove dice above requested count
+function removeExtraDice(playerColor, count) {
+  const targetZone = document.getElementById(`${playerColor}-dice-zone`);
+  if (!targetZone) return;
+  const dice = targetZone.querySelectorAll(".die");
+  dice.forEach((die) => {
+    const match = die.id.match(/-die-(\d+)$/);
+    if (!match) return;
+    const dieNumber = Number(match[1]);
+    if (dieNumber > count) {
+      die.remove();
+    }
+  });
+}
+
+// Helper: remove Cube offer when no longer needed
+function clearInactiveDice() {
+  ['black', 'white'].forEach(player => {
+    // Clear both players if game over; otherwise leave active player
+    if (state.gamePhase !== 'game_over' && player === state.currentPlayer) return;
+
+    const zone = document.getElementById(`${player}-dice-zone`);
+    if (!zone) return;
+
+    zone.querySelectorAll('.die').forEach(die => {
+      die.remove();
+    });
+  });
+}
+
 // ================================
 //  DYNAMIC DICE UI
 // ================================
 
-export function renderDiceUI() {
-
-  // Helper: get or create a die
-  function getOrCreateDie(playerColor, index) {
-    const dieId = `${playerColor}-die-${index + 1}`;
-    let dieEl = document.getElementById(dieId);
-
-    if (!dieEl) {
-      const targetZone = document.getElementById(`${playerColor}-dice-zone`);
-      if (!targetZone) return null;
-      dieEl = document.createElement("div");
-      dieEl.id = dieId;
-      dieEl.className = "die";      
-      targetZone.appendChild(dieEl);
-    }
-    // Reset className to 'die' every time it gets used
-    dieEl.className = "die";
-    return dieEl;
-  }
-
-  // Helper: remove dice above requested count
-  function removeExtraDice(playerColor, count) {
-    const targetZone = document.getElementById(`${playerColor}-dice-zone`);
-    if (!targetZone) return;
-    const dice = targetZone.querySelectorAll(".die");
-    dice.forEach((die) => {
-      const match = die.id.match(/-die-(\d+)$/);
-      if (!match) return;
-      const dieNumber = Number(match[1]);
-      if (dieNumber > count) {
-        die.remove();
-      }
-    });
-  }
-
-  // Helper: remove Cube offer when no longer needed
-  function clearInactiveDice() {
-    ['black', 'white'].forEach(player => {
-      // Clear both players if game over; otherwise leave active player
-      if (state.gamePhase !== 'game_over' && player === state.currentPlayer) return;
-
-      const zone = document.getElementById(`${player}-dice-zone`);
-      if (!zone) return;
-
-      zone.querySelectorAll('.die').forEach(die => {
-        die.remove();
-      });
-    });
-  }
+export function renderDiceUI() { 
 
   // --- CUBE OFFER PENDING STATE ---
   if (state.isCubeOffered) {
@@ -280,13 +284,16 @@ export function renderWinnerOpeningDice(winner, higherVal, lowerVal) {
   } 
 }
 
+// ==========================================
+//  HELPER FUNCTION TO DISPLAY Y / N DICE
+// ==========================================
 /**
  * Renders 'Y' and 'N' dice for specific target player and update zone visibility.
  * @param {'black'|'white'} player - The player whose dice zone should show Y / N.
  * @param {string} yesAction - Dataset action tag for the 'Y' die.
  * @param {string} noAction  - Dataset action tag for the 'N' die.
  */
-export function renderChoiceDice(player, yesAction = 'yes', noAction = 'no') {
+function renderChoiceDice(player, yesAction = 'yes', noAction = 'no') {
   const die1 = getOrCreateDie(player, 0);
   const die2 = getOrCreateDie(player, 1);
 
@@ -301,9 +308,7 @@ export function renderChoiceDice(player, yesAction = 'yes', noAction = 'no') {
     die1.dataset.action = yesAction;
     die2.dataset.action = noAction;
   }
-
   removeExtraDice(player, 2);
-
   // Show only the target player's dice zone
   const blackZone = document.getElementById('black-dice-zone');
   const whiteZone = document.getElementById('white-dice-zone');
@@ -314,6 +319,5 @@ export function renderChoiceDice(player, yesAction = 'yes', noAction = 'no') {
     if (blackZone) blackZone.style.display = 'none';
     if (whiteZone) whiteZone.style.display = 'flex';
   }
-
   updateLegendUI();
 }
