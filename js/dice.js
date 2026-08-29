@@ -212,3 +212,21 @@ export function refreshDiceForNewTurn() {
     resetDiceUI();
     renderDiceUI();
 }
+
+// =======================================
+// POST GAME
+// =======================================
+export function handlePostGameDieClick(event) {
+  if (state.gamePhase !== 'game_over') return;
+
+  const target = event.target;
+  if (!target.classList.contains(`play-again-die`)) return;
+
+  const choice = target.dataset.choice;
+
+  if (choice === 'yes') {
+    logStatus("Starting a new game...", 3000);
+  } else if (choice  === 'no') {
+    logStatus("Thank you for playing!");
+  }
+}

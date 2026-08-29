@@ -102,7 +102,7 @@ export function resolveCubeOffer(accepted, targetValue) {
 // Helper function if mouse  pointer leaves cube during opening
 export function handleCubeMouseLeave() {
     // Restore any previous status message immediately when cursor exits
-    resetStatusToDefault(1000);    
+    resetStatusToDefault(DISPLAY_TIME);    
 }
 
 // Helper function to update positioning in CSS 

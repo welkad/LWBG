@@ -34,12 +34,6 @@ export function setDieValue(element, value) {
 // ================================
 
 export function renderDiceUI() {
-  // --- GAME OVER STATE ---
-  if (state.gamePhase === "game_over") {
-    clearInactiveDice();  // Remove remaining dice DOM elementts
-    updateLegendUI();
-    return;
-  }
 
   // Helper: get or create a die
   function getOrCreateDie(playerColor, index) {
@@ -92,57 +86,26 @@ export function renderDiceUI() {
   // --- CUBE OFFER PENDING STATE ---
   if (state.isCubeOffered) {
     const respondingPlayer =
-      state.cubeOfferedBy === "white" ? "black" : "white";
-    const die1 = getOrCreateDie(respondingPlayer, 0);
-    const die2 = getOrCreateDie(respondingPlayer, 1);
-    if (die1 && die2) {
-      die1.style.display = "";
-      die2.style.display = "";
-      setDieValue(die1, "Y");
-      setDieValue(die2, "N");
-      die1.classList.remove("used");
-      die2.classList.remove("used");
-    }
-    removeExtraDice(respondingPlayer, 2);
-    // Show the responding player's dice zone
-    const blackZone = document.getElementById('black-dice-zone');
-    const whiteZone = document.getElementById('white-dice-zone');
-    if (respondingPlayer === 'black') {
-      if (blackZone) blackZone.style.display = 'flex';
-      if (whiteZone) whiteZone.style.display = 'none';
-    } else {
-      if (blackZone) blackZone.style.display = 'none';
-      if (whiteZone) whiteZone.style.display = 'flex';
-    }    
-    updateLegendUI();
+      state.cubeOfferedBy === "black" ? "white" : "black";
+    renderChoiceDice(respondingPlayer, 'cube-accept', 'cube-decline');
     return;
   }
 
-  // -- RESIGN OFFER PENDING STATE ---
+  // --- RESIGN OFFER PENDING STATE ---
   if (state.isResignOffered) {
     const resigningPlayer = state.resignOfferedBy;
-    const die1 = getOrCreateDie(resigningPlayer, 0);
-    const die2 = getOrCreateDie(resigningPlayer, 1);
+    renderChoiceDice(resigningPlayer, 'resign-confirm', 'resign-cancel');
+    return;
+  }
 
-    if (die1 && die2) {
-      die1.style.display = "";
-      die2.style.display = "";
-      setDieValue(die1, "Y");
-      setDieValue(die2, "N");
-      die1.classList.remove("used");
-      die2.classList.remove("used");
-    }
-
-    removeExtraDice(resigningPlayer, 2);
-    updateLegendUI();
+  // --- GAME OVER PLAY AGAIN STATE ---
+  if (state.gamePhase === 'game_over' && state.losingPlayer) {
+    renderChoiceDice(state.losingPlayer, 'play-again-yes', 'play-again-no');
     return;
   }
 
   // Cube or resign offer has ended - remove old Y/N dice
   clearInactiveDice();
-
-  // Update legend back to  standard controls when cube offer is resolved
-  updateLegendUI();
 
   // Opening Roll Phase
   if (state.gamePhase === "opening_roll") {
@@ -315,4 +278,42 @@ export function renderWinnerOpeningDice(winner, higherVal, lowerVal) {
       winnerDie2.style.display = '';
       setDieValue(winnerDie2, lowerVal);
   } 
+}
+
+/**
+ * Renders 'Y' and 'N' dice for specific target player and update zone visibility.
+ * @param {'black'|'white'} player - The player whose dice zone should show Y / N.
+ * @param {string} yesAction - Dataset action tag for the 'Y' die.
+ * @param {string} noAction  - Dataset action tag for the 'N' die.
+ */
+export function renderChoiceDice(player, yesAction = 'yes', noAction = 'no') {
+  const die1 = getOrCreateDie(player, 0);
+  const die2 = getOrCreateDie(player, 1);
+
+  if (die1 && die2) {
+    die1.style.display = '';
+    die2.style.display = '';
+    setDieValue(die1, "Y");
+    setDieValue(die2, "N");
+    die1.classList.remove('used');
+    die2.classList.remove('used');
+    // Action attributes for event handling
+    die1.dataset.action = yesAction;
+    die2.dataset.action = noAction;
+  }
+
+  removeExtraDice(player, 2);
+
+  // Show only the target player's dice zone
+  const blackZone = document.getElementById('black-dice-zone');
+  const whiteZone = document.getElementById('white-dice-zone');
+  if (player === 'black') {
+    if (blackZone) blackZone.style.display = 'flex';
+    if (whiteZone) whiteZone.style.display = 'none';
+  } else {
+    if (blackZone) blackZone.style.display = 'none';
+    if (whiteZone) whiteZone.style.display = 'flex';
+  }
+
+  updateLegendUI();
 }

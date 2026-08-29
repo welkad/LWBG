@@ -7,6 +7,7 @@ import { updateTurnUI, refreshDiceForNewTurn } from './dice.js';
 import { renderBoard, updatePointLabels, updateScoreBoardUI } from './board.js';
 import { updateCubePositionUI } from './doubling-cube.js';
 import { logStatus, clearStatusQueue } from './ui.js';
+import { renderDiceUI } from './dice-renderer.js';
 
 export const state = {
     boardState: Array(24).fill(null).map(() => ({ player: null, count: 0 })),
@@ -22,6 +23,7 @@ export const state = {
     isCubeOffered: false,                       // True when decision is pending
     cubeOfferedBy: null,                        // Cube offered by 'black' or 'white'
     gamePhase:  'opening_roll',                 // 'opening_roll', 'turns', or 'game_over'
+    losingPlayer: null,                         // Tracks who lost for post game Y/N prompt
     currentPlayer: null,                        // Set dynamically by opening roll
     isResignOffered: false,                     // Resignation state
     resignOfferedBy: null,                      // Resigning player
@@ -49,6 +51,7 @@ export function initBoardState() {
     // Reset opening roll state
     state.gamePhase = 'opening_roll';
     state.currentPlayer = null;
+    state.losingPlayer = null;
     state.openingRolls = { white: null, black: null };
     state.isRolling = false;
     state.hasRolled = false;
@@ -76,12 +79,13 @@ export function initBoardState() {
 // Game victory by resignation
 export function handleResignation(resigningPlayer) {
   const winner = resigningPlayer === 'black' ? 'white' : 'black';
-
+  
   // Points won equal current doubling cube value
   state.scores[winner] += state.cubeValue;
 
   // Lock down phase and reset flags
   state.gamePhase = 'game_over';
+  state.losingPlayer = resigningPlayer;
   state.isResignOffered = false;
   state.resignOfferedBy = null;
   state.hasRolled = false;
@@ -91,13 +95,15 @@ export function handleResignation(resigningPlayer) {
 
   const cube = state.cubeValue;
   const message = cube > 1 ? `${cube} points` : 'the game';
-  logStatus(`${resigningPlayer} resigned and ${winner} wins ${message}!`);
+  logStatus(`${resigningPlayer} resigned and ${winner} wins ${message}! Play again?`);
+  
 
   // Update DOM display elements
   renderBoard();            // Ensure entire DOM enters game_over state
   updatePointLabels(null);  // Remove point numbers from the board
   updateScoreBoardUI();     // Update score displayed on the page
   updateCubePositionUI();   // Visually disable doubling cube
+  renderDiceUI();           // Trigger renderChoiceDice
 }
 
 // Reset hasRolled on Turn Change

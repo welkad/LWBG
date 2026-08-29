@@ -130,11 +130,11 @@ export function updateLegendUI() {
     if (!legendEl) return;
 
     if (state.gamePhase === 'game_over') {
-      legendEl.innerHTML = '';  // Clear legend controls on game over
-      return;
-    }
-
-    if (state.isResignOffered) {
+        legendEl.innerHTML = `
+          <span><strong>Y</strong> : Play Again</span>
+          <span><strong>N</strong> : Decline</span>
+        `;
+    } else if (state.isResignOffered) {
         legendEl.innerHTML = `
           <span><strong>Y</strong> : Resign</span>
           <span><strong>N</strong> : Cancel</span>
