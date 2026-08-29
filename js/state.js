@@ -86,15 +86,18 @@ export function handleResignation(resigningPlayer) {
   state.resignOfferedBy = null;
   state.hasRolled = false;
 
+  // Clear pending queue messages
+  clearStatusQueue();
+
+  const cube = state.cubeValue;
+  const message = cube > 1 ? `${cube} points` : 'the game';
+  logStatus(`${resigningPlayer} resigned and ${winner} wins ${message}!`);
+
   // Update DOM display elements
+  renderBoard();            // Ensure entire DOM enters game_over state
   updatePointLabels(null);  // Remove point numbers from the board
   updateScoreBoardUI();     // Update score displayed on the page
   updateCubePositionUI();   // Visually disable doubling cube
-  
-  clearStatusQueue();  
-  const cube = state.cubeValue;
-  const message = cube > 1 ? `${cube} points` : 'the game';
-  logStatus(`${resigningPlayer} resigned. ${winner} wins ${message}!`);
 }
 
 // Reset hasRolled on Turn Change
@@ -131,10 +134,6 @@ export function switchTurn() {
  *  Black moves from index 23 -> 0 (bears off past 0).
  */
 export function calculatePipCount(player) {
-    if (state.gamePhase === 'game_over') {
-      return; // Don't reset pip count when game ends!
-    }
-
     let pips = 0;
 
     // Checkers on the board

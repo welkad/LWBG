@@ -49,7 +49,7 @@ export function handleCubeClick(player) {
 
     // Clear stale queued messages (e.g. "Turn switched") so Doubles prompt can render
     clearStatusQueue();
-    logStatus(`${player} offered to double the cube to ${targetValue}. Waiting for ${respondingPlayer}...`);
+    logStatus(`${player} offered to double the cube to ${targetValue}. Does ${respondingPlayer} accept?`);
 
     // Render interactive dice for opponent
     renderDiceUI();
@@ -74,10 +74,8 @@ export function resolveCubeOffer(accepted, targetValue) {
         state.currentPlayer = offeringPlayer; // Player who offered Cube continues their turn
 
         logStatus(
-            `${opponent} accepted the cube! Value is now ${state.cubeValue}. ${opponent} now owns the cube.`,
-            DISPLAY_TIME
-        );
-        logStatus(`${offeringPlayer}'s turn to play.`);
+            `${opponent} accepted the cube! ...${offeringPlayer}'s turn to play.`
+        );        
         
         // Move cube to new owner's tray
         updateCubePositionUI();
