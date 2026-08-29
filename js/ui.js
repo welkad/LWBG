@@ -55,6 +55,9 @@ function showTemporaryStatus(tempMessage, duration) {
 }
 
 export function resetStatusToDefault(delay = 400) {
+    // Leave last message on board if game is over (i.e. don't reset message)
+    if (state.gamePhase === 'game_over') return;
+
     // Allow immediate revert on events like mouseleave
     if (temporaryMessageTimer) {
         clearTimeout(temporaryMessageTimer);

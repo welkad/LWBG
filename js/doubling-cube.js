@@ -84,8 +84,10 @@ export function resolveCubeOffer(accepted, targetValue) {
         // Restore normal dice UI for the player whose turn it is
         renderDiceUI();
     } else {
-        // Opponent declined -> Resign current game        
-        logStatus(`${opponent} declined the cube and resigned! ${offeringPlayer} wins the game (${state.cubeValue} pts).`, 3000);        
+        // Opponent declined -> Resign current game
+        const cube = state.cubeValue;
+        const message = cube > 1 ? `${cube} points` : 'the game';
+        logStatus(`${opponent} declined the cube and resigned! ${offeringPlayer} wins ${message}!`);        
         // Award points equal to current cube value before the declined double
         state.scores[offeringPlayer] += state.cubeValue;       
         renderDiceUI();
