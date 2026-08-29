@@ -290,5 +290,6 @@ export function undoLastMove() {
 
   console.log("Last move undone.");
   renderBoard();
-  renderDiceUI();  
+  renderDiceUI();
+  updateScoreBoardUI(); // Restore pip count
 }
