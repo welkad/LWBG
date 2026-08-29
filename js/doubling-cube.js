@@ -6,8 +6,10 @@ import { renderDiceUI } from './dice-renderer.js';
 const DISPLAY_TIME = 2000; // Temporary message duration
 
 export function handleCubeClick(player) {
-    // Disable cube if game is over
-    if (state.gamePhase === 'game_over') return;
+    // Disable cube if game is over or an offer is pending
+    if (state.isCubeOffered || state.isResignOffered || state.gamePhase === 'game_over') {
+      return;
+    }
 
     // Disable cube during opening roll phase
     if (state.gamePhase === 'opening_roll') {        
@@ -109,6 +111,12 @@ export function handleCubeMouseLeave() {
 export function updateCubePositionUI() {
     const cubeEl = document.getElementById('doubling-cube');
     if (!cubeEl) return;
+
+    // Disable interactions during offers or end-game phases
+    if (state.isCubeOffered || state.isResignOffered || state.gamePhase === 'game_over') {
+      cubeEl.classList.add('disabled');
+      return;
+    }
 
     // Move cube to appropriate container based on owner
     let targetContainerId = 'bar';  // default center position

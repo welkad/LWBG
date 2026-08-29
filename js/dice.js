@@ -1,14 +1,17 @@
 // js/dice.js - Contains dice rolling logic and turn UI toggling.
-import { handleResignation, state, switchTurn } from './state.js';
+import { handleResignation, resetGame, state, switchTurn } from './state.js';
 import { handleCubeClick, handleCubeMouseLeave, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, handleOpeningRoll, toggleDiceOrder } from './dice-rolling.js';
 import { renderDiceUI, setDieValue } from './dice-renderer.js';
 import { undoLastMove } from './moves.js';
-import { logStatus } from './ui.js';
+import { clearStatusQueue, logStatus, updateLegendUI } from './ui.js';
 
-export function handleDieClick(player, dieNumber) {
+export function handleDieClick(player, dieNumber, event) {
     // Prevent any clicks if the game has ended
-    if (state.gamePhase === 'game_over') return;
+    if (state.gamePhase === 'game_over') {
+      handlePostGameDieClick(event);
+      return;
+    }
 
     // Handle resign decision phase (Y/N)
     if (state.isResignOffered) {
@@ -27,7 +30,9 @@ export function handleDieClick(player, dieNumber) {
           // Player canceled resignation
           state.isResignOffered = false;
           state.resignOfferedBy = null;
+          clearStatusQueue();
           logStatus(`${player}'s turn. Roll or Resign.`);
+          updateCubePositionUI();
           renderDiceUI();
         }
         return;
@@ -70,7 +75,9 @@ export function handleDieClick(player, dieNumber) {
       // Trigger resign confirmation
       state.isResignOffered = true;
       state.resignOfferedBy = player;
+      clearStatusQueue(); // Clear older messages
       logStatus("Are you sure you want to resign?");
+      updateCubePositionUI(); // Deactivate cube while pending
       renderDiceUI();
     } else if (content === 'U') {
         undoLastMove();
@@ -101,7 +108,7 @@ export function initDiceListeners() {
             const player = match[1];
             const dieNumber = Number(match[2]);
 
-            handleDieClick(player, dieNumber);
+            handleDieClick(player, dieNumber, event);
         });
     });    
 
@@ -214,19 +221,36 @@ export function refreshDiceForNewTurn() {
 }
 
 // =======================================
-// POST GAME
+// POST GAME LOGIC
 // =======================================
 export function handlePostGameDieClick(event) {
   if (state.gamePhase !== 'game_over') return;
 
-  const target = event.target;
-  if (!target.classList.contains(`play-again-die`)) return;
+  // Find the clicked die
+  const dieEl = event.target.closest('.die');
+  if (!dieEl) return;
 
-  const choice = target.dataset.choice;
+  // Match target action attribute or class
+  const action = dieEl.dataset.action; 
 
-  if (choice === 'yes') {
+  if (action === 'play-again-yes') {
     logStatus("Starting a new game...", 3000);
-  } else if (choice  === 'no') {
+
+    // Disable click interaction on choice dice to prevent double-clicks
+    dieEl.style.pointerEvents = 'none';
+
+    setTimeout(() => {
+      resetGame();
+    }, 1500); // Delay new game setup
+  }
+  else if (action  === 'play-again-no') {
     logStatus("Thank you for playing!");
+
+    // Remove dice elements from both zones
+    const choiceDice = document.querySelectorAll('.die');
+    choiceDice.forEach(die => die.remove());
+
+    // Clear the dice legend
+    updateLegendUI();
   }
 }

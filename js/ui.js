@@ -129,11 +129,18 @@ export function updateLegendUI() {
     const legendEl = document.querySelector('.dice-legend');
     if (!legendEl) return;
 
-    if (state.gamePhase === 'game_over') {
+    if (state.gamePhase === 'game_over') {     
+      const hasChoice = document.querySelector('.die[data-action^="play-again"]');
+
+      if (hasChoice) {   // If choice dice still exist, show Y/N prompt
         legendEl.innerHTML = `
           <span><strong>Y</strong> : Play Again</span>
           <span><strong>N</strong> : Decline</span>
         `;
+      } else {
+        legendEl.innerHTML = ''; // Otherwise clear dice legend if no longer playing
+      }
+
     } else if (state.isResignOffered) {
         legendEl.innerHTML = `
           <span><strong>Y</strong> : Resign</span>

@@ -6,7 +6,7 @@
 import { updateTurnUI, refreshDiceForNewTurn } from './dice.js';
 import { renderBoard, updatePointLabels, updateScoreBoardUI } from './board.js';
 import { updateCubePositionUI } from './doubling-cube.js';
-import { logStatus, clearStatusQueue } from './ui.js';
+import { logStatus, clearStatusQueue, updateLegendUI } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
 
 export const state = {
@@ -95,8 +95,7 @@ export function handleResignation(resigningPlayer) {
 
   const cube = state.cubeValue;
   const message = cube > 1 ? `${cube} points` : 'the game';
-  logStatus(`${resigningPlayer} resigned and ${winner} wins ${message}! Play again?`);
-  
+  logStatus(`${resigningPlayer} resigned and ${winner} wins ${message}! Play again?`);  
 
   // Update DOM display elements
   renderBoard();            // Ensure entire DOM enters game_over state
@@ -104,6 +103,21 @@ export function handleResignation(resigningPlayer) {
   updateScoreBoardUI();     // Update score displayed on the page
   updateCubePositionUI();   // Visually disable doubling cube
   renderDiceUI();           // Trigger renderChoiceDice
+}
+
+// Reset board for new game but preserve match scores
+export function resetGame() {
+  clearStatusQueue();
+  initBoardState();     // Restore board, bar, cube and opening roll state
+
+  // Refresh UI for opening roll phase
+  renderBoard();
+  updateScoreBoardUI(); // Display current score and reset pip counts
+  updateTurnUI();       // Display both dice zones
+  renderDiceUI();       // Render opening 'R' die for both players
+  updateLegendUI();     // Update legend back to standard controls
+
+  logStatus("New game started! Highest roll plays first.")
 }
 
 // Reset hasRolled on Turn Change
@@ -141,7 +155,6 @@ export function switchTurn() {
  */
 export function calculatePipCount(player) {
     let pips = 0;
-
     // Checkers on the board
     state.boardState.forEach((point, index) => {
         if (point.player === player && point.count > 0) {
@@ -152,11 +165,9 @@ export function calculatePipCount(player) {
             pips += distance * point.count;
         }
     });
-
     // Checkers on the bar (max distance = 25 pips)
     if (state.bar[player] > 0) {
         pips += state.bar[player] * 25;
     }
-
     return pips;
 }
