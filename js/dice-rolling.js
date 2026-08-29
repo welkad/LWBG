@@ -152,6 +152,9 @@ export function handleDiceRoll(player) {
       state.isRolling = false;
       state.hasRolled = true;
 
+      // Update doubling cube UI state to disabled after rolling dice
+      updateCubePositionUI();
+
       // Indicate that non-doubles can now be swapped by clicking
       const diceZone = document.getElementById(`${player}-dice-zone`);
 
