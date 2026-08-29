@@ -19,8 +19,31 @@ function formatPlayerNames(message) {
 }
 
 export function logStatus(message, timeout = 0) {    
-    const formattedMessage = formatPlayerNames(message);  // Capitalize player names in the text    
-    console.log(formattedMessage);  // Log message to developer console with no delay
+    const formattedMessage = formatPlayerNames(message);  // Capitalize player names
+
+    // Capture caller stack trace
+    const stack = new Error().stack;
+    let origin = 'unknown';
+
+    if (stack) {
+      const lines = stack.split('\n');
+      // Find first line in call stack that did not originate from ui.js
+      const callerLine = lines.find(line => {
+        return line.includes('.js') && !line.includes('ui.js')
+      });
+
+      if (callerLine) {
+        // Extract filename.js:line:col
+        const match = callerLine.match(/([\w-]+\.js:\d+:\d+)/);
+        if (match) {
+          origin = match[1];
+        }
+      }
+    }
+
+    // Log message to developer console with call origin details
+    console.log(`${formattedMessage} [${origin}]`);
+
     // Temporary/interrupting message with a specified duration
     if (timeout > 0) {
         showTemporaryStatus(formattedMessage, timeout);
@@ -55,7 +78,7 @@ function showTemporaryStatus(tempMessage, duration) {
 }
 
 export function resetStatusToDefault(delay = 400) {
-    // Leave last message on board if game is over (i.e. don't reset message)
+    // Leave last message on board if game is over (don't reset it)
     if (state.gamePhase === 'game_over') return;
 
     // Allow immediate revert on events like mouseleave
