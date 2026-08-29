@@ -56,6 +56,19 @@ function createPointDOM(index) {
     // Top row (12-23) & bottom row (11-0) layering order
     pointEl.style.zIndex = index >= 12 ? (30 - index) : (index + 10);
 
+    const pointData = state.boardState[index];
+    const isOwner = pointData && pointData.player === state.currentPlayer && pointData.count > 0;
+    const isValidTarget = state.validMoves && state.validMoves.includes(index);
+
+    // Only allow clickable cursor during turns, after rolling, and on valid pieces/targets
+    const isCickable = state.gamePhase === 'turns' && 
+                       state.hasRolled &&
+                       (isOwner || isValidTarget);
+
+    if (isCickable) {
+      pointEl.classList.add('clickable');
+    }
+
     // Apply selection and valid move target highlights
     if (state.selectedPoint === index) {
         pointEl.classList.add('selected');
@@ -63,8 +76,7 @@ function createPointDOM(index) {
     if (state.validMoves && state.validMoves.includes(index)) {
         pointEl.classList.add('valid-target');
     }
-
-    const pointData = state.boardState[index];
+    
     if (pointData && pointData.count > 0) {
         // Checker piece color class
         const pieceColorClass = pointData.player === 'white' ? 'white-piece' : 'black-piece';
@@ -103,7 +115,6 @@ function createPointDOM(index) {
           pointEl.appendChild(checkerEl);
         }
     }
-
     // Direct event listener invoking move handling logic
     pointEl.addEventListener('click', () => handlePointClick(index));
     return pointEl;
