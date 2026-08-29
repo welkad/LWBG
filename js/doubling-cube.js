@@ -3,36 +3,43 @@ import { state } from './state.js';
 import { logStatus, resetStatusToDefault, clearStatusQueue } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
 
+const DISPLAY_TIME = 2000; // Temporary message duration
+
 export function handleCubeClick(player) {
+    // Disable cube if game is over
+    if (state.gamePhase === 'game_over') return;
+
     // Disable cube during opening roll phase
     if (state.gamePhase === 'opening_roll') {        
-        logStatus("Doubling cube is disabled during the opening roll.", 1000);
+        logStatus("Doubling cube is disabled during the opening roll.",
+          DISPLAY_TIME);
         return;
     }
     // Disable if a cube offer is already pending
     if (state.isCubeOffered) {        
-        logStatus("A cube decision is currently pending.", 1000);
+        logStatus("A cube decision is currently pending.", DISPLAY_TIME);
         return;
     }
     // Disable if not player's turn or after rolling
     if (player !== state.currentPlayer || state.isRolling) {        
-        logStatus("You can only double on your turn.", 1000);
+        logStatus("You can only double on your turn.", DISPLAY_TIME);
         return;
     }
     // Cannot double after rolling the dice
     if (state.hasRolled) {    
-        logStatus("You cannot double after rolling the dice!", 1000);
+        logStatus("You cannot double after rolling the dice!", DISPLAY_TIME);
         return;
     }
     // Cube must be in center or 'owned' by the current player
     if (state.cubeOwner !== 'center' && state.cubeOwner !== player) {       
-        logStatus(`You cannot double - ${state.cubeOwner} owns the doubling cube!`, 1500);
+        logStatus(`You cannot double - ${state.cubeOwner} owns the doubling cube!`,
+          DISPLAY_TIME);
         return;
     }
     // Determine proposed next value
     const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
     if (targetValue > 64) {       
-        logStatus("Cube value cannot exceed 64.", 1000);
+        logStatus("Cube value cannot exceed 64.", DISPLAY_TIME);
         return;
     }
     // Set pending offer state
@@ -68,7 +75,7 @@ export function resolveCubeOffer(accepted, targetValue) {
 
         logStatus(
             `${opponent} accepted the cube! Value is now ${state.cubeValue}. ${opponent} now owns the cube.`,
-            2000
+            DISPLAY_TIME
         );
         logStatus(`${offeringPlayer}'s turn to play.`);
         
@@ -125,10 +132,11 @@ export function updateCubePositionUI() {
 
     // Determine if the cube should be visually active/clickable
     const isOpening = state.gamePhase === 'opening_roll';    
+    const isGameOver = state.gamePhase === 'game_over';
     const isOwnedByOpponent = state.cubeOwner !== 'center' && state.cubeOwner !== state.currentPlayer;
 
-    // Disable cube for opening roll, player already rolled, or opponent owns it
-    if (!isOpening && (state.hasRolled || isOwnedByOpponent)) {
+    // Disable cube for game over, opening roll, player already rolled, or opponent owns it
+    if (isGameOver || isOpening  || state.hasRolled || isOwnedByOpponent) {
         cubeEl.classList.add('disabled');
         cubeEl.classList.remove('active');
     } else {
