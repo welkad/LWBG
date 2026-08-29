@@ -26,7 +26,7 @@ export function handleCubeClick(player) {
     }
     // Cube must be in center or 'owned' by the current player
     if (state.cubeOwner !== 'center' && state.cubeOwner !== player) {       
-        logStatus(`You cannot double - ${state.cubeOwner} owns the doubling cube!`, 1000);
+        logStatus(`You cannot double - ${state.cubeOwner} owns the doubling cube!`, 1500);
         return;
     }
     // Determine proposed next value
