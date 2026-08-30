@@ -92,6 +92,7 @@ export function renderDiceUI() {
     const respondingPlayer =
       state.cubeOfferedBy === "black" ? "white" : "black";
     renderChoiceDice(respondingPlayer, 'cube-accept', 'cube-decline');
+    updateLegendUI();
     return;
   }
 
@@ -99,12 +100,14 @@ export function renderDiceUI() {
   if (state.isResignOffered) {
     const resigningPlayer = state.resignOfferedBy;
     renderChoiceDice(resigningPlayer, 'resign-confirm', 'resign-cancel');
+    updateLegendUI();
     return;
   }
 
   // --- GAME OVER PLAY AGAIN STATE ---
   if (state.gamePhase === 'game_over' && state.losingPlayer) {
     renderChoiceDice(state.losingPlayer, 'play-again-yes', 'play-again-no');
+    updateLegendUI();
     return;
   }
 
@@ -133,6 +136,8 @@ export function renderDiceUI() {
       // Opening roll should never have dice 3/4
       removeExtraDice(playerColor, 2);
     });
+
+    updateLegendUI();
     return;
   }
 
@@ -158,6 +163,7 @@ export function renderDiceUI() {
     die2.classList.remove("used");
     die1.style.display = "";
     die2.style.display = "";
+    updateLegendUI();
     return;
   }
 
@@ -188,6 +194,7 @@ export function renderDiceUI() {
         }
       }
       removeExtraDice(player, 4);
+      updateLegendUI();
       return;
     }
 
@@ -208,6 +215,7 @@ export function renderDiceUI() {
     }
 
     removeExtraDice(player, 4);
+    updateLegendUI();
     return;
   }
 
@@ -222,6 +230,7 @@ export function renderDiceUI() {
     die2.classList.remove("used");
     die1.style.display = "";
     die2.style.display = "";
+    updateLegendUI();
     return;
   }
 
@@ -233,6 +242,7 @@ export function renderDiceUI() {
     die2.classList.remove("used");
     die1.style.display = "";
     die2.style.display = "";
+    updateLegendUI();
     return;
   }
 
@@ -244,6 +254,7 @@ export function renderDiceUI() {
     die2.classList.remove("used");
     die1.style.display = "";
     die2.style.display = "";
+    updateLegendUI();
     return;
   }
 }
@@ -270,7 +281,7 @@ export function renderWinnerOpeningDice(winner, higherVal, lowerVal) {
     loserDie2.style.display = 'none';
   }
   
-  // Display winning playe's roll
+  // Display winning player's roll
   const winnerDie1 = document.getElementById(`${winner}-die-1`);
   const winnerDie2 = document.getElementById(`${winner}-die-2`);
   

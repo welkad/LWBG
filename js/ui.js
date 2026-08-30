@@ -126,43 +126,51 @@ function processQueue() {
  *  Update the dice control legend dynamically between regular play and cube decisions
  */
 export function updateLegendUI() {
-    const legendEl = document.querySelector('.dice-legend');
-    if (!legendEl) return;
+  const legendEl = document.querySelector('.dice-legend');
+  if (!legendEl) return;
 
-    if (state.gamePhase === 'game_over') {     
-      const hasChoice = document.querySelector('.die[data-action^="play-again"]');
+  if (state.gamePhase === 'game_over') {     
+    const hasChoice = document.querySelector('.die[data-action^="play-again"]');
 
-      if (hasChoice) {   // If choice dice still exist, show Y/N prompt
-        legendEl.innerHTML = `
-          <span><strong>Y</strong> : Play Again</span>
-          <span><strong>N</strong> : Decline</span>
-        `;
-      } else {
-        legendEl.innerHTML = ''; // Otherwise clear dice legend if no longer playing
-      }
-
-    } else if (state.isResignOffered) {
-        legendEl.innerHTML = `
-          <span><strong>Y</strong> : Resign</span>
-          <span><strong>N</strong> : Cancel</span>
-        `;
-    } else if (state.isCubeOffered) {
-        legendEl.innerHTML = `
-          <span><strong>Y</strong> : Accept</span>
-          <span><strong>N</strong> : Resign</span>
+    if (hasChoice) {   // If choice still exists, show Y/N prompt
+      legendEl.innerHTML = `
+        <span><strong>Y</strong> : Play Again</span>
+        <span><strong>N</strong> : Decline</span>
       `;
-    } else if (!state.hasRolled && state.gamePhase === 'turns') {
-        legendEl.innerHTML = `
-          <span><strong>R</strong> : Roll</span>
-          <span><strong>Q</strong> : Resign</span>
-        `;
     } else {
-        legendEl.innerHTML = `
+      legendEl.innerHTML = ''; // Otherwise clear dice legend if no longer playing
+    }
+  } else if (state.isResignOffered) {
+      legendEl.innerHTML = `
+        <span><strong>Y</strong> : Resign</span>
+        <span><strong>N</strong> : Cancel</span>
+      `;
+  } else if (state.isCubeOffered) {
+      legendEl.innerHTML = `
+        <span><strong>Y</strong> : Accept</span>
+        <span><strong>N</strong> : Resign</span>
+    `;
+  } else if (!state.hasRolled && state.gamePhase === 'turns') {
+      legendEl.innerHTML = `
+        <span><strong>R</strong> : Roll</span>
+        <span><strong>Q</strong> : Resign</span>
+      `;
+  } else if (state.gamePhase === 'turns' ){
+    if (state.hasRolled) {
+      // Post-roll active turn menu
+      legendEl.innerHTML = `
           <span><strong>R</strong> : Roll</span>
           <span><strong>U</strong> : Undo</span>
           <span><strong>D</strong> : Done</span>
-        `;
+      `;
+    } else {
+      // Pre-roll menu
+      legendEl.innerHTML = `
+          <span><strong>R</strong> : Roll</span>
+          <span><strong>Q</strong> : Resign</span>
+      `;
     }
+  }
 }
 
 /**

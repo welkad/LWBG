@@ -1,6 +1,6 @@
 // js/dice-rolling.js
 import { state } from './state.js';
-import { logStatus } from './ui.js';
+import { logStatus, updateLegendUI } from './ui.js';
 import { updatePointLabels } from './board.js';
 import { renderDiceUI, setDieValue, renderWinnerOpeningDice } from './dice-renderer.js';
 import { updateCubePositionUI } from './doubling-cube.js';
@@ -164,8 +164,7 @@ export function handleDiceRoll(player) {
         diceZone.classList.remove("swappable");
       }
 
-      // Render 2 or 4 dice based on the new state.currentRoll
-      renderDiceUI();
+      renderDiceUI();   // Render 2 or 4 dice based on currentRoll
 
       // Format message: "Black rolled: Double 4s!" or "White rolled: 5, 3"
       const rollMessage = state.isDouble

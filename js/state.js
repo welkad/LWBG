@@ -145,6 +145,7 @@ export function switchTurn() {
     updateCubePositionUI(); // Refresh cube UI based on currentPlayer & ownership    
     updateTurnUI();
     refreshDiceForNewTurn();
+    updateLegendUI();
     renderBoard();
 }
 
