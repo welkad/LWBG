@@ -260,7 +260,7 @@ export function handlePostGameDieClick(event) {
     } else {
       clearStatusQueue();
       const opponent = player === 'black' ? 'white' : 'black';
-      logStatus(`${player} wants to play again. Waiting for ${opponent}'s decision...`);
+      logStatus(`${player} wants to play again. Waiting on ${opponent}'s decision.`);
       renderDiceUI(); // Update dice UI to show single 'Y' 
     }
   }

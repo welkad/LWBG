@@ -59,8 +59,8 @@ export function handleOpeningRoll(player) {
     state.openingRolls[player] = finalVal;
     delete die1El.dataset.animating; // Clear animation flag
 
-    // Log the individual opening roll result
-    console.log(`${player} rolled a ${finalVal}.`); // log to the console only
+    // Declare opponent for logStatus message
+    const opponent = player === 'black' ? 'White' : 'Black';
 
     // Check if both players have finished rolling before evaluating winner
     if (
@@ -74,6 +74,9 @@ export function handleOpeningRoll(player) {
       if (!whiteDie.dataset.animating && !blackDie.dataset.animating) {
         evaluateOpeningRoll();
       }
+    } else {
+      // Only one player has rolled -> display waiting message
+      logStatus(`${player} rolled a ${finalVal}. Waiting for ${opponent} to roll.`);
     }
   });
 }
@@ -109,7 +112,7 @@ function evaluateOpeningRoll() {
     updateCubePositionUI();
 
     logStatus(
-      `Black wins opening roll (${black} vs ${white}) and plays first!`,
+      `Black wins the opening roll (${black} vs ${white}) and plays first!`,
     );
   } else {
     logStatus(`Tie roll (${white} vs ${black}) - Try again!`);
