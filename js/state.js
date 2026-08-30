@@ -11,26 +11,28 @@ import { renderDiceUI } from './dice-renderer.js';
 
 export const state = {
     boardState: Array(24).fill(null).map(() => ({ player: null, count: 0 })),
-    bar: { white: 0, black: 0 },                // Checkers waiting on the bar
-    borneOff: { white: 0, black: 0 },           // Checkers safely borne off
-    scores: { white: 0, black: 0 },             // How many games won
-    selectedPoint: null,                        // Point index (0-23) or 'bar'
-    validMoves: [],                             // Target indices (0-23 or 'off') for selected pieces
-    moveHistory:[],                             // Holds snapshots of boardState, bar, and currentRoll
+    bar: { white: 0, black: 0 },                    // Checkers waiting on the bar
+    borneOff: { white: 0, black: 0 },               // Checkers safely borne off
+    scores: { white: 0, black: 0 },                 // How many games won
+    selectedPoint: null,                            // Point index (0-23) or 'bar'
+    validMoves: [],                                 // Target indices (0-23 or 'off') for selected pieces
+    moveHistory:[],                                 // Holds snapshots of boardState, bar, and currentRoll
 
-    cubeValue: 1,                               // Default starting multiplier
-    cubeOwner: 'center',                        // 'center', 'white', of 'black'
-    isCubeOffered: false,                       // True when decision is pending
-    cubeOfferedBy: null,                        // Cube offered by 'black' or 'white'
-    gamePhase:  'opening_roll',                 // 'opening_roll', 'turns', or 'game_over'
-    losingPlayer: null,                         // Tracks who lost for post game Y/N prompt
-    currentPlayer: null,                        // Set dynamically by opening roll
-    isResignOffered: false,                     // Resignation state
-    resignOfferedBy: null,                      // Resigning player
+    cubeValue: 1,                                   // Default starting multiplier
+    cubeOwner: 'center',                            // 'center', 'white', of 'black'
+    isCubeOffered: false,                           // True when decision is pending
+    cubeOfferedBy: null,                            // Cube offered by 'black' or 'white'
+    gamePhase:  'opening_roll',                     // 'opening_roll', 'turns', or 'game_over'
+    losingPlayer: null,                             // Tracks who lost for post game Y/N prompt
+    currentPlayer: null,                            // Set dynamically by opening roll
+    isResignOffered: false,                         // Resignation state
+    resignOfferedBy: null,                          // Resigning player
+    playAgainChoices: { black: null, white: null }, // Track Y/N decision for each player
+    awaitingPlayAgainPrompt: false,                 // Delay displaying play again prompt
 
     openingRolls: { white: null, black: null },
-    currentRoll: [],                            // e.g., [5, 3] or [4, 4, 4, 4]
-    isDouble: false,                            // Track if current turn started with double dice
+    currentRoll: [],                                // e.g., [5, 3] or [4, 4, 4, 4]
+    isDouble: false,                                // Track if current turn started with double dice
     activeRoller: null,
     isRolling: false,
     hasRolled: false,
@@ -64,6 +66,8 @@ export function initBoardState() {
     state.cubeOfferedBy = null;
     state.isResignOffered = false;
     state.resignOfferedBy = null;
+    state.playAgainChoices = { black: null, white: null };
+    state.awaitingPlayAgainPrompt = false;
 
     // Official Standard Backgammon Starting Setup
     state.boardState[0]  = { player: 'white', count: 2 }; // Point 1
@@ -89,13 +93,16 @@ export function handleResignation(resigningPlayer) {
   state.isResignOffered = false;
   state.resignOfferedBy = null;
   state.hasRolled = false;
+  state.awaitingPlayAgainPrompt = true; // Hide playAgain dice during victory message
 
   // Clear pending queue messages
   clearStatusQueue();
 
   const cube = state.cubeValue;
   const message = cube > 1 ? `${cube} points` : 'the game';
-  logStatus(`${resigningPlayer} resigned and ${winner} wins ${message}! Play again?`);  
+
+  // Log initial victory message
+  logStatus(`${resigningPlayer} resigned and ${winner} wins ${message}!`, 2000);
 
   // Update DOM display elements
   renderBoard();            // Ensure entire DOM enters game_over state
@@ -103,6 +110,21 @@ export function handleResignation(resigningPlayer) {
   updateScoreBoardUI();     // Update score displayed on the page
   updateCubePositionUI();   // Visually disable doubling cube
   renderDiceUI();           // Trigger renderChoiceDice
+
+  // Delay the "Play again?" prompt and Y/N choice dice for 3 seconds
+  setTimeout(() => {
+    if (state.playAgainChoices.black === 'no' || state.playAgainChoices.white === 'no') {
+      return; // Do not display play again prompt if either player declined.
+    }
+
+    state.awaitingPlayAgainPrompt = false;  // Allow Y/N choice dice to render
+    clearStatusQueue();
+    logStatus(
+      "The score is now Black: " + state.scores.black +
+      " and White: " + state.scores.white + ". Play again?"
+    );
+    renderDiceUI(); // Display Y/N dice and update legend
+  }, 2000);
 }
 
 // Reset board for new game but preserve match scores
@@ -115,9 +137,9 @@ export function resetGame() {
   updateScoreBoardUI(); // Display current score and reset pip counts
   updateTurnUI();       // Display both dice zones
   renderDiceUI();       // Render opening 'R' die for both players
-  updateLegendUI();     // Update legend back to standard controls
+  updateLegendUI();     // Update legend back to standard controls  
 
-  logStatus("New game started! Highest roll plays first.")
+  logStatus("New game started! Highest roll plays first.");  
 }
 
 // Reset hasRolled on Turn Change

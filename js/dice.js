@@ -231,26 +231,55 @@ export function handlePostGameDieClick(event) {
   if (!dieEl) return;
 
   // Match target action attribute or class
-  const action = dieEl.dataset.action; 
+  const action = dieEl.dataset.action;
+  const player = dieEl.dataset.player;
+  if (!action || !player) return;
 
   if (action === 'play-again-yes') {
-    logStatus("Starting a new game...", 3000);
+    state.playAgainChoices[player] = 'yes';
 
-    // Disable click interaction on choice dice to prevent double-clicks
-    dieEl.style.pointerEvents = 'none';
+    // Render UI so both players see confirmation dice
+    renderDiceUI();
 
-    setTimeout(() => {
-      resetGame();
-    }, 1500); // Delay new game setup
+    // Check if both players have agreed
+    if (state.playAgainChoices.black === 'yes' && state.playAgainChoices.white === 'yes') {
+      clearStatusQueue();      
+      logStatus("Both players accepted! Starting a new game...", 2000);
+
+      // Clear legend while waiting for game to reset
+      // const legendEl = document.querySelector('.dice-legend');
+      // if (legendEl) legendEl.innerHTML = '';
+
+      // Disable click interaction on dice to prevent double-clicks
+      document.querySelectorAll('.die').forEach(d => d.style.pointerEvents = 'none');
+
+      setTimeout(() => {
+        resetGame();
+      }, 2000); // Briefly delay new game setup
+    
+    } else {
+      clearStatusQueue();
+      const opponent = player === 'black' ? 'white' : 'black';
+      logStatus(`${player} wants to play again. Waiting for ${opponent}'s decision...`);
+      renderDiceUI(); // Update dice UI to show single 'Y' 
+    }
   }
   else if (action  === 'play-again-no') {
-    logStatus("Thank you for playing!");
+    state.playAgainChoices[player] = 'no';
 
-    // Remove dice elements from both zones
-    const choiceDice = document.querySelectorAll('.die');
-    choiceDice.forEach(die => die.remove());
+    // Disable click interactions on all dice
+    document.querySelectorAll('.die').forEach(d => d.style.pointerEvents = 'none');
 
-    // Clear the dice legend
-    updateLegendUI();
+    clearStatusQueue();
+    logStatus(`${player} declined. Thank you for playing!`);
+
+    // Delay clearing dice elements immediately
+    setTimeout(() => {
+      // Remove dice elements from both zones
+      const choiceDice = document.querySelectorAll('.die');
+      choiceDice.forEach(die => die.remove());
+      // Clear the dice legend
+      updateLegendUI();
+    }, 1500);
   }
 }

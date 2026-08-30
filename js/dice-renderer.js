@@ -92,22 +92,26 @@ export function renderDiceUI() {
     const respondingPlayer =
       state.cubeOfferedBy === "black" ? "white" : "black";
     renderChoiceDice(respondingPlayer, 'cube-accept', 'cube-decline');
-    updateLegendUI();
     return;
   }
 
   // --- RESIGN OFFER PENDING STATE ---
   if (state.isResignOffered) {
     const resigningPlayer = state.resignOfferedBy;
-    renderChoiceDice(resigningPlayer, 'resign-confirm', 'resign-cancel');
-    updateLegendUI();
+    renderChoiceDice(resigningPlayer, 'resign-confirm', 'resign-cancel');   
     return;
   }
 
   // --- GAME OVER PLAY AGAIN STATE ---
-  if (state.gamePhase === 'game_over' && state.losingPlayer) {
-    renderChoiceDice(state.losingPlayer, 'play-again-yes', 'play-again-no');
-    updateLegendUI();
+  if (state.gamePhase === 'game_over') {
+    // Clear dice containers and return early during victory message
+    if (state.awaitingPlayAgainPrompt) {
+      clearInactiveDice();
+      updateLegendUI(); // Clear legend during victory message
+      return;
+    }
+    // Render Y/N choices in BOTH dice zones after victory message finished
+    renderChoiceDice(['black', 'white'], 'play-again-yes', 'play-again-no');    
     return;
   }
 
@@ -296,39 +300,63 @@ export function renderWinnerOpeningDice(winner, higherVal, lowerVal) {
 }
 
 // ==========================================
-//  HELPER FUNCTION TO DISPLAY Y / N DICE
+//  HELPER FUNCTION TO DISPLAY Y/N DICE
 // ==========================================
 /**
  * Renders 'Y' and 'N' dice for specific target player and update zone visibility.
- * @param {'black'|'white'} player - The player whose dice zone should show Y / N.
+ * @param {'black'|'white'|Array<'black'|'white'>} targetPlayers - Show Y/N to player(s).
  * @param {string} yesAction - Dataset action tag for the 'Y' die.
  * @param {string} noAction  - Dataset action tag for the 'N' die.
  */
-function renderChoiceDice(player, yesAction = 'yes', noAction = 'no') {
-  const die1 = getOrCreateDie(player, 0);
-  const die2 = getOrCreateDie(player, 1);
+function renderChoiceDice(targetPlayers, yesAction = 'yes', noAction = 'no') {
+  const players = Array.isArray(targetPlayers) ? targetPlayers : [targetPlayers];
 
-  if (die1 && die2) {
-    die1.style.display = '';
-    die2.style.display = '';
-    setDieValue(die1, "Y");
-    setDieValue(die2, "N");
-    die1.classList.remove('used');
-    die2.classList.remove('used');
-    // Action attributes for event handling
-    die1.dataset.action = yesAction;
-    die2.dataset.action = noAction;
-  }
-  removeExtraDice(player, 2);
-  // Show only the target player's dice zone
-  const blackZone = document.getElementById('black-dice-zone');
-  const whiteZone = document.getElementById('white-dice-zone');
-  if (player === 'black') {
-    if (blackZone) blackZone.style.display = 'flex';
-    if (whiteZone) whiteZone.style.display = 'none';
-  } else {
-    if (blackZone) blackZone.style.display = 'none';
-    if (whiteZone) whiteZone.style.display = 'flex';
-  }
+  // Configure visibility for both dice zones
+  ['black', 'white'].forEach(player => {
+    const zone = document.getElementById(`${player}-dice-zone`);
+    if (!zone) return;
+
+    if (players.includes(player)) {
+      zone.style.display = 'flex';
+
+      // Check if player already accepted play-again request
+      if (yesAction === 'play-again-yes' && state.playAgainChoices?.[player] === 'yes') {
+        const die1 = getOrCreateDie(player, 0);
+        const die2 = getOrCreateDie(player, 1);
+        if (die1) {
+          die1.style.display = '';
+          setDieValue(die1, 'Y');  // '✓'
+          die1.style.pointerEvents = 'none';
+          die1.classList.add('disabled');
+        }
+        if (die2) die2.style.display = 'none';
+        removeExtraDice(player, 1);
+        return;
+      }
+
+      // Render Yes-No dice
+      const die1 = getOrCreateDie(player, 0);
+      const die2 = getOrCreateDie(player, 1);
+
+      if (die1 && die2) {
+        die1.style.display = '';
+        die2.style.display = '';
+        setDieValue(die1, "Y");
+        setDieValue(die2, "N");
+        die1.classList.remove('used');
+        die2.classList.remove('used');
+        // Action attributes for event handling
+        die1.dataset.action = yesAction;
+        die1.dataset.player = player;
+        die2.dataset.action = noAction;
+        die2.dataset.player = player;        
+      }
+      removeExtraDice(player, 2);
+    } else {
+      // Hide zone if player not in active target list
+      zone.style.display = 'none';
+    }
+  });
+
   updateLegendUI();
 }

@@ -129,6 +129,15 @@ export function updateLegendUI() {
   const legendEl = document.querySelector('.dice-legend');
   if (!legendEl) return;
 
+  if (state.gamePhase === 'opening_roll') {
+    legendEl.innerHTML = `
+        <span><strong>R</strong> : Roll</span>
+        <span><strong>U</strong> : Undo</span>
+        <span><strong>D</strong> : Done</span>
+    `;
+    return;
+  }
+
   if (state.gamePhase === 'game_over') {     
     const hasChoice = document.querySelector('.die[data-action^="play-again"]');
 
