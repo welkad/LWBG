@@ -63,7 +63,7 @@ body.opening-roll-phase .doubling-cube,
     color: #b0b0b0;
     border: 2px solid #992a2a;
     cursor: not-allowed;
-    pointer-events: none; /* or use auto */
+    pointer-events: auto; /* use none or auto */
     box-shadow: none;
 }
 
