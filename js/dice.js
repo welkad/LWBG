@@ -1,5 +1,5 @@
 // js/dice.js - Contains dice rolling logic and turn UI toggling.
-import { handleResignation, resetGame, state, switchTurn } from './state.js';
+import { handleResignation, initBoardState, resetGame, state, switchTurn } from './state.js';
 import { handleCubeClick, handleCubeMouseLeave, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, handleOpeningRoll, toggleDiceOrder } from './dice-rolling.js';
 import { renderDiceUI, setDieValue } from './dice-renderer.js';
@@ -223,48 +223,47 @@ export function refreshDiceForNewTurn() {
 // =======================================
 // POST GAME LOGIC
 // =======================================
-export function handlePostGameDieClick(event) {
+export function handlePostGameDieClick(eventOrPlayer, choice) {
   if (state.gamePhase !== 'game_over') return;
+  
+  let playerType = typeof eventOrPlayer === 'string' ? eventOrPlayer : state.currentPlayer;
+  let selectedChoice = choice;
 
-  // Find the clicked die
-  const dieEl = event.target.closest('.die');
-  if (!dieEl) return;
+  // Extract attributes if invoked via DOM event click
+  if (eventOrPlayer && eventOrPlayer.target) {
+    const dieEl = eventOrPlayer.target.closest('.die');
+    if (dieEl) {
+      selectedChoice = dieEl.dataset.choice 
+        || (dieEl.dataset.action === 'play-again-yes' ? 'yes' : 'no' );
+      playerType = dieEl.dataset.player || playerType;
+    }
+  }
 
-  // Match target action attribute or class
-  const action = dieEl.dataset.action;
-  const player = dieEl.dataset.player;
-  if (!action || !player) return;
+  if (!selectedChoice) return;
 
-  if (action === 'play-again-yes') {
+  if (selectedChoice === 'yes') {
     state.playAgainChoices[player] = 'yes';
+    renderDiceUI();  // Render UI so both players see confirmation dice
 
-    // Render UI so both players see confirmation dice
-    renderDiceUI();
-
-    // Check if both players have agreed
+    // Check if both players agreed (or single keyboard decision)
     if (state.playAgainChoices.black === 'yes' && state.playAgainChoices.white === 'yes') {
       clearStatusQueue();      
       logStatus("Both players accepted! Starting a new game...", 2000);
-
-      // Clear legend while waiting for game to reset
-      // const legendEl = document.querySelector('.dice-legend');
-      // if (legendEl) legendEl.innerHTML = '';
 
       // Disable click interaction on dice to prevent double-clicks
       document.querySelectorAll('.die').forEach(d => d.style.pointerEvents = 'none');
 
       setTimeout(() => {
-        resetGame();
-      }, 2000); // Briefly delay new game setup
-    
+        resetGame(); // Or initBoardState(); renderBoard(); updateTurnUI();
+      }, 2000);  // Briefly delay new game setup
     } else {
       clearStatusQueue();
       const opponent = player === 'black' ? 'white' : 'black';
       logStatus(`${player} wants to play again. Waiting on ${opponent}'s decision.`);
       renderDiceUI(); // Update dice UI to show single 'Y' 
     }
-  }
-  else if (action  === 'play-again-no') {
+  } 
+  else if (selectedChoice === 'no') {
     state.playAgainChoices[player] = 'no';
 
     // Disable click interactions on all dice
@@ -276,9 +275,8 @@ export function handlePostGameDieClick(event) {
     // Delay clearing dice elements immediately
     setTimeout(() => {
       // Remove dice elements from both zones
-      const choiceDice = document.querySelectorAll('.die');
-      choiceDice.forEach(die => die.remove());
-      // Clear the dice legend
+      document.querySelectorAll('.die').forEach(die => die.remove());
+       // Clear the dice legend
       updateLegendUI();
     }, 1500);
   }

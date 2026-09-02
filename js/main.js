@@ -2,6 +2,7 @@
 import { initBoardState } from './state.js';
 import { renderBoard } from './board.js';
 import { updateTurnUI, initDiceListeners } from './dice.js';
+import { setupKeyboardListeners } from './keyboard.js';
 import { renderDiceUI } from './dice-renderer.js';
 import { logStatus } from './ui.js';
 
@@ -24,8 +25,9 @@ function initApp() {
     renderDiceUI();
     updateTurnUI();
 
-    // Attach click handlers for cube, opening/normal rolls, Undo, Done & Swap
+    // Attach click handlers and keyboard listeners
      initDiceListeners();
+     setupKeyboardListeners();
 }
 
 // Run setup after DOM is fully loaded

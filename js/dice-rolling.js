@@ -1,6 +1,6 @@
 // js/dice-rolling.js
 import { state } from './state.js';
-import { logStatus, updateLegendUI } from './ui.js';
+import { logStatus } from './ui.js';
 import { updatePointLabels } from './board.js';
 import { renderDiceUI, setDieValue, renderWinnerOpeningDice } from './dice-renderer.js';
 import { updateCubePositionUI } from './doubling-cube.js';
@@ -125,6 +125,17 @@ function evaluateOpeningRoll() {
 }
 
 export function handleDiceRoll(player) {
+  // If still in opening phase, route keypresses to handleOpeningRoll
+  if (state.gamePhase !== 'turns') {
+    if (state.openingRolls.black === null) {
+      handleOpeningRoll('black');
+    } else if (state.openingRolls.white === null) {
+      handleOpeningRoll('white');
+    }
+    return;
+  }
+
+  // Standard Turn Guard
   if (player !== state.currentPlayer || state.isRolling || state.hasRolled)
     return;
 

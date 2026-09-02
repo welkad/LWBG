@@ -1,5 +1,5 @@
 // js/moves.js
-import { state } from './state.js';
+import { state, handleGameEnd } from './state.js';
 import { renderBoard, updateScoreBoardUI } from './board.js';
 import { renderDiceUI } from './dice-renderer.js';
 import { logStatus } from './ui.js';
@@ -9,6 +9,26 @@ const DIRECTIONS = {
   white: 1, // Increasing index (0 to 23)
   black: -1 // Decreasing index (23 to 0)
 };
+
+/**
+ * Checks if all checkers of a given player are in their home board or borne off.
+ * Black home board: indices 0-5
+ * White home board: indices 18-23
+ */
+export function canPlayerBearOff(player) {
+  if (state.bar[player] > 0) return false;
+
+  const outsideHomeRange = player === 'black'
+    ? { start: 6, end: 23 }
+    : { start: 0, end: 17 };
+
+  for (let i = outsideHomeRange.start; i <= outsideHomeRange.end; i++) {
+    if (state.boardState[i].player === player) {
+      return false;
+    }
+  }
+  return true;
+}
 
 /**
  * Checks if a specific point-index is open for the current player to land on.
@@ -41,7 +61,8 @@ export function getValidMovesForPoint(fromIndex) {
   }
 
   const validTargets = new Set();
-  const availableDice = [...state.currentRoll]; // Unique die values available 
+  const availableDice = [...state.currentRoll]; // Unique die values available
+  const isBearOffEligible = canPlayerBearOff(player);  // Check if bear-off possible
 
   // Helper function to recursively traverse possible die paths
   function findPaths(currentIndex, remainingDice) {
@@ -73,10 +94,47 @@ export function getValidMovesForPoint(fromIndex) {
           findPaths(nextIndex, nextRemaining);
         }
       }
+      // Handle bear-off logic
+      else if (isBearOffEligible && currentIndex !== 'bar') {
+        const isExactBearOff = (player === 'black' && nextIndex === -1)
+          || (player === 'white' && nextIndex === 24);
+        const isOverShootBearOff = (player === 'black' && nextIndex < -1)
+          || (player === 'white' && nextIndex > 24)
+
+        if (isExactBearOff) {
+          validTargets.add('off');
+        } else if (isOverShootBearOff) {
+          // Can only bear-off with higher die if no checkers exist on higher point
+          const isHighestChecker = isCheckerOnHighestPoint(fromIndex, player);
+          if (isHighestChecker) {
+            validTargets.add('off');
+          }
+        }
+      }
     });
   }
   findPaths(fromIndex, availableDice);
   return Array.from(validTargets);
+}
+
+/**
+ * Helper: Check if on furthest active point in the home board.
+ */
+function isCheckerOnHighestPoint(fromIndex, player) {
+  if (player === 'black') {
+    for (let i = 23; i > fromIndex; i--) {
+      if (state.boardState[i].player === 'black') {
+        return false;
+      }
+    }
+  } else {
+    for (let i = 18; i < fromIndex; i++) {
+      if (state.boardState[i].player === 'white') {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 /**
@@ -141,23 +199,24 @@ export function handlePointClick(pointIndex) {
 }
 
 /** 
- * Executes a checker move, handles hits on opponent blots, consumes used dice,
- * and updates board state and turn flow.
+ * Executes a checker move, handles hits, bear-offs, consumed dice,
+ * updates board state and turn flow, including win checking.
  */
 export function executeMove(fromIndex, toIndex) {
-  const player = state.currentPlayer;
-  const targetPoint = state.boardState[toIndex];
+  const player = state.currentPlayer;  
 
   // Calculate distance moved
   let distance;
-  if (fromIndex === 'bar') {
-    distance = player === 'white' ? toIndex + 1 : 24 - toIndex;
+  if (toIndex === 'off') {
+    distance = player === 'black' ? fromIndex + 1 : 24 - fromIndex;
+  } else if (fromIndex === 'bar') {
+    distance = player === 'black' ? toIndex - 17 : 24 - toIndex;
   } else {
     distance = Math.abs(toIndex - fromIndex);
   }
 
   // Determine consumed die value(s) for this move
-  const consumedDice = getConsumedDiceForDistance(distance);
+  const consumedDice = getConsumedDiceForDistance(distance, toIndex === 'off');  
 
   // Assign a unique checker ID to track this specific piece across multi-step moves
   const checkerId = `${player}-${fromIndex}`;
@@ -175,17 +234,24 @@ export function executeMove(fromIndex, toIndex) {
     }
   }
 
-  // Handle landing on opponent's blot (hitting)
-  if (targetPoint.player && targetPoint.player !== player && targetPoint.count === 1) {
-    const opponent = targetPoint.player;
-    state.bar[opponent]++;
-    logStatus(`${player} hit ${opponent}'s blot on Point ${toIndex + 1}!`);
-    targetPoint.player = player;
-    targetPoint.count = 1;
+  // Execute placement or bear-off
+  if (toIndex === 'off') {
+    state.borneOff[player]++;
+    logStatus(`${player} bore off a checker! (${state.borneOff[player]}/15)`);
   } else {
-    // Normal placement on empty or friendly point
-    targetPoint.player = player;
-    targetPoint.count++;
+    const targetPoint = state.boardState[toIndex];
+    // Handle landing on opponent's blot (hitting)
+    if (targetPoint.player && targetPoint.player !== player && targetPoint.count === 1) {
+      const opponent = targetPoint.player;
+      state.bar[opponent]++;
+      logStatus(`${player} hit ${opponent}'s blot on Point ${toIndex + 1}!`);
+      targetPoint.player = player;
+      targetPoint.count = 1;
+    } else {
+      // Normal placement on empty or friendly point
+      targetPoint.player = player;
+      targetPoint.count++;
+    }
   }
 
   // Consume die values from state.currentRoll
@@ -199,19 +265,32 @@ export function executeMove(fromIndex, toIndex) {
   // Clear selection and re-render
   state.selectedPoint = null;
   state.validMoves = [];
+
+  // Check for victory condition (15 checkers borne off)
+  if (state.borneOff[player] === 15) {
+    handleGameEnd(player);
+    return;
+  }
   renderBoard();
   renderDiceUI();
   updateScoreBoardUI(); // Refresh pip count immediately
 }
 
 /**
- * Calculates which die value(s) match the requested move distance.
+ * Calculate consumed dice for standard moves or bear-offs.
  */
-function getConsumedDiceForDistance(distance) {
+function getConsumedDiceForDistance(distance, isBearOff = false) {
   // Check exact match on a single die first
   const exactIndex = state.currentRoll.indexOf(distance);
   if (exactIndex !== -1) {
     return [state.currentRoll[exactIndex]];
+  }
+
+  // If bearing off and distance > highest die, consume closest higher die
+  if (isBearOff) {
+    const higherDice = state.currentRoll.
+      filter(d => d >= distance).sort((a, b) => a - b);
+    if (higherDice.length > 0) return [higherDice[0]];
   }
 
   // Composite move: find smallest combination of dice summing to distance
@@ -221,34 +300,13 @@ function getConsumedDiceForDistance(distance) {
   for (let i = 0; i < state.currentRoll.length; i++) {
     sum += state.currentRoll[i];
     usedVals.push(state.currentRoll[i]);
-    if (sum === distance) {
+    if (sum === distance || (isBearOff && sum > distance)) {
       return usedVals;
     }
   }
 
   return usedVals;
 }
-
-/**
- * Check if current player can make any move with remaining die/dice.
- */
-// function hasAnyLegalMoves() {
-//   const player = state.currentPlayer;
-
-//   if (state.bar[player] > 0) {
-//     return getValidMovesForPoint('bar').length > 0;
-//   }
-
-//   for (let i = 0; i < 24; i++) {
-//     if (state.boardState[i].player === player) {
-//       if (getValidMovesForPoint(i).length > 0) {
-//         return true;
-//       }
-//     }
-//   }
-
-//   return false;
-// }
 
 // ==================================
 //  MOVE HISTORY / DONE / UNDO LOGIC

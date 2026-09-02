@@ -80,51 +80,10 @@ export function initBoardState() {
     state.boardState[23] = { player: 'black', count: 2 }; // Point 24
 }
 
-// Game victory by resignation
+// Call handleGameEnd function if player resigns
 export function handleResignation(resigningPlayer) {
   const winner = resigningPlayer === 'black' ? 'white' : 'black';
-  
-  // Points won equal current doubling cube value
-  state.scores[winner] += state.cubeValue;
-
-  // Lock down phase and reset flags
-  state.gamePhase = 'game_over';
-  state.losingPlayer = resigningPlayer;
-  state.isResignOffered = false;
-  state.resignOfferedBy = null;
-  state.hasRolled = false;
-  state.awaitingPlayAgainPrompt = true; // Hide playAgain dice during victory message
-
-  // Clear pending queue messages
-  clearStatusQueue();
-
-  const cube = state.cubeValue;
-  const message = cube > 1 ? `${cube} points` : 'the game';
-
-  // Log initial victory message
-  logStatus(`${resigningPlayer} resigned and ${winner} wins ${message}!`, 2000);
-
-  // Update DOM display elements
-  renderBoard();            // Ensure entire DOM enters game_over state
-  updatePointLabels(null);  // Remove point numbers from the board
-  updateScoreBoardUI();     // Update score displayed on the page
-  updateCubePositionUI();   // Visually disable doubling cube
-  renderDiceUI();           // Trigger renderChoiceDice
-
-  // Delay the "Play again?" prompt and Y/N choice dice for 3 seconds
-  setTimeout(() => {
-    if (state.playAgainChoices.black === 'no' || state.playAgainChoices.white === 'no') {
-      return; // Do not display play again prompt if either player declined.
-    }
-
-    state.awaitingPlayAgainPrompt = false;  // Allow Y/N choice dice to render
-    clearStatusQueue();
-    logStatus(
-      "The score is now Black: " + state.scores.black +
-      " and White: " + state.scores.white + ". Play again?"
-    );
-    renderDiceUI(); // Display Y/N dice and update legend
-  }, 2000);
+  handleGameEnd(winner, resigningPlayer);
 }
 
 // Reset board for new game but preserve match scores
@@ -193,4 +152,59 @@ export function calculatePipCount(player) {
         pips += state.bar[player] * 25;
     }
     return pips;
+}
+
+/**
+ * Handle end-of-game state when bearing off all checkers or resigning game.
+ * @param {'black'|'white'} winner - The winning player.
+ * @param {'black'|'white'|null} [resigningPlayer = null] - The resigning player.
+ */
+export function handleGameEnd(winner, resigningPlayer = null) {
+  // Calculate points won (defaults to cube value <- expand for Gammon/Backgammon)
+  const pointsWon = state.cubeValue;
+  state.scores[winner] += pointsWon;
+
+  // Lock game state and reset flags
+  state.gamePhase = 'game_over';
+  state.losingPlayer = resigningPlayer || (winner === 'black' ? 'white' : 'black');
+  state.isResignOffered = false;
+  state.resignOfferedBy = null;
+  state.hasRolled = false;
+  state.awaitingPlayAgainPrompt = true; // Temporary flag to delay Y/N display
+
+  clearStatusQueue(); // Clear any pending messages
+
+  // Craft victory status message
+  const cube = state.cubeValue;
+  const message = cube > 1 ? `${cube} points` : 'the game';
+  let winMessage = '';
+  if (resigningPlayer) {
+    winMessage = `${resigningPlayer} resigned. ${winner} wins ${message}!`;
+  } else {
+    winMessage = `${winner} bore off all checkers and wins ${message}!`;
+  }
+
+  logStatus(winMessage, 2000);  // log initial victory message
+
+  // Update UI components
+  renderBoard();            // Ensure entire DOM enters game_over state
+  updatePointLabels(null);  // Remove point numbers from the board
+  updateScoreBoardUI();     // Update score displayed on the page
+  updateCubePositionUI();   // Visually disable doubling cube
+  renderDiceUI();           // Trigger renderChoiceDice
+
+  // 2 second delay before prompting to play again
+  setTimeout(() => {
+    if (state.playAgainChoices.black === 'no' || state.playAgainChoices.white === 'no') {
+      return;  // Do not display play again prompt if either player declined.
+    }
+
+    state.awaitingPlayAgainPrompt = false;  // Allow Y/N choice dice to render
+    clearStatusQueue();
+    logStatus(
+      "The score is now Black: " + state.scores.black +
+      " and White: " + state.scores.white + ". Play again?"
+    );
+    renderDiceUI(); // Display Y/N dice and update legend
+  }, 2000);  
 }
