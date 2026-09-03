@@ -1,5 +1,5 @@
 // js/doubling-cube.js - Contains all doubling cube logic.
-import { state } from './state.js';
+import { handleResignation, state } from './state.js';
 import { logStatus, resetStatusToDefault, clearStatusQueue } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
 
@@ -10,7 +10,6 @@ export function handleCubeClick(player) {
     if (state.isCubeOffered || state.isResignOffered || state.gamePhase === 'game_over') {
       return;
     }
-
     // Disable cube during opening roll phase
     if (state.gamePhase === 'opening_roll') {        
         logStatus("Doubling cube is disabled during the opening roll.",
@@ -47,7 +46,10 @@ export function handleCubeClick(player) {
     // Set pending offer state
     state.isCubeOffered = true;
     state.cubeOfferedBy = player;
-    const respondingPlayer = player === 'white' ? 'black' : 'white';
+    const respondingPlayer = player === 'black' ? 'white' : 'black';
+
+    // Refresh cube UI so classes update immediately
+    updateCubePositionUI();
 
     // Clear stale queued messages (e.g. "Turn switched") so Doubles prompt can render
     clearStatusQueue();
@@ -62,7 +64,7 @@ export function handleCubeClick(player) {
  */
 export function resolveCubeOffer(accepted, targetValue) {
     const offeringPlayer = state.cubeOfferedBy;
-    const opponent = offeringPlayer === 'white' ? 'black' : 'white';
+    const opponent = offeringPlayer === 'black' ? 'white' : 'black';
 
     // Clear flags and wipe any stale status messages
     state.isCubeOffered = false;
@@ -78,7 +80,6 @@ export function resolveCubeOffer(accepted, targetValue) {
         logStatus(
             `${opponent} accepted the cube! ...${offeringPlayer}'s turn to play.`
         );        
-        
         // Move cube to new owner's tray
         updateCubePositionUI();
 
@@ -87,17 +88,11 @@ export function resolveCubeOffer(accepted, targetValue) {
         if (currentZone) {
             currentZone.style.display = 'flex';
         }
-
         // Restore normal dice UI for the player whose turn it is
         renderDiceUI();
     } else {
         // Opponent declined -> Resign current game
-        const cube = state.cubeValue;
-        const message = cube > 1 ? `${cube} points` : 'the game';
-        logStatus(`${opponent} declined the cube and resigned! ${offeringPlayer} wins ${message}!`);        
-        // Award points equal to current cube value before the declined double
-        state.scores[offeringPlayer] += state.cubeValue;       
-        renderDiceUI();
+        handleResignation(opponent);
     }
 }
 
@@ -111,12 +106,6 @@ export function handleCubeMouseLeave() {
 export function updateCubePositionUI() {
     const cubeEl = document.getElementById('doubling-cube');
     if (!cubeEl) return;
-
-    // Disable interactions during offers or end-game phases
-    if (state.isCubeOffered || state.isResignOffered || state.gamePhase === 'game_over') {
-      cubeEl.classList.add('disabled');
-      return;
-    }
 
     // Move cube to appropriate container based on owner
     let targetContainerId = 'bar';  // default center position
@@ -139,14 +128,19 @@ export function updateCubePositionUI() {
     // Determine if the cube should be visually active/clickable
     const isOpening = state.gamePhase === 'opening_roll';    
     const isGameOver = state.gamePhase === 'game_over';
-    const isOwnedByOpponent = state.cubeOwner !== 'center' && state.cubeOwner !== state.currentPlayer;
+    const isOwnedByOpponent = state.cubeOwner !== 'center'
+      && state.cubeOwner !== state.currentPlayer;
 
-    // Disable cube for game over, opening roll, player already rolled, or opponent owns it
-    if (isGameOver || isOpening  || state.hasRolled || isOwnedByOpponent) {
+    // Apply proper CSS class state
+    if (state.isCubeOffered) {
+      cubeEl.classList.add('pending-offer');
+      cubeEl.classList.remove('active', 'disabled');      
+    } else if (isGameOver || isOpening || state.hasRolled || isOwnedByOpponent
+      || state.isResignOffered) {
         cubeEl.classList.add('disabled');
-        cubeEl.classList.remove('active');
+        cubeEl.classList.remove('active', 'pending-offer');
     } else {
-        cubeEl.classList.add('active');
-        cubeEl.classList.remove('disabled');
+      cubeEl.classList.add('active');
+      cubeEl.classList.remove('disabled', 'pending-offer');
     }
 }

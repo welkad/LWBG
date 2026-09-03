@@ -105,7 +105,7 @@ export function setupKeyboardListeners() {
       case 'KeyC':
         event.preventDefault();
         if (!state.hasRolled && !state.isCubeOffered && state.gamePhase !== 'game_over') {
-          handleCubeClick();
+          handleCubeClick(state.currentPlayer);
         }
         break;
 

@@ -160,8 +160,9 @@ export function updateLegendUI() {
         <span><strong>N</strong> : Resign</span>
     `;
   } else if (!state.hasRolled && state.gamePhase === 'turns') {
-      legendEl.innerHTML = `
+      legendEl.innerHTML = `        
         <span><strong>R</strong> : Roll</span>
+        <span><strong>C</strong> : Double</span>
         <span><strong>Q</strong> : Resign</span>
       `;
   } else if (state.gamePhase === 'turns' ){
