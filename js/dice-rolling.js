@@ -127,7 +127,11 @@ function evaluateOpeningRoll() {
 export function handleDiceRoll(player) {
   // If still in opening phase, route keypresses to handleOpeningRoll
   if (state.gamePhase !== 'turns') {
-    if (state.openingRolls.black === null) {
+    const blackDie = document.getElementById('black-die-1');
+    const blackHasRolled = state.openingRolls.black !== null 
+      || blackDie?.dataset.animating === 'true';
+    
+    if (!blackHasRolled) {
       handleOpeningRoll('black');
     } else if (state.openingRolls.white === null) {
       handleOpeningRoll('white');

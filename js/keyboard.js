@@ -1,6 +1,5 @@
 // js/keyboard.js - Global keyboard shortcuts for game actions.
 import { handleResignation, initBoardState, state, switchTurn } from './state.js';
-import { handlePostGameDieClick } from './dice.js';
 import { renderDiceUI } from './dice-renderer.js';
 import { clearStatusQueue, logStatus } from './ui.js';
 import { handleCubeClick, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
@@ -84,14 +83,16 @@ export function setupKeyboardListeners() {
       case 'Space':
       case 'KeyR':
         event.preventDefault();
-        if (state.gamePhase !== 'game_over') {
-          if (state.gamePhase !== 'turns') {
-            // Trigger opening roll
-            handleDiceRoll(null);
-          } else if (!state.hasRolled) {
-            // Regular turn roll
-            handleDiceRoll(state.currentPlayer);
+        if (state.gamePhase === 'opening_roll') {
+          // Identify who needs to roll
+          if (!state.openingRolls?.black) {
+            handleDiceRoll('black');
+          } else if (!state.openingRolls?.white) {
+            handleDiceRoll('white');
           }
+        } else if (state.gamePhase === 'turns' && !state.hasRolled) {
+          // Regular turn roll
+          handleDiceRoll(state.currentPlayer);
         }
         break;
 
