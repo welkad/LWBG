@@ -138,6 +138,74 @@ function isCheckerOnHighestPoint(fromIndex, player) {
 }
 
 /**
+ * Find sequence of individual die values required based on toIndex and fromIndex.
+ * @param {number|string} fromIndex - Starting position (0-23 or 'bar')
+ * @param {number|string} toIndex - Ending destination (0-23 or 'off')
+ * @param {Array<number>} availableDice - Active roll values remaining in state
+ * @param {string} player - Current player ('black' | 'white')
+ * @returns {Array<number>|null} Ordered array of dice used or null if invalid.
+ */
+function findDiceSequenceForMove(fromIndex, toIndex, availableDice, player) {
+  const dir = DIRECTIONS[player];
+  const isBearOffEligible = canPlayerBearOff(player);
+
+  function search(currentIndex, remainingDice, path) {
+    // Base condition: Check if current step matches the desired destination
+    if (path.length > 0) {
+      if (toIndex === 'off') {
+        if (currentIndex < 0 || currentIndex > 23) return path;
+      } else if (currentIndex === toIndex) {
+        return path;
+      }
+    }
+
+    if (remainingDice.length === 0) return null;
+
+    // Evaluate unique dice values to avoid duplicate path checking
+    const uniqueDice = [...new Set(remainingDice)];
+
+    for (const dieValue of uniqueDice) {
+      let nextIndex;
+
+      // Calculat the intermediate point index after applying current dieValue
+      if (currentIndex === 'bar') {
+        nextIndex = player === 'white' ? dieValue - 1 : 24 - dieValue;
+      } else {
+        nextIndex = currentIndex + (dieValue * dir);
+      }
+
+      // Standard board move: Continue if intermediate point is open
+      if (toIndex !== 'off' && isPointOpen(nextIndex, player)) {
+        const nextRemaining = [...remainingDice];
+        nextRemaining.splice(nextRemaining.indexOf(dieValue), 1);
+        const result = search(nextIndex, nextRemaining, [...path, dieValue]);
+        if (result) return result;        
+      }
+      // Bear-off path: Check exact or overshoot conditions
+      else if (toIndex === 'off' && isBearOffEligible && currentIndex !== 'bar') {
+        const isExact = (player === 'black' && nextIndex === -1)
+          || (player === 'white' && nextIndex === 24);
+        const isOvershoot = (player === 'black' && nextIndex < -1)
+          || (player === 'white' && nextIndex > 24);
+        
+        if (isExact || (isOvershoot && isCheckerOnHighestPoint(currentIndex, player))) {
+          return [...path, dieValue];
+        }
+        // If not bearing off directly, ensure interemediate point is open
+        if (nextIndex >= 0 && nextIndex <=23 && isPointOpen(nextIndex, player)) {
+          const nextRemaining = [...remainingDice];
+          nextRemaining.splice(nextRemaining.indexOf(dieValue), 1);
+          const result = search(nextIndex, nextRemaining, [...path, dieValue]);
+          if (result) return result;
+        }
+      }
+    }
+    return null;  // Return null if no valid sequence leads to target
+  }
+  return search(fromIndex, [...availableDice], []);
+}
+
+/**
  * Selects a point, deselects, or triggers a move execution if valid target is clicked.
  * @param {number|string} pointIndex - 0-23 or 'bar'
  */
@@ -198,33 +266,11 @@ export function handlePointClick(pointIndex) {
   renderBoard();
 }
 
-/** 
- * Executes a checker move, handles hits, bear-offs, consumed dice,
- * updates board state and turn flow, including win checking.
+/**
+ * Execute a single step, hitting any blots if present
  */
-export function executeMove(fromIndex, toIndex) {
-  const player = state.currentPlayer;  
-
-  // Calculate distance moved
-  let distance;
-  if (toIndex === 'off') {
-    distance = player === 'black' ? fromIndex + 1 : 24 - fromIndex;
-  } else if (fromIndex === 'bar') {
-    distance = player === 'black' ? toIndex - 17 : 24 - toIndex;
-  } else {
-    distance = Math.abs(toIndex - fromIndex);
-  }
-
-  // Determine consumed die value(s) for this move
-  const consumedDice = getConsumedDiceForDistance(distance, toIndex === 'off');  
-
-  // Assign a unique checker ID to track this specific piece across multi-step moves
-  const checkerId = `${player}-${fromIndex}`;
-
-  // Record history snapshot including checkerId and consumed dice
-  recordMoveSnapshot(checkerId, consumedDice);
-
-  // Remove checker from origin
+function applySingleStep (fromIndex, toIndex, player) {
+  // Remove checker from source (bar or point)
   if (fromIndex === 'bar') {
     state.bar[player]--;
   } else {
@@ -233,36 +279,80 @@ export function executeMove(fromIndex, toIndex) {
       state.boardState[fromIndex].player = null;
     }
   }
-
-  // Execute placement or bear-off
+  // Place checker at target destination (bear-off or point)
   if (toIndex === 'off') {
     state.borneOff[player]++;
     logStatus(`${player} bore off a checker! (${state.borneOff[player]}/15)`);
   } else {
     const targetPoint = state.boardState[toIndex];
-    // Handle landing on opponent's blot (hitting)
-    if (targetPoint.player && targetPoint.player !== player && targetPoint.count === 1) {
+    // HIT LOGIC: If landing on an opponent's single checker (blot)
+    if (targetPoint.player && targetPoint.player !== player 
+        && targetPoint.count === 1) {
       const opponent = targetPoint.player;
-      state.bar[opponent]++;
-      logStatus(`${player} hit ${opponent}'s blot on Point ${toIndex + 1}!`);
+      state.bar[opponent]++;  // Send opponent to bar
+      logStatus(`${player} hit ${opponent}'s blot on the ${toIndex + 1} point!`);
       targetPoint.player = player;
       targetPoint.count = 1;
     } else {
-      // Normal placement on empty or friendly point
+      // Regular placement on friendly or empty point
       targetPoint.player = player;
       targetPoint.count++;
     }
   }
+}
 
-  // Consume die values from state.currentRoll
-  consumedDice.forEach(val => {
-    const idx = state.currentRoll.indexOf(val);
+/** 
+ * Executes a checker move, handles hits, bear-offs, consumed dice,
+ * updates board state and turn flow, including win checking. Refactored to ensure
+ * all blots on intermediate points are hit as the checker moves along the board.
+ */
+export function executeMove(fromIndex, toIndex) {
+  const player = state.currentPlayer;  
+  const dir = DIRECTIONS[player];
+
+  // Resolve exact sequence of individual dice needed for this move
+  const dieSequence =
+    findDiceSequenceForMove(fromIndex, toIndex, state.currentRoll, player);
+  if (!dieSequence) return;
+
+  // Assign a unique checker ID to track this specific piece across multi-step moves
+  const checkerId = `${player}-${fromIndex}`; 
+  // Record single snapshot for undo history before executing step sequence
+  recordMoveSnapshot(checkerId, dieSequence);
+
+  let currentStepIndex = fromIndex;
+
+  // Process each die step individually so intermediate points trigger hit logic
+  dieSequence.forEach(dieValue => {
+    let nextStepIndex;
+    if (toIndex === 'off') {
+      const distanceToOff = player === 'black'
+        ? currentStepIndex + 1 : 24 - currentStepIndex;
+      if (dieValue >= distanceToOff) {
+        nextStepIndex = 'off';
+      } else {
+        nextStepIndex = currentStepIndex + (dieValue * dir);
+      }
+    } else {
+      if (currentStepIndex === 'bar') {
+        nextStepIndex = player === 'white' ? dieValue - 1 : 24 - dieValue;
+      } else {
+        nextStepIndex = currentStepIndex + (dieValue * dir);
+      }
+    }
+    // Apply board state changes and hit detection for this specific step
+    applySingleStep(currentStepIndex, nextStepIndex, player);
+
+    // Consume the corresponding die value form the current roll pool
+    const idx = state.currentRoll.indexOf(dieValue);
     if (idx !== -1) {
       state.currentRoll.splice(idx, 1);
     }
-  });
+    // Advance tracker index for next step in multi-die move
+    currentStepIndex = nextStepIndex;
+  });  
 
-  // Clear selection and re-render
+  // Clear selections
   state.selectedPoint = null;
   state.validMoves = [];
 
@@ -271,41 +361,11 @@ export function executeMove(fromIndex, toIndex) {
     handleGameEnd(player);
     return;
   }
+
+  // Refresh UI
   renderBoard();
   renderDiceUI();
   updateScoreBoardUI(); // Refresh pip count immediately
-}
-
-/**
- * Calculate consumed dice for standard moves or bear-offs.
- */
-function getConsumedDiceForDistance(distance, isBearOff = false) {
-  // Check exact match on a single die first
-  const exactIndex = state.currentRoll.indexOf(distance);
-  if (exactIndex !== -1) {
-    return [state.currentRoll[exactIndex]];
-  }
-
-  // If bearing off and distance > highest die, consume closest higher die
-  if (isBearOff) {
-    const higherDice = state.currentRoll.
-      filter(d => d >= distance).sort((a, b) => a - b);
-    if (higherDice.length > 0) return [higherDice[0]];
-  }
-
-  // Composite move: find smallest combination of dice summing to distance
-  let sum = 0;
-  const usedVals = [];
-
-  for (let i = 0; i < state.currentRoll.length; i++) {
-    sum += state.currentRoll[i];
-    usedVals.push(state.currentRoll[i]);
-    if (sum === distance || (isBearOff && sum > distance)) {
-      return usedVals;
-    }
-  }
-
-  return usedVals;
 }
 
 // ==================================
