@@ -229,7 +229,7 @@ export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlaye
   let player = selectPlayer || typeof eventOrPlayer === 'string' ? eventOrPlayer : null;
   let selectedChoice = choice;
 
-  // Extract attributes if invoked via DOM event click
+  // Extract attributes from data
   if (eventOrPlayer && eventOrPlayer.target) {
     const dieEl = eventOrPlayer.target.closest('.die');
     if (dieEl) {
@@ -239,19 +239,21 @@ export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlaye
       const content = dieEl.textContent.trim();
       if (content === 'Y') selectedChoice = 'yes';
       if (content === 'N') selectedChoice = 'no';
-
-      // Fallback datasets if content isn't plain text
-      selectedChoice = dieEl.dataset.choice 
+    
+      selectedChoice = selectedChoice || dieEl.dataset.choice 
         || (dieEl.dataset.action === 'play-again-yes' ? 'yes' : 'no' );
       player = dieEl.dataset.player || player;
     }
   }
 
-  // Fallback to active player if still unassigned
-  if (!player) player = state.currentPlayer || 'black';
   if (!selectedChoice) return;
 
   if (selectedChoice === 'yes') {
+    // If triggered by keyboard without context, default first 'Y' to Black
+    if (!player) {
+      player = !state.playAgainChoices.black ? 'black' : 'white';
+    }
+
     state.playAgainChoices[player] = 'yes';
     renderDiceUI();  // Render UI so both players see confirmation dice
 
@@ -274,13 +276,26 @@ export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlaye
     }
   } 
   else if (selectedChoice === 'no') {
-    state.playAgainChoices[player] = 'no';
+    // Determine if someone already voted 'yes'
+    const blackVoted = state.playAgainChoices.black === 'yes';
+    const whiteVoted = state.playAgainChoices.white === 'yes';    
 
+    // Try to infer who declined (if not alreay known by mouse-click)
+    let decliner = player;
+    if (!decliner) {
+      if (blackVoted) decliner = 'white';
+      else if (whiteVoted) decliner = 'black';
+      // If neither player voted, decliner remains null
+    }
+    if (decliner) {
+      state.playAgainChoices[player] = 'no';
+    }
     // Disable click interactions on all dice
     document.querySelectorAll('.die').forEach(d => d.style.pointerEvents = 'none');
-
-    clearStatusQueue();
-    logStatus(`${player} declined. Thank you for playing!`);
+    clearStatusQueue();    
+    // Dynamic message based on input source content
+    const declineMsg = decliner ? `${decliner}` : 'Another game was';     
+    logStatus(`${declineMsg} declined. Thank you for playing!`);
 
     // Delay clearing dice elements immediately
     setTimeout(() => {

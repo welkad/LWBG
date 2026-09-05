@@ -38,15 +38,11 @@ export function setupKeyboardListeners() {
 
         // Play again prompt (end of game)
         if (isPlayAgainActive) {
-          // Determine target player: fill unvoted slot
-          let player = 'black';
-          if (state.playAgainChoices.black === 'yes') {
-            player = 'white';
-          } else if (state.playAgainChoices.white === 'yes') {
-            player = 'black';
-          }
+          // Ignore any key press during intial post-game delay
+          if (state.awaitingPlayAgainPrompt) return;
+
           // Delegate directly to dice.js post-game handler
-          handlePostGameDieClick(null, choice, player);
+          handlePostGameDieClick(null, choice, null);         
           return;
         }
 
@@ -129,7 +125,8 @@ export function setupKeyboardListeners() {
       // RESIGN or QUIT
       case 'KeyQ':
         event.preventDefault();
-        if (!state.hasRolled && !state.isResignOffered && state.gamePhase !== 'game_over') {
+        if (!state.hasRolled && !state.isResignOffered && 
+          state.gamePhase !== 'game_over' && state.gamePhase === 'turns') {
           state.isResignOffered = true;
           state.resignOfferedBy = state.currentPlayer;
           clearStatusQueue();
