@@ -102,6 +102,15 @@
     cursor: pointer;
 }
 
+/* Subtle spacing for checkers on the bar */
+#bar-black .checker:first-child {
+    margin-top: 2px;
+}
+
+#bar-white .checker:first-child {
+    margin-bottom: 2px;
+}
+
 /* ==========================================
    CHECKER OVERFLOW & STACKING RULES
    ========================================== */
