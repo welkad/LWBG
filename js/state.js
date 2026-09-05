@@ -1,7 +1,8 @@
 // ==========================================
 // GAME STATE MANAGEMENT
 // ==========================================
-// js/state.js - Centralizes all global mutable game state in one place so modules can import and modify it predictably.
+// js/state.js - Centralizes all global mutable game state in one place
+// so modules can import and modify it predictably.
 
 import { updateTurnUI, refreshDiceForNewTurn } from './dice.js';
 import { renderBoard, updatePointLabels, updateScoreBoardUI } from './board.js';
@@ -11,28 +12,28 @@ import { renderDiceUI } from './dice-renderer.js';
 
 export const state = {
     boardState: Array(24).fill(null).map(() => ({ player: null, count: 0 })),
-    bar: { white: 0, black: 0 },                    // Checkers waiting on the bar
-    borneOff: { white: 0, black: 0 },               // Checkers safely borne off
-    scores: { white: 0, black: 0 },                 // How many games won
-    selectedPoint: null,                            // Point index (0-23) or 'bar'
-    validMoves: [],                                 // Target indices (0-23 or 'off') for selected pieces
-    moveHistory:[],                                 // Holds snapshots of boardState, bar, and currentRoll
+    bar: { white: 0, black: 0 },      // Checkers waiting on the bar
+    borneOff: { white: 0, black: 0 }, // Checkers safely borne off
+    scores: { white: 0, black: 0 },   // How many games won
+    selectedPoint: null,              // Point index (0-23) or 'bar'
+    validMoves: [],                   // Target indices (0-23 or 'off') for selected pieces
+    moveHistory:[],                   // Holds snapshots of boardState, bar, and currentRoll
 
-    cubeValue: 1,                                   // Default starting multiplier
-    cubeOwner: 'center',                            // 'center', 'white', of 'black'
-    isCubeOffered: false,                           // True when decision is pending
-    cubeOfferedBy: null,                            // Cube offered by 'black' or 'white'
-    gamePhase:  'opening_roll',                     // 'opening_roll', 'turns', or 'game_over'
-    losingPlayer: null,                             // Tracks who lost for post game Y/N prompt
-    currentPlayer: null,                            // Set dynamically by opening roll
-    isResignOffered: false,                         // Resignation state
-    resignOfferedBy: null,                          // Resigning player
+    cubeValue: 1,                     // Default starting multiplier
+    cubeOwner: 'center',              // 'center', 'white', of 'black'
+    isCubeOffered: false,             // True when decision is pending
+    cubeOfferedBy: null,              // Cube offered by 'black' or 'white'
+    gamePhase:  'opening_roll',       // 'opening_roll', 'turns', or 'game_over'
+    losingPlayer: null,               // Tracks who lost for post game Y/N prompt
+    currentPlayer: null,              // Set dynamically by opening roll
+    isResignOffered: false,           // Resignation state
+    resignOfferedBy: null,            // Resigning player
     playAgainChoices: { black: null, white: null }, // Track Y/N decision for each player
     awaitingPlayAgainPrompt: false,                 // Delay displaying play again prompt
 
     openingRolls: { white: null, black: null },
-    currentRoll: [],                                // e.g., [5, 3] or [4, 4, 4, 4]
-    isDouble: false,                                // Track if current turn started with double dice
+    currentRoll: [],                  // e.g., [5, 3] or [4, 4, 4, 4]
+    isDouble: false,                  // Track if current turn started with double dice
     activeRoller: null,
     isRolling: false,
     hasRolled: false,
@@ -88,7 +89,8 @@ export function handleResignation(resigningPlayer) {
 
 // Reset board for new game but preserve match scores
 export function resetGame() {
-  clearStatusQueue();
+  document.body.classList.remove('game-over-phase');  // Remove game-over class
+  clearStatusQueue();   // Clear any stale messages
   initBoardState();     // Restore board, bar, cube and opening roll state
 
   // Refresh UI for opening roll phase
@@ -163,6 +165,10 @@ export function handleGameEnd(winner, resigningPlayer = null) {
   // Calculate points won (defaults to cube value <- expand for Gammon/Backgammon)
   const pointsWon = state.cubeValue;
   state.scores[winner] += pointsWon;
+
+  // Add phase class to body to scope CSS
+  document.body.classList.add('game-over-phase');
+  document.body.classList.remove('opening-roll-phase');
 
   // Lock game state and reset flags
   state.gamePhase = 'game_over';
