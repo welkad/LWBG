@@ -1,15 +1,15 @@
 // js/dice.js - Contains dice rolling logic and turn UI toggling.
-import { handleResignation, initBoardState, resetGame, state, switchTurn } from './state.js';
+import { handleResignation, resetGame, state, switchTurn } from './state.js';
 import { handleCubeClick, handleCubeMouseLeave, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, handleOpeningRoll, toggleDiceOrder } from './dice-rolling.js';
 import { renderDiceUI, setDieValue } from './dice-renderer.js';
-import { undoLastMove } from './moves.js';
 import { clearStatusQueue, logStatus, updateLegendUI } from './ui.js';
+import { undoLastMove } from './moves.js';
 
 export function handleDieClick(player, dieNumber, event) {
     // Prevent any clicks if the game has ended
     if (state.gamePhase === 'game_over') {
-      handlePostGameDieClick(event);
+      handlePostGameDieClick(event, null, player);
       return;
     }
 
@@ -223,22 +223,32 @@ export function refreshDiceForNewTurn() {
 // =======================================
 // POST GAME LOGIC
 // =======================================
-export function handlePostGameDieClick(eventOrPlayer, choice) {
+export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlayer = null) {
   if (state.gamePhase !== 'game_over') return;
   
-  let playerType = typeof eventOrPlayer === 'string' ? eventOrPlayer : state.currentPlayer;
+  let player = selectPlayer || typeof eventOrPlayer === 'string' ? eventOrPlayer : null;
   let selectedChoice = choice;
 
   // Extract attributes if invoked via DOM event click
   if (eventOrPlayer && eventOrPlayer.target) {
     const dieEl = eventOrPlayer.target.closest('.die');
     if (dieEl) {
+      const match = dieEl.id?.match(/^(black|white)-die/);
+      if (match) player = match[1];
+
+      const content = dieEl.textContent.trim();
+      if (content === 'Y') selectedChoice = 'yes';
+      if (content === 'N') selectedChoice = 'no';
+
+      // Fallback datasets if content isn't plain text
       selectedChoice = dieEl.dataset.choice 
         || (dieEl.dataset.action === 'play-again-yes' ? 'yes' : 'no' );
-      playerType = dieEl.dataset.player || playerType;
+      player = dieEl.dataset.player || player;
     }
   }
 
+  // Fallback to active player if still unassigned
+  if (!player) player = state.currentPlayer || 'black';
   if (!selectedChoice) return;
 
   if (selectedChoice === 'yes') {

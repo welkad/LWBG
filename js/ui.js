@@ -132,8 +132,6 @@ export function updateLegendUI() {
   if (state.gamePhase === 'opening_roll') {
     legendEl.innerHTML = `
         <span><strong>R</strong> : Roll</span>
-        <span><strong>U</strong> : Undo</span>
-        <span><strong>D</strong> : Done</span>
     `;
     return;
   }
@@ -168,8 +166,7 @@ export function updateLegendUI() {
   } else if (state.gamePhase === 'turns' ){
     if (state.hasRolled) {
       // Post-roll active turn menu
-      legendEl.innerHTML = `
-          <span><strong>R</strong> : Roll</span>
+      legendEl.innerHTML = `          
           <span><strong>U</strong> : Undo</span>
           <span><strong>D</strong> : Done</span>
       `;

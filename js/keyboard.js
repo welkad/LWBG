@@ -1,11 +1,12 @@
 // js/keyboard.js - Global keyboard shortcuts for game actions.
-import { handleResignation, initBoardState, state, switchTurn } from './state.js';
 import { renderDiceUI } from './dice-renderer.js';
+import { handlePostGameDieClick } from './dice.js';
 import { clearStatusQueue, logStatus } from './ui.js';
+import { handleResignation, state, switchTurn } from './state.js';
 import { handleCubeClick, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, toggleDiceOrder } from './dice-rolling.js';
 import { undoLastMove } from './moves.js';
-import { renderBoard } from './board.js';
+
 /** 
  * - Space / R : Roll dice
  * - S         : Swap dice order
@@ -37,18 +38,15 @@ export function setupKeyboardListeners() {
 
         // Play again prompt (end of game)
         if (isPlayAgainActive) {
-          if (choice === 'yes') {
-            // Restart game / reset board state
-            initBoardState();
-            renderBoard();
-            renderDiceUI();
-            updateTurnUI();
-            logStatus("New game started! Highest roll moves first.")
-          } else {
-            // User declined to play again
-            logStatus("Game ended. Thanks for playing!")
-            renderDiceUI(); // Hide Y/N dice buttons
+          // Determine target player: fill unvoted slot
+          let player = 'black';
+          if (state.playAgainChoices.black === 'yes') {
+            player = 'white';
+          } else if (state.playAgainChoices.white === 'yes') {
+            player = 'black';
           }
+          // Delegate directly to dice.js post-game handler
+          handlePostGameDieClick(null, choice, player);
           return;
         }
 
