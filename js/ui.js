@@ -159,8 +159,7 @@ export function updateLegendUI() {
     `;
   } else if (!state.hasRolled && state.gamePhase === 'turns') {
       legendEl.innerHTML = `        
-        <span><strong>R</strong> : Roll</span>
-        <span><strong>C</strong> : Double</span>
+        <span><strong>R</strong> : Roll</span>        
         <span><strong>Q</strong> : Resign</span>
       `;
   } else if (state.gamePhase === 'turns' ){
