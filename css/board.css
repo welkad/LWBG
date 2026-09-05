@@ -101,6 +101,11 @@ body {
     clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
 }
 
+/* Optical compensation for crowded top points */
+.top .point.crowded .checker {
+    margin-bottom: -1px;
+}
+
 /* Bottom Triangles: stack pieces starting immediately at the very bottom edge */
 .bottom .point { 
     flex-direction: column-reverse; 

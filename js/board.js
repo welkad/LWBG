@@ -60,6 +60,11 @@ function createPointDOM(index) {
     const isOwner = pointData && pointData.player === state.currentPlayer && pointData.count > 0;
     const isValidTarget = state.validMoves && state.validMoves.includes(index);
 
+    // Visually shorten crowded points (5+ checkers) to preserve perceived tip length
+    if (pointData && pointData.count === 5) {
+        pointEl.classList.add('crowded');
+    }
+
     // Only allow clickable cursor during turns, after rolling, and on valid pieces/targets
     const isCickable = state.gamePhase === 'turns' && 
                        state.hasRolled &&

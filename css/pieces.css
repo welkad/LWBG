@@ -27,7 +27,7 @@
 }
 
 /* Upper points: cast shadow away from triangle tip */
-/* .top .point .white-piece {
+.top .point .white-piece {
     box-shadow:
         0 -3px 5px rgba(0, 0, 0, 0.4),
         inset 0 -3px 4px rgba(0,0,0,0.2);
@@ -37,7 +37,7 @@
     box-shadow:
         0 -3px 5px rgba(0, 0, 0, 0.5),
         inset 0 3px 4px rgba(255,255,255,0.15);
-} */
+}
 
 /* Bear-Off Home Bar Wrapper */
 #home-bar {
