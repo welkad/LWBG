@@ -178,14 +178,14 @@ export function updatePointLabels(currentPlayer) {
         topRight.innerHTML = createSpans([19, 20, 21, 22, 23, 24]);
         topLeft.innerHTML = createSpans([13, 14, 15, 16, 17, 18]);
         // Black moves bottom-left (12-7) -> bottom-right (6-1)
-        bottomLeft.innerHTML = createSpans([12, 12, 10, 9, 8, 7]);
+        bottomLeft.innerHTML = createSpans([12, 11, 10, 9, 8, 7]);
         bottomRight.innerHTML = createSpans([6, 5, 4, 3, 2, 1]);
     } else if (currentPlayer === 'white') {  // Clockwise
         // White moves bottom-right (19-24) -> bottom-left (13-18)
         bottomRight.innerHTML = createSpans([19, 20, 21, 22, 23, 24]);
         bottomLeft.innerHTML = createSpans([13, 14, 15, 16, 17, 18]);
         // White moves top-left (12-7) -> top-right (6-1)
-        topLeft.innerHTML = createSpans([12, 12, 10, 9, 8, 7]);
+        topLeft.innerHTML = createSpans([12, 11, 10, 9, 8, 7]);
         topRight.innerHTML = createSpans([6, 5, 4, 3, 2, 1]);
     }
 }
