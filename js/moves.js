@@ -1,5 +1,5 @@
 // js/moves.js
-import { state, handleGameEnd } from './state.js';
+import { state, handleGameEnd, switchTurn } from './state.js';
 import { renderBoard, updateScoreBoardUI } from './board.js';
 import { renderDiceUI } from './dice-renderer.js';
 import { logStatus } from './ui.js';
@@ -242,6 +242,12 @@ export function handlePointClick(pointIndex) {
 
   // Allow selecting only own pieces
   if (pointOwner === state.currentPlayer && pointCount > 0) {
+    // Prevent selecting any points on the board if player has checkers on the BAR
+    if (state.bar[state.currentPlayer] > 0 && pointIndex !== 'bar') {
+      logStatus("Must enter checkers from the BAR point first!", 2000);
+      return;
+    }
+
     state.selectedPoint = pointIndex;
     state.validMoves = getValidMovesForPoint(pointIndex);
 
@@ -378,6 +384,7 @@ export function executeMove(fromIndex, toIndex) {
 /**
  * Automatically select the bar checker if current player has
  * any pieces trapped and remaining moves are available.
+ * If no moves are available, then switch turn.
  */
 export function autoSelectBarIfRequired() {
   const player = state.currentPlayer;
@@ -385,11 +392,26 @@ export function autoSelectBarIfRequired() {
 
   // Auto-select only if checkers exist on the bar and dice are available
   if (barCount > 0 && state.hasRolled && state.currentRoll.length > 0) {
-    state.selectedPoint = 'bar';
-    // Calculate destination points specifically for bar moves
-    state.validMoves = getValidMovesForPoint('bar');
+    const validBarMoves = getValidMovesForPoint('bar');
+
+    // Check if trapped on BAR point with no legal moves available
+    if (validBarMoves.length === 0) {
+      logStatus(`${player} is trapped on the bar! All entry points are blocked.`, 3000);
+
+      // Clear remaining dice and automatically switch turn after a brief delay
+      state.currentRoll = [];
+      setTimeout(() => {
+        switchTurn();
+      }, 3000);
+      return false; // Signal that no valid moves exist
+    }
+    // Legal moves exist
+    state.selectedPoint = 'bar';    
+    state.validMoves = validBarMoves; // Calculate destination points from bar
     renderBoard();  // Show selected highlight on bar & target points
+    return true;
   }
+  return true;
 }
 
 // ==================================
