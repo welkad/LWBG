@@ -4,6 +4,7 @@ import { logStatus } from './ui.js';
 import { updatePointLabels } from './board.js';
 import { renderDiceUI, setDieValue, renderWinnerOpeningDice } from './dice-renderer.js';
 import { updateCubePositionUI } from './doubling-cube.js';
+import { autoSelectBarIfRequired } from './moves.js';
 
 // ==========================================
 // ROLL LOGIC & OPENING ROLL
@@ -190,7 +191,10 @@ export function handleDiceRoll(player) {
         : `${finalD1}, ${finalD2}`;
 
       logStatus(`${player} rolled: ${rollMessage}`);
-    },
+
+      // Automatically select the bar if current player is trapped on it
+      autoSelectBarIfRequired();
+    }
   );
 }
 

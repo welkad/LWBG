@@ -276,33 +276,74 @@ body {
    POINT INTERACTION & HIGHLIGHT STYLES
    ===================================== */
 
-/* Elevate checkers above point pseudoelements */
+/* Split center bar container to align top/bottom halves to outer frame edges */
+#bar {
+    position: relative;
+    background: linear-gradient(90deg, #3a2a1e 46%, #150d08 46%, #150d08 54%, #3a2a1e 54%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes top bar to top edge, bottom bar to bottom edge */
+    height: 100%;
+}
+
+/* Clamp bar halves to match exact 200px triangle point height */
+.bar-half {
+  height: 200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  position: relative; /* Let #bar flexbox push them to top and bottom edges */
+}
+
+/* Black checkers start at top edge and stack downward */
+#bar-black {
+  justify-content: flex-start;
+}
+
+/* White checkers sit flush against bottom edge and stack upward */
+#bar-white {
+  justify-content: flex-end;
+}
+
+/* Highlight the BAR section container when active */
+.bar-half.selected {
+  background-color: rgba(255, 235, 59, 0.28);
+  box-shadow: inset 0 0 0 2px #ffeb3b;
+  border-radius: 4px;
+}
+
+/* Highlight checkers on active bar */
+.bar-half.selected .checker {
+  box-shadow: 0 0 10px 4px #ffeb3b;
+  transform: scale(1.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Point selection rules */
 .point {
   z-index: 2;
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Selected Point & Bar Section Highlight */
-.point.selected,
-.bar-section.selected {
+.point.selected {
   background-color: rgba(255, 235, 59, 0.28) !important;
   box-shadow: inset 0 0 0 2px #ffeb3b;
 }
 
-/* Highlight the top checker on a selected point */
 .point.selected .checker:last-child {
   box-shadow: 0 0 8px 3px #ffeb3b;
   transform: scale(1.05);
 }
 
-/* Valid Destination Target Highlight */
+/* Target indicators */
 .point.valid-target {
   background-color: rgba(76, 175, 80, 0.22) !important;
   box-shadow: inset 0 0 0 2px #4caf50;
   cursor: pointer;
 }
 
-/* Glowing green dot indicator inside valid target points */
 .point.valid-target::after {
   content: '';
   position: absolute;
@@ -318,23 +359,11 @@ body {
   animation: pulse-target 1.5s infinite alternate;
 }
 
-/* Position green dots near the tip of top vs bottom triangles */
-.top .point.valid-target::after {
-  bottom: 12px; /* Near bottom tip of top triangles */
-}
-
-.bottom .point.valid-target::after {
-  top: 12px; /* Near top tip of bottom triangles */
-}
+.top .point.valid-target::after { bottom: 12px; }
+.bottom .point.valid-target::after { top: 12px; }
 
 /* Pulsing animation for target indicators */
 @keyframes pulse-target {
-  from {
-    transform: translateX(-50%) scale(0.85);
-    opacity: 0.7;
-  }
-  to {
-    transform: translateX(-50%) scale(1.15);
-    opacity: 1;
-  }
+  from { transform: translateX(-50%) scale(0.85); opacity: 0.7; }
+  to { transform: translateX(-50%) scale(1.15); opacity: 1; }
 }

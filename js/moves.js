@@ -350,11 +350,7 @@ export function executeMove(fromIndex, toIndex) {
     }
     // Advance tracker index for next step in multi-die move
     currentStepIndex = nextStepIndex;
-  });  
-
-  // Clear selections
-  state.selectedPoint = null;
-  state.validMoves = [];
+  });
 
   // Check for victory condition (15 checkers borne off)
   if (state.borneOff[player] === 15) {
@@ -362,10 +358,38 @@ export function executeMove(fromIndex, toIndex) {
     return;
   }
 
-  // Refresh UI
-  renderBoard();
+  // --- POST-MOVE SELECTION LOGIC ---
+  const remainingBarCount = state.bar[player] || 0;
+  if (remainingBarCount > 0 && state.currentRoll.length > 0) {
+    // If player still has checkers on the bar, maintain auto-selection logic
+    autoSelectBarIfRequired();
+  } else {
+    // Bar is clear: reset selections so regular board clicks resume
+    state.selectedPoint = null;
+    state.validMoves = [];
+    renderBoard();
+  }
+
+  // Refresh remaining UI components
   renderDiceUI();
   updateScoreBoardUI(); // Refresh pip count immediately
+}
+
+/**
+ * Automatically select the bar checker if current player has
+ * any pieces trapped and remaining moves are available.
+ */
+export function autoSelectBarIfRequired() {
+  const player = state.currentPlayer;
+  const barCount = state.bar[player] ||  0;
+
+  // Auto-select only if checkers exist on the bar and dice are available
+  if (barCount > 0 && state.hasRolled && state.currentRoll.length > 0) {
+    state.selectedPoint = 'bar';
+    // Calculate destination points specifically for bar moves
+    state.validMoves = getValidMovesForPoint('bar');
+    renderBoard();  // Show selected highlight on bar & target points
+  }
 }
 
 // ==================================
