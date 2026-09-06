@@ -244,7 +244,7 @@ export function handlePointClick(pointIndex) {
   if (pointOwner === state.currentPlayer && pointCount > 0) {
     // Prevent selecting any points on the board if player has checkers on the BAR
     if (state.bar[state.currentPlayer] > 0 && pointIndex !== 'bar') {
-      logStatus("Must enter checkers from the BAR point first!", 2000);
+      logStatus("You must enter checkers from the BAR point first!", 2000);
       return;
     }
 
