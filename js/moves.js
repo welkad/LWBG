@@ -248,6 +248,19 @@ export function handlePointClick(pointIndex) {
       return;
     }
 
+    // Calculate potential destinations for this point
+    const moves = getValidMovesForPoint(pointIndex);
+
+    // Prevent selection of point if no legal moves available
+    if (moves.length  === 0) {
+      logStatus("You cannot make a valid move from this point.", 1500);
+      state.selectedPoint = null;
+      state.validMoves = [];
+      renderBoard();
+      return;
+    }
+
+    // Valid moves exist: commit selection and store targets
     state.selectedPoint = pointIndex;
     state.validMoves = getValidMovesForPoint(pointIndex);
 
