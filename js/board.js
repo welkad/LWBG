@@ -60,11 +60,6 @@ function createPointDOM(index) {
     const isOwner = pointData && pointData.player === state.currentPlayer && pointData.count > 0;
     const isValidTarget = state.validMoves && state.validMoves.includes(index);
 
-    // Visually shorten crowded points (5+ checkers) to preserve perceived tip length
-    if (pointData && pointData.count === 5) {
-        pointEl.classList.add('crowded');
-    }
-
     // Only allow clickable cursor during turns, after rolling, and on valid pieces/targets
     const isCickable = state.gamePhase === 'turns' && 
                        state.hasRolled &&
@@ -141,13 +136,32 @@ function renderBar(player) {
 
     const count = state.bar[player] || 0;
     const colorClass = player === 'white' ? 'white-piece' : 'black-piece';
+    const isTop = player === 'black'; // Stack down from top or up from bottom
 
     for (let i = 0; i < count; i++) {
         const checker = document.createElement('div');
         checker.className = `checker ${colorClass}`;
+
+        // Stacking logic for 6 or more checkers on bar point
+        if (i >= 5) {
+          const overflowIndex = i - 5;  // 0 for 6th, 1 for 7th, etc.
+          const rowOffset = overflowIndex * 24; // 24px vertical step for extra checkers
+
+          checker.classList.add('stacked');
+          
+          if (isTop) {
+            // Black bar: stack downward from top frame edge
+            checker.style.top = `${rowOffset}px`;
+          } else {
+            // White bar: stack upward from bottom frame edge
+            checker.style.bottom = `${rowOffset}px`;
+          }
+          // Layer overflow checkers above base stack
+          checker.style.zIndex = 10 + i;
+        }
+        // Append checkers to the BAR point (normally or stacked)
         barEl.appendChild(checker);
     }
-
     // Allow clicking the active player's bar section
     barEl.onclick = () => {
         if (state.currentPlayer === player && state.bar[player] > 0) {
