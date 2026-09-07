@@ -178,7 +178,7 @@ function renderBar(player) {
 function renderBearOff(player) {
   // Map players to their respective HTML pocket elements
   const pocketId = player === 'black' ? 'home-bottom-pocket' : 'home-top-pocket';
-  const bearOffEl = document.getElementById(`off-${pocketId}`);
+  const bearOffEl = document.getElementById(pocketId);
   if (!bearOffEl) return;
 
   bearOffEl.innerHTML = '';
@@ -195,7 +195,7 @@ function renderBearOff(player) {
   }
 
   const count = state.borneOff[player] || 0;
-  const colorClass = player = 'black' ? 'black-piece' : 'white-piece';
+  const colorClass = player === 'black' ? 'black-piece' : 'white-piece';
 
   for (let i = 0; i < count; i++) {
     const checker = document.createElement('div');
@@ -204,7 +204,7 @@ function renderBearOff(player) {
   }
 
   // Handle bear-off target click
-  bearOffEl.onClick = () => {
+  bearOffEl.onclick = () => {
     if (isCurrentPlayer && state.validMoves 
       && state.validMoves.includes('off')) {
         handlePointClick('off');

@@ -390,14 +390,16 @@ export function executeMove(fromIndex, toIndex) {
   dieSequence.forEach(dieValue => {
     let nextStepIndex;
     if (toIndex === 'off') {
-      const distanceToOff = player === 'black'
-        ? currentStepIndex + 1 : 24 - currentStepIndex;
+      // Calculate remaining distance based on player direction
+      const distanceToOff = dir === 1
+        ? 24 - currentStepIndex : currentStepIndex + 1;
       if (dieValue >= distanceToOff) {
         nextStepIndex = 'off';
       } else {
         nextStepIndex = currentStepIndex + (dieValue * dir);
       }
     } else {
+      // Standard board step calculation
       if (currentStepIndex === 'bar') {
         nextStepIndex = player === 'white' ? dieValue - 1 : 24 - dieValue;
       } else {
