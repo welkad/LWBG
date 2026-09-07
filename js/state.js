@@ -41,8 +41,7 @@ export const state = {
 
 export function initBoardState() {
     state.boardState = Array(24).fill(null).map(() => ({ player: null, count: 0 }));    
-    updatePointLabels(null);
-    updateCubePositionUI();
+    updatePointLabels(null);    
 
     // Reset board states
     state.bar = { white: 0, black: 0 };
@@ -69,6 +68,8 @@ export function initBoardState() {
     state.resignOfferedBy = null;
     state.playAgainChoices = { black: null, white: null };
     state.awaitingPlayAgainPrompt = false;
+
+    updateCubePositionUI(); // Update cube position AFTER state resets
 
     // Official Standard Backgammon Starting Setup
     state.boardState[0]  = { player: 'white', count: 2 }; // Point 1
