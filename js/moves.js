@@ -45,6 +45,26 @@ function isPointOpen(targetIndex, player) {
 }
 
 /**
+ * Helper: Check if on furthest active point in the home board.
+ */
+function isCheckerOnHighestPoint(fromIndex, player) {
+  if (player === 'black') {
+    for (let i = 23; i > fromIndex; i--) {
+      if (state.boardState[i].player === 'black') {
+        return false;
+      }
+    }
+  } else {
+    for (let i = 18; i < fromIndex; i++) {
+      if (state.boardState[i].player === 'white') {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+/**
  * Calculates valid destinations for a selected point or bar piece.
  * @param {number|string} fromIndex - Index (0-23) or 'bar'
  * @returns {Array<number>} Array of valid target indices
@@ -118,26 +138,6 @@ export function getValidMovesForPoint(fromIndex) {
 }
 
 /**
- * Helper: Check if on furthest active point in the home board.
- */
-function isCheckerOnHighestPoint(fromIndex, player) {
-  if (player === 'black') {
-    for (let i = 23; i > fromIndex; i--) {
-      if (state.boardState[i].player === 'black') {
-        return false;
-      }
-    }
-  } else {
-    for (let i = 18; i < fromIndex; i++) {
-      if (state.boardState[i].player === 'white') {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-/**
  * Find sequence of individual die values required based on toIndex and fromIndex.
  * @param {number|string} fromIndex - Starting position (0-23 or 'bar')
  * @param {number|string} toIndex - Ending destination (0-23 or 'off')
@@ -167,7 +167,7 @@ function findDiceSequenceForMove(fromIndex, toIndex, availableDice, player) {
     for (const dieValue of uniqueDice) {
       let nextIndex;
 
-      // Calculat the intermediate point index after applying current dieValue
+      // Calculate the intermediate point index after applying current dieValue
       if (currentIndex === 'bar') {
         nextIndex = player === 'white' ? dieValue - 1 : 24 - dieValue;
       } else {
@@ -272,7 +272,7 @@ export function handlePointClick(pointIndex) {
 
     // Valid moves exist: commit selection and store targets
     state.selectedPoint = pointIndex;
-    state.validMoves = getValidMovesForPoint(pointIndex);
+    state.validMoves = moves;
 
     // Extract valid point numbers, sort them smallest to largest, and handle 'off'
     const sortedMoves = state.validMoves
@@ -303,7 +303,7 @@ export function handlePointClick(pointIndex) {
 /**
  * Execute a single step, hitting any blots if present
  */
-function applySingleStep (fromIndex, toIndex, player) {
+function applySingleStep (fromIndex, toIndex, player, hits) {
   // Remove checker from source (bar or point)
   if (fromIndex === 'bar') {
     state.bar[player]--;
@@ -324,7 +324,13 @@ function applySingleStep (fromIndex, toIndex, player) {
         && targetPoint.count === 1) {
       const opponent = targetPoint.player;
       state.bar[opponent]++;  // Send opponent to bar
-      logStatus(`${player} hit ${opponent}'s blot on the ${toIndex + 1} point!`);
+
+      // Collect 1-indexed point for formatted summary log
+      if (hits) {
+        hits.push({ opponent, point: toIndex + 1 });
+      }
+
+      // logStatus(`${player} hit ${opponent}'s blot on the ${toIndex + 1} point!`);
       targetPoint.player = player;
       targetPoint.count = 1;
     } else {
@@ -333,6 +339,31 @@ function applySingleStep (fromIndex, toIndex, player) {
       targetPoint.count++;
     }
   }
+}
+
+/**
+ * Helper to construct readable status for single or multiple hits
+ */
+function logHitSummary(player, hits) {
+  if (!hits || hits.length === 0) return;
+
+  const opponent = hits[0].opponent;
+  const pointNumbers = hits.map(h => h.point);
+  const totalHits = pointNumbers.length;
+  const plural = totalHits > 1 ? 'blots' : 'blot';
+
+  let pointsString = '';
+  if (totalHits === 1) {
+    pointsString = `${pointNumbers[0]} point`;
+  } else if (totalHits === 2) {
+    pointsString = `${pointNumbers[0]} and ${pointNumbers[1]} points`;
+  } else {
+    // Non-mutating extraction for all points except the last
+    const initialPoints = pointNumbers.slice(0, -1).join(', ');
+    const lastPoint = pointNumbers[pointNumbers.length - 1];
+    pointsString = `${initialPoints} and ${lastPoint} points`;
+  } 
+  logStatus(`${player} hit ${opponent}'s ${plural} on the ${pointsString}!`, 3000);
 }
 
 /** 
@@ -348,13 +379,12 @@ export function executeMove(fromIndex, toIndex) {
   const dieSequence =
     findDiceSequenceForMove(fromIndex, toIndex, state.currentRoll, player);
   if (!dieSequence) return;
-
-  // Assign a unique checker ID to track this specific piece across multi-step moves
-  const checkerId = `${player}-${fromIndex}`; 
+  
   // Record single snapshot for undo history before executing step sequence
-  recordMoveSnapshot(checkerId, dieSequence);
+  recordMoveSnapshot(dieSequence);
 
   let currentStepIndex = fromIndex;
+  const hits = [];  // Array to aggregate hits during this move execution
 
   // Process each die step individually so intermediate points trigger hit logic
   dieSequence.forEach(dieValue => {
@@ -375,7 +405,7 @@ export function executeMove(fromIndex, toIndex) {
       }
     }
     // Apply board state changes and hit detection for this specific step
-    applySingleStep(currentStepIndex, nextStepIndex, player);
+    applySingleStep(currentStepIndex, nextStepIndex, player, hits);
 
     // Consume the corresponding die value form the current roll pool
     const idx = state.currentRoll.indexOf(dieValue);
@@ -385,6 +415,9 @@ export function executeMove(fromIndex, toIndex) {
     // Advance tracker index for next step in multi-die move
     currentStepIndex = nextStepIndex;
   });
+
+  // Log summary message for all hits accumulated during this move
+  logHitSummary(player, hits);
 
   // Check for victory condition (15 checkers borne off)
   if (state.borneOff[player] === 15) {
@@ -449,7 +482,7 @@ export function autoSelectBarIfRequired() {
 /**
  * Save a pre-move state snapshot so each individual step can be reverted independently
  */
-function recordMoveSnapshot(checkerId, consumedDice) {
+function recordMoveSnapshot(consumedDice) {
   state.moveHistory.push({    
     consumedDice: consumedDice,
     boardState: JSON.parse(JSON.stringify(state.boardState)),

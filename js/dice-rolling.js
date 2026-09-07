@@ -189,7 +189,7 @@ export function handleDiceRoll(player) {
 
       // Format message: "Black rolled: Double 4s!" or "White rolled: 5, 3"
       const rollMessage = state.isDouble
-        ? 'Doubles!'  // or ${finalD1} if value of doubles needed
+        ? `Double ${finalD1}s!`
         : `${finalD1}, ${finalD2}`;
 
       logStatus(`${player} rolled: ${rollMessage}`);
