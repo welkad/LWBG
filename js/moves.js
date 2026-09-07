@@ -212,8 +212,15 @@ function findDiceSequenceForMove(fromIndex, toIndex, availableDice, player) {
 export function handlePointClick(pointIndex) {
   if (!state.hasRolled || state.currentRoll.length === 0) return;
 
+  const playerHasBarCheckers = state.bar[state.currentPlayer] > 0;
+
   // Deselect if clicking the same point again
   if (state.selectedPoint === pointIndex) {
+    // Do not allow de-selecting the BAR point
+    if (pointIndex === 'bar' && playerHasBarCheckers) {
+      logStatus("You must enter checkers from the BAR point first!", 2000);
+      return;
+    }
     state.selectedPoint = null;
     state.validMoves = [];
     logStatus("Selection cleared.");
@@ -224,6 +231,15 @@ export function handlePointClick(pointIndex) {
   // If piece selected and clicked point is valid target, execute the move
   if (state.selectedPoint !== null && state.validMoves.includes(pointIndex)) {
     executeMove(state.selectedPoint, pointIndex);
+    return;
+  }
+
+  // Do not de-select BAR point if clicking any other invalid target or point
+  if (playerHasBarCheckers) {
+    logStatus("You must enter checkers from the BAR point first!", 2000);
+    state.selectedPoint = 'bar';
+    state.validMoves = getValidMovesForPoint('bar');
+    renderBoard();
     return;
   }
 
