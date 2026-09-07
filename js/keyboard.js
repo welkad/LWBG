@@ -65,7 +65,7 @@ export function setupKeyboardListeners() {
 
         // Doubling cube prompt
         if (isCubeActive) {
-          const targetValue = state.cubeValue * 2;
+          const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
           resolveCubeOffer(choice === 'yes', targetValue);
           return;
         }
@@ -125,7 +125,7 @@ export function setupKeyboardListeners() {
       // RESIGN or QUIT
       case 'KeyQ':
         event.preventDefault();
-        if (!state.hasRolled && !state.isResignOffered && 
+        if (!state.hasRolled && !state.isResignOffered && !state.isCubeOffered &&
           state.gamePhase !== 'game_over' && state.gamePhase === 'turns') {
           state.isResignOffered = true;
           state.resignOfferedBy = state.currentPlayer;
