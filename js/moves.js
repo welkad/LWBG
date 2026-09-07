@@ -293,7 +293,7 @@ export function handlePointClick(pointIndex) {
     // Remove selection if player clicked empty point, opponent checker, or invalid area
     state.selectedPoint = null;
     state.validMoves = [];
-    logStatus("Selection cleared.", 100);
+    logStatus("Selection cleared.", -1);  // Set timeout to -1 for console only message
   }
 
   // Apply .selected and .valid-target classes to DOM
