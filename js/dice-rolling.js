@@ -1,7 +1,7 @@
 // js/dice-rolling.js
 import { state } from './state.js';
 import { logStatus } from './ui.js';
-import { updatePointLabels } from './board.js';
+import { renderBoard, updatePointLabels } from './board.js';
 import { renderDiceUI, setDieValue, renderWinnerOpeningDice } from './dice-renderer.js';
 import { updateCubePositionUI } from './doubling-cube.js';
 import { autoSelectBarIfRequired } from './moves.js';
@@ -91,6 +91,7 @@ function evaluateOpeningRoll() {
     state.gamePhase = "turns";
     state.hasRolled = true;
 
+    renderBoard();  // Activate turn listeners and classes
     renderDiceUI();
     updatePointLabels(state.currentPlayer);
     // Display the opening move dice on the  winning player's board zone
@@ -106,6 +107,7 @@ function evaluateOpeningRoll() {
     state.gamePhase = "turns";
     state.hasRolled = true;
 
+    renderBoard();  // Activate turn listeners and classes
     renderDiceUI();
     updatePointLabels(state.currentPlayer);
     // Display the opening move dice on the winning player's board zone

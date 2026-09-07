@@ -258,12 +258,6 @@ export function handlePointClick(pointIndex) {
 
   // Allow selecting only own pieces
   if (pointOwner === state.currentPlayer && pointCount > 0) {
-    // Prevent selecting any points on the board if player has checkers on the BAR
-    if (state.bar[state.currentPlayer] > 0 && pointIndex !== 'bar') {
-      logStatus("You must enter checkers from the BAR point first!", 2000);
-      return;
-    }
-
     // Calculate potential destinations for this point
     const moves = getValidMovesForPoint(pointIndex);
 
@@ -295,6 +289,11 @@ export function handlePointClick(pointIndex) {
     // Log move options to console only
     console.log(`Point selected ${pointIndex === 'bar'
       ? 'BAR' : pointIndex + 1}. Valid moves: [ ${ formattedMoves } ]`);
+  } else {
+    // Remove selection if player clicked empty point, opponent checker, or invalid area
+    state.selectedPoint = null;
+    state.validMoves = [];
+    logStatus("Selection cleared.", 100);
   }
 
   // Apply .selected and .valid-target classes to DOM
