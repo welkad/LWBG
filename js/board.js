@@ -23,8 +23,12 @@ export function renderBoard() {
     for (let i = 5; i >= 0; i--) bottomRight.appendChild(createPointDOM(i));
 
     // Render bar sections
-    renderBar('white');
     renderBar('black');
+    renderBar('white');    
+
+    // Render home/bear-off tray sections
+    renderBearOff('black');
+    renderBearOff('white');
 
     // Update PIP count and Scores in the header
     updateScoreBoardUI();
@@ -168,6 +172,44 @@ function renderBar(player) {
             handlePointClick('bar');
         }
     };
+}
+
+// Show borne-off checkers and enable bear-off targets
+function renderBearOff(player) {
+  // Map players to their respective HTML pocket elements
+  const pocketId = player === 'black' ? 'home-bottom-pocket' : 'home-top-pocket';
+  const bearOffEl = document.getElementById(`off-${pocketId}`);
+  if (!bearOffEl) return;
+
+  bearOffEl.innerHTML = '';
+
+  const isCurrentPlayer = state.currentPlayer === player;
+  const isValidTarget = isCurrentPlayer && state.validMoves 
+    && state.validMoves.includes('off');
+  
+  // Highlight as valid target when 'off' is a legal move
+  if (isValidTarget) {
+    bearOffEl.classList.add('valid-target', 'clickable');
+  } else {
+    bearOffEl.classList.remove('valid-target', 'clickable');
+  }
+
+  const count = state.borneOff[player] || 0;
+  const colorClass = player = 'black' ? 'black-piece' : 'white-piece';
+
+  for (let i = 0; i < count; i++) {
+    const checker = document.createElement('div');
+    checker.className = `checker ${colorClass}`;
+    bearOffEl.appendChild(checker);
+  }
+
+  // Handle bear-off target click
+  bearOffEl.onClick = () => {
+    if (isCurrentPlayer && state.validMoves 
+      && state.validMoves.includes('off')) {
+        handlePointClick('off');
+      }
+  }
 }
 
 /**
