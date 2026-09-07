@@ -363,7 +363,7 @@ function logHitSummary(player, hits) {
     const lastPoint = pointNumbers[pointNumbers.length - 1];
     pointsString = `${initialPoints} and ${lastPoint} points`;
   } 
-  logStatus(`${player} hit ${opponent}'s ${plural} on the ${pointsString}!`, 3000);
+  logStatus(`${player} hit ${opponent}'s ${plural} on the ${pointsString}!`, 2000);
 }
 
 /** 

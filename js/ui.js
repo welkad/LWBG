@@ -45,9 +45,7 @@ export function logStatus(message, timeout = 0) {
     console.log(`${formattedMessage} [${origin}]`);
 
     // Console-only message: Skip status bar display if timeout is explicitly -1
-    if (timeout === -1) {
-      return;
-    }
+    if (timeout === -1) return;
 
     // Temporary/interrupting message with a specified duration
     if (timeout > 0) {
