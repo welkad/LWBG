@@ -196,10 +196,26 @@ function renderBearOff(player) {
 
   const count = state.borneOff[player] || 0;
   const colorClass = player === 'black' ? 'black-piece' : 'white-piece';
+  const isTop = player === 'white'; // Top pocket stacks downward
 
   for (let i = 0; i < count; i++) {
     const checker = document.createElement('div');
     checker.className = `checker ${colorClass}`;
+
+    // Overlap offset for 6 or more checkers
+    if (i >= 5) {
+      const overflowIndex = i - 5;
+      const rowOffset = overflowIndex * 24; // Piece stacking offset
+
+      checker.classList.add('stacked');
+      if (isTop) {
+        checker.style.top = `${rowOffset}px`;
+      } else {
+        checker.style.bottom = `${rowOffset}px`;
+      }
+      checker.style.zIndex = 10 + i;
+    }
+
     bearOffEl.appendChild(checker);
   }
 

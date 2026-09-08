@@ -39,54 +39,86 @@
         inset 0 3px 4px rgba(255,255,255,0.15);
 }
 
-/* Bear-Off Home Bar Wrapper */
+/* =======================================
+    BEAR OFF HOME POCKETS
+   ======================================= */
+
+/* Bear-Off Home Bar Wrapper Container */
 #home-bar {
-    justify-content: space-between;
-    padding: 2px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes top pocket UP and bottom pocket DOWN */
+    height: 100%;                  /* Fills full vertical height of playing field */
+    padding: 0;
+    box-sizing: border-box;
 }
 
 /* Bear-Off Recessed Wood Pockets */
 .bear-off-pocket {
     width: 32px;
-    height: 180px;
+    height: 190px;                 /* Matches #bar-black / #bar-white 190px height */
     background: #2d2016;
     border-radius: 4px;
     box-shadow: inset 2px 2px 5px rgba(0,0,0,0.6), 1px 1px 1px rgba(255,255,255,0.05);
     display: flex;
-    align-items: center;
     box-sizing: border-box;
-    padding: 4px 0;
-    gap: 2px; Uniform spacing between tiles
+    padding: 0;
+    position: relative;
+    overflow: hidden;
 }
 
+/* Top Pocket (White): Pin first checker flush to top frame edge */
 .top-pocket {
     flex-direction: column;
     justify-content: flex-start;
+    align-items: center;
 }
 
+/* Bottom Pocket (Black): Pin first checker flush to bottom frame edge */
 .bottom-pocket {
     flex-direction: column-reverse;
     justify-content: flex-start;
+    align-items: center;
 }
 
-/* Sideways Flat Tile Checkers for Bear-Off Pockets */
+/* Match exact 32px sizing of Bar checkers */
 .bear-off-pocket .checker {
-    width: 26px;             /* Fits neatly inside the 32px pocket width */
-    height: 9px;             /* Slim height lets 15 checkers fit without shrinking */
-    min-height: 9px;         /* Prevents aspect ratio distortion */
-    border-radius: 2px;      /* Flat bar look instead of circular */
-    flex-shrink: 0;          /* Disables flexbox squishing */
-    margin: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    z-index: 2;
 }
 
-/* Lighting adjustments for flat tiles */
-.bear-off-pocket .white-piece {
-    box-shadow: inset 0 -1px 2px rgba(0,0,0,0.2);
+/* Match negative overlap spacing used on the Bar (-4px) */
+.top-pocket .checker + .checker {
+    margin-top: -4px;
 }
 
-.bear-off-pocket .black-piece {
-    box-shadow: inset 0 1px 2px rgba(255,255,255,0.15);
+.bottom-pocket .checker + .checker {
+    margin-bottom: -4px;
 }
+
+/* Spacing from outer wooden trim edge */
+.top-pocket .checker:first-child {
+    margin-top: 2px;
+}
+
+.bottom-pocket .checker:first-child {
+    margin-bottom: 2px;
+}
+
+/* Absolute positioning alignment for 6+ overflow checkers */
+.top-pocket .checker.stacked,
+.bottom-pocket .checker.stacked {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* ===============================
+    BAR-POINTS
+   ================================== */
 
 #bar-black {
     width: 100%;
