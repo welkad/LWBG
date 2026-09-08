@@ -194,7 +194,7 @@ export function handleGameEnd(winner, resigningPlayer = null) {
     winMessage = `${winner} bore off all checkers and wins ${message}!`;
   }
 
-  logStatus(winMessage, 2000);  // log initial victory message
+  logStatus(winMessage, 5000);  // log initial victory message
 
   // Update UI components
   renderBoard();            // Ensure entire DOM enters game_over state
