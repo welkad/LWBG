@@ -16,8 +16,8 @@ export const state = {
     borneOff: { white: 0, black: 0 }, // Checkers safely borne off
     scores: { white: 0, black: 0 },   // How many games won
     selectedPoint: null,              // Point index (0-23) or 'bar'
-    validMoves: [],                   // Target indices (0-23 or 'off') for selected pieces
-    moveHistory:[],                   // Holds snapshots of boardState, bar, and currentRoll
+    validMoves: [],                   // Target indices (0-23 or 'off') for checkers
+    moveHistory:[],                   // Holds snapshots of boardState, bar, currentRoll
 
     cubeValue: 1,                     // Default starting multiplier
     cubeOwner: 'center',              // 'center', 'white', of 'black'
@@ -173,6 +173,9 @@ export function handleGameEnd(winner, resigningPlayer = null) {
 
   // Lock game state and reset flags
   state.gamePhase = 'game_over';
+  state.selectedPoint = null; // Clear active selection highlight
+  state.validMoves = [];      // Clear target destination highlight
+
   state.losingPlayer = resigningPlayer || (winner === 'black' ? 'white' : 'black');
   state.isResignOffered = false;
   state.resignOfferedBy = null;
