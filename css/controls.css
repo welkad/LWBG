@@ -165,7 +165,7 @@ body.game-over-phase .doubling-cube {
     color: #ffffff;
 }
 
-/* High-specificity parent hover: Lifts ALL dice in unison without !important */
+/* High-specificity parent hover: Lifts ALL dice in unison */
 #white-dice-zone.player-dice-zone:hover .die,
 #black-dice-zone.player-dice-zone:hover .die {
     transform: translateY(-3px);
