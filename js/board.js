@@ -3,229 +3,215 @@ import { state, calculatePipCount } from './state.js';
 import { handlePointClick} from './moves.js';
 
 export function renderBoard() {
-    const topLeft = document.getElementById('top-left');
-    const topRight = document.getElementById('top-right');
-    const bottomLeft = document.getElementById('bottom-left');
-    const bottomRight = document.getElementById('bottom-right');
-    
-    topLeft.innerHTML = ''; 
-    topRight.innerHTML = '';
-    bottomLeft.innerHTML = ''; 
-    bottomRight.innerHTML = '';
+  const topLeft = document.getElementById('top-left');
+  const topRight = document.getElementById('top-right');
+  const bottomLeft = document.getElementById('bottom-left');
+  const bottomRight = document.getElementById('bottom-right');
+  
+  topLeft.innerHTML = ''; 
+  topRight.innerHTML = '';
+  bottomLeft.innerHTML = ''; 
+  bottomRight.innerHTML = '';
 
-    // Top Left: Points 12 to 17
-    for (let i = 12; i <= 17; i++) topLeft.appendChild(createPointDOM(i));    
-    // Top Right: Points 18 to 23
-    for (let i = 18; i <= 23; i++) topRight.appendChild(createPointDOM(i));    
-    // Bottom Left: Points 11 down to 6
-    for (let i = 11; i >= 6; i--) bottomLeft.appendChild(createPointDOM(i));    
-    // Bottom Right: Points 5 down to 0
-    for (let i = 5; i >= 0; i--) bottomRight.appendChild(createPointDOM(i));
+  // Top Left: Points 12 to 17
+  for (let i = 12; i <= 17; i++) topLeft.appendChild(createPointDOM(i));    
+  // Top Right: Points 18 to 23
+  for (let i = 18; i <= 23; i++) topRight.appendChild(createPointDOM(i));    
+  // Bottom Left: Points 11 down to 6
+  for (let i = 11; i >= 6; i--) bottomLeft.appendChild(createPointDOM(i));    
+  // Bottom Right: Points 5 down to 0
+  for (let i = 5; i >= 0; i--) bottomRight.appendChild(createPointDOM(i));
 
-    // Render bar sections
-    renderBar('black');
-    renderBar('white');    
+  // Render bar sections
+  renderBar('black');
+  renderBar('white');    
 
-    // Render home/bear-off tray sections
-    renderBearOff('black');
-    renderBearOff('white');
+  // Render home/bear-off tray sections
+  renderBearOff('black');
+  renderBearOff('white');
 
-    // Update PIP count and Scores in the header
-    updateScoreBoardUI();
+  // Update PIP count and Scores in the header
+  updateScoreBoardUI();
 }
 
 // Refresh scoreboard elements in DOM when invoking renderBoard()
 export function updateScoreBoardUI() {
-    const blackPipEl = document.getElementById('pip-black');
-    const whitePipEl = document.getElementById('pip-white');
-    const blackScoreEl = document.getElementById('score-black');
-    const whiteScoreEl = document.getElementById('score-white');
+  const blackPipEl = document.getElementById('pip-black');
+  const whitePipEl = document.getElementById('pip-white');
+  const blackScoreEl = document.getElementById('score-black');
+  const whiteScoreEl = document.getElementById('score-white');
 
-    if (blackPipEl) blackPipEl.textContent = calculatePipCount('black');
-    if (whitePipEl) whitePipEl.textContent = calculatePipCount('white');
-    if (blackScoreEl) blackScoreEl.textContent = state.scores.black;
-    if (whiteScoreEl) whiteScoreEl.textContent = state.scores.white;
+  if (blackPipEl) blackPipEl.textContent = calculatePipCount('black');
+  if (whitePipEl) whitePipEl.textContent = calculatePipCount('white');
+  if (blackScoreEl) blackScoreEl.textContent = state.scores.black;
+  if (whiteScoreEl) whiteScoreEl.textContent = state.scores.white;
 }
 
 // Update point and checker listeners
 function createPointDOM(index) {
-    const pointEl = document.createElement('div');
+  const pointEl = document.createElement('div');
 
-    // Global index 0, 2, 4... -> even | 1, 3, 5... -> odd
-    const pointColorClass = (index % 2 === 0) ? 'point-even' : 'point-odd';
-    pointEl.className = `point ${pointColorClass}`; // Board triangle color class
-    pointEl.dataset.index = index;
+  // Global index 0, 2, 4... -> even | 1, 3, 5... -> odd
+  const pointColorClass = (index % 2 === 0) ? 'point-even' : 'point-odd';
+  pointEl.className = `point ${pointColorClass}`; // Board triangle color class
+  pointEl.dataset.index = index;
 
-    // Adjust Z-Index so point stacks overflow on top of adjacent triangles
-    // Top row (12-23) & bottom row (11-0) layering order
-    pointEl.style.zIndex = index >= 12 ? (30 - index) : (index + 10);
+  // Adjust Z-Index so point stacks overflow on top of adjacent triangles
+  // Top row (12-23) & bottom row (11-0) layering order
+  pointEl.style.zIndex = index >= 12 ? (30 - index) : (index + 10);
 
-    const pointData = state.boardState[index];
-    const isOwner = pointData && pointData.player === state.currentPlayer && pointData.count > 0;
-    const isValidTarget = state.validMoves && state.validMoves.includes(index);
+  const pointData = state.boardState[index];
+  const isOwner = pointData && pointData.player === state.currentPlayer && pointData.count > 0;
+  const isValidTarget = state.validMoves && state.validMoves.includes(index);
 
-    // Only allow clickable cursor during turns, after rolling, and on valid pieces/targets
-    const isCickable = state.gamePhase === 'turns' && 
-                       state.hasRolled &&
-                       (isOwner || isValidTarget);
+  // Only allow clickable cursor during turns, after rolling, and on valid pieces/targets
+  const isCickable = state.gamePhase === 'turns' && 
+                      state.hasRolled &&
+                      (isOwner || isValidTarget);
 
-    if (isCickable) {
-      pointEl.classList.add('clickable');
-    }
+  if (isCickable) {
+    pointEl.classList.add('clickable');
+  }
 
-    // Apply selection and valid move target highlights
-    if (state.selectedPoint === index) {
-        pointEl.classList.add('selected');
-    }
-    if (state.validMoves && state.validMoves.includes(index)) {
-        pointEl.classList.add('valid-target');
-    }
+  // Apply selection and valid move target highlights
+  if (state.selectedPoint === index) {
+    pointEl.classList.add('selected');
+  }
+  if (state.validMoves && state.validMoves.includes(index)) {
+    pointEl.classList.add('valid-target');
+  }
+  
+  if (pointData && pointData.count > 0) {
+    // Checker piece color class
+    const pieceColorClass = pointData.player === 'white' ? 'white-piece' : 'black-piece';
+    const isTopRow = index >= 12; // Top points: 12-23, Bottom points: 0-11
     
-    if (pointData && pointData.count > 0) {
-        // Checker piece color class
-        const pieceColorClass = pointData.player === 'white' ? 'white-piece' : 'black-piece';
-        const isTopRow = index >= 12; // Top points: 12-23, Bottom points: 0-11
-        
-        for (let i = 0; i < pointData.count; i++) {
-          const checkerEl = document.createElement('div');
-          checkerEl.className = `checker ${pieceColorClass}`;
+    for (let i = 0; i < pointData.count; i++) {
+      const checkerEl = document.createElement('div');
+      checkerEl.className = `checker ${pieceColorClass}`;
 
-          // Mini-column overflow logic (up to 5 checkers per column)
-          if (i >= 5) {
-            const colIndex = Math.floor(i / 5); // Col 1 for pieces 5-9, Col 2 for pieces 10-14
-            const rowIndex = i % 5;             // Row height position (0 to 4) inside new column
+      // Mini-column overflow logic (up to 5 checkers per column)
+      if (i >= 5) {
+        const colIndex = Math.floor(i / 5); // Col 1 for pieces 5-9, Col 2 for pieces 10-14
+        const rowIndex = i % 5;             // Row height position (0 to 4) inside new column
 
-            // Horizontal shift: 12px right per extra column (tune as needed)
-            const offsetX = colIndex * 6;
+        // Horizontal shift: 12px right per extra column (tune as needed)
+        const offsetX = colIndex * 6;
 
-            // Staggered vertical base offset + standard spacing
-            const colStaggerY = colIndex * 10;  // up/down PX per column
-            const rowSpacingY = rowIndex * 36;   // overlap per checker
-            const totalOffsetY = colStaggerY + rowSpacingY;
+        // Staggered vertical base offset + standard spacing
+        const colStaggerY = colIndex * 10;  // up/down PX per column
+        const rowSpacingY = rowIndex * 36;   // overlap per checker
+        const totalOffsetY = colStaggerY + rowSpacingY;
 
-            checkerEl.classList.add('stacked');
-            checkerEl.style.transform = `translateX(calc(-50% + ${offsetX}px))`;
+        checkerEl.classList.add('stacked');
+        checkerEl.style.transform = `translateX(calc(-50% + ${offsetX}px))`;
 
-            if (isTopRow) {
-              // Top triangles: Shift down away from top board frame
-              checkerEl.style.top = `${totalOffsetY}px`;
-            } else {
-              // Bottom triangles: Shift up away from bottom board frame
-              checkerEl.style.bottom = `${totalOffsetY}px`;
-            }
-            // Keep layered  checkers above the base stack
-            checkerEl.style.zIndex = 10 + i;
-          }
-          pointEl.appendChild(checkerEl);
+        if (isTopRow) {
+          // Top triangles: Shift down away from top board frame
+          checkerEl.style.top = `${totalOffsetY}px`;
+        } else {
+          // Bottom triangles: Shift up away from bottom board frame
+          checkerEl.style.bottom = `${totalOffsetY}px`;
         }
+        // Keep layered  checkers above the base stack
+        checkerEl.style.zIndex = 10 + i;
+      }
+      pointEl.appendChild(checkerEl);
     }
-    // Direct event listener invoking move handling logic
-    pointEl.addEventListener('click', () => handlePointClick(index));
-    return pointEl;
+  }
+  // Direct event listener invoking move handling logic
+  pointEl.addEventListener('click', () => handlePointClick(index));
+  return pointEl;
+}
+
+/**
+ *  Shared renderer for vertical trays (bar & bear-off pockets) 
+ */
+function renderTrayCheckers(containerEl, count, colorClass, isTop) {
+  if (!containerEl) return;
+  containerEl.innerHTML = '';
+
+  for (let i = 0; i < count; i++) {
+    const checker = document.createElement('div');
+    checker.className = `checker ${colorClass}`;
+
+    // Apply stacking/staggering logic once for both Bar & Home Pockets
+    if (i >= 5) {
+      const colIndex = Math.floor(i / 5);
+      const rowIndex = i % 5;
+
+      const offsetX = colIndex * 4;       // Slight horizontal offset
+      const colStaggerY = colIndex * 8;   // Vertical shift per column
+      const rowSpacingY = rowIndex * 28;  // Overlap spacing
+      const totalOffsetY = colStaggerY + rowSpacingY;
+
+      checker.classList.add('stacked');
+      checker.style.transform = `translateX(calc(-50% + ${offsetX}px))`;
+
+      if (isTop) {
+        checker.style.top = `${totalOffsetY}px`;
+      } else {
+        checker.style.bottom = `${totalOffsetY}px`;
+      }
+      checker.style.zIndex = 10 + i;
+    }
+    containerEl.appendChild(checker);
+  }
 }
 
 // Show checkers on the BAR point
-function renderBar(player) {
-    const barEl = document.getElementById(`bar-${player}`);
-    if (!barEl) return;
+function renderBar() {
+  const blackBarEl = document.getElementById('black-bar');
+  const whiteBarEl = document.getElementById('white-bar');
+  const blackCount = state.bar.black || 0;
+  const whiteCount = state.bar.white || 0;
 
-    barEl.innerHTML = '';
+  // Top tray for Black player, bottom tray for White player
+  renderTrayCheckers(blackBarEl, blackCount|| 0, 'black-piece', true);
+  renderTrayCheckers(whiteBarEl, whiteCount || 0, 'white-piece', false);
 
-    // Highlight bar if selected
-    if (state.selectedPoint === 'bar' && state.currentPlayer === player) {
-        barEl.classList.add('selected');
-    } else {
-        barEl.classList.remove('selected');
-    }
-
-    const count = state.bar[player] || 0;
-    const colorClass = player === 'white' ? 'white-piece' : 'black-piece';
-    const isTop = player === 'black'; // Stack down from top or up from bottom
-
-    for (let i = 0; i < count; i++) {
-        const checker = document.createElement('div');
-        checker.className = `checker ${colorClass}`;
-
-        // Stacking logic for 6 or more checkers on bar point
-        if (i >= 5) {
-          const overflowIndex = i - 5;  // 0 for 6th, 1 for 7th, etc.
-          const rowOffset = overflowIndex * 24; // 24px vertical step for extra checkers
-
-          checker.classList.add('stacked');
-          
-          if (isTop) {
-            // Black bar: stack downward from top frame edge
-            checker.style.top = `${rowOffset}px`;
-          } else {
-            // White bar: stack upward from bottom frame edge
-            checker.style.bottom = `${rowOffset}px`;
-          }
-          // Layer overflow checkers above base stack
-          checker.style.zIndex = 10 + i;
-        }
-        // Append checkers to the BAR point (normally or stacked)
-        barEl.appendChild(checker);
-    }
-    // Allow clicking the active player's bar section
-    barEl.onclick = () => {
-        if (state.currentPlayer === player && state.bar[player] > 0) {
-            handlePointClick('bar');
-        }
-    };
+  // Attach interactivity states & click handlers for Bar pieces
+  if (blackBarEl) {
+    const isBlackActive = state.currentPlayer === 'black' && blackCount > 0;
+    blackBarEl.classList.toggle('clickable', isBlackActive);
+    blackBarEl.onclick = isBlackActive ? () => handleBarClick('black') : null;
+  }
+  if (whiteBarEl) {
+    const isWhiteActive = state.currentPlayer === 'white' && whiteCount > 0;
+    whiteBarEl.classList.toggle('clickable', isWhiteActive);
+    whiteBarEl.onclick = isWhiteActive ? () => handleBarClick('white') : null;
+  }
 }
 
 // Show borne-off checkers and enable bear-off targets
-function renderBearOff(player) {
-  // Map players to their respective HTML pocket elements
+export function renderBearOff(player) {
   const pocketId = player === 'black' ? 'home-bottom-pocket' : 'home-top-pocket';
   const bearOffEl = document.getElementById(pocketId);
   if (!bearOffEl) return;
 
-  bearOffEl.innerHTML = '';
+  const count = state.borneOff[player] || 0;
+  const colorClass = player === 'black' ? 'black-piece' : 'white-piece';
+  const isTop = player === 'white';
 
+  // Delegate rendering to shared function
+  renderTrayCheckers(bearOffEl, count, colorClass, isTop);
+
+  // Handle interactivity state for bearing off
   const isCurrentPlayer = state.currentPlayer === player;
-  const isValidTarget = isCurrentPlayer && state.validMoves 
-    && state.validMoves.includes('off');
+  const isValidTarget = isCurrentPlayer &&
+    state.validMoves && state.validMoves.includes('off');
   
-  // Highlight as valid target when 'off' is a legal move
   if (isValidTarget) {
     bearOffEl.classList.add('valid-target', 'clickable');
   } else {
     bearOffEl.classList.remove('valid-target', 'clickable');
   }
 
-  const count = state.borneOff[player] || 0;
-  const colorClass = player === 'black' ? 'black-piece' : 'white-piece';
-  const isTop = player === 'white'; // Top pocket stacks downward
-
-  for (let i = 0; i < count; i++) {
-    const checker = document.createElement('div');
-    checker.className = `checker ${colorClass}`;
-
-    // Overlap offset for 6 or more checkers
-    if (i >= 5) {
-      const overflowIndex = i - 5;
-      const rowOffset = overflowIndex * 24; // Piece stacking offset
-
-      checker.classList.add('stacked');
-      if (isTop) {
-        checker.style.top = `${rowOffset}px`;
-      } else {
-        checker.style.bottom = `${rowOffset}px`;
-      }
-      checker.style.zIndex = 10 + i;
-    }
-
-    bearOffEl.appendChild(checker);
-  }
-
-  // Handle bear-off target click
   bearOffEl.onclick = () => {
-    if (isCurrentPlayer && state.validMoves 
-      && state.validMoves.includes('off')) {
-        handlePointClick('off');
-      }
-  }
+    if (isCurrentPlayer && state.validMoves && state.validMoves.includes('off')) {
+      handlePointClick('off');
+    }
+  };
 }
 
 /**

@@ -40,144 +40,96 @@
 }
 
 /* =======================================
-    BEAR OFF HOME POCKETS
+    UNIFIED TRAYS FOR BAR & HOME POCKETS
    ======================================= */
 
-/* Bear-Off Home Bar Wrapper Container */
-#home-bar {
+/* Outer Tray Wrapper Containers */
+#home-bar,
+#bar {
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Pushes top pocket UP and bottom pocket DOWN */
-    height: 100%;                  /* Fills full vertical height of playing field */
+    justify-content: space-between;
+    height: 100%;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Bear-Off Recessed Wood Pockets */
-.bear-off-pocket {
+/* Base Tray Containers (Bar & Bear-off Pockets) */
+.bear-off-pocket,
+#bar-black,
+#bar-white {
     width: 32px;
-    height: 190px;                 /* Matches #bar-black / #bar-white 190px height */
-    background: #2d2016;
-    border-radius: 4px;
-    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.6), 1px 1px 1px rgba(255,255,255,0.05);
+    height: 190px;
     display: flex;
     box-sizing: border-box;
     padding: 0;
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* Allows staggered 6+ columns to render without clipping */
 }
 
-/* Top Pocket (White): Pin first checker flush to top frame edge */
-.top-pocket {
+/* Recessed Wood Pocket Styling */
+.bear-off-pocket {
+    background: #2d2016;
+    border-radius: 4px;
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.6), 1px 1px 1px rgba(255,255,255,0.05);
+}
+
+/* Top Trays (White Bar / White Pocket): Stack top-to-bottom */
+.top-pocket,
+#bar-black {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
 }
 
-/* Bottom Pocket (Black): Pin first checker flush to bottom frame edge */
-.bottom-pocket {
+/* Bottom Trays (Black Bar / Black Pocket): Stack bottom-to-top */
+.bottom-pocket,
+#bar-white {
     flex-direction: column-reverse;
     justify-content: flex-start;
     align-items: center;
 }
 
-/* Match exact 32px sizing of Bar checkers */
-.bear-off-pocket .checker {
+/* Unified 32px Tray Checker Sizing */
+.bear-off-pocket .checker,
+#bar-black .checker,
+#bar-white .checker {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     flex-shrink: 0;
-    z-index: 2;
+    z-index: 10;
+    cursor: pointer;
 }
 
-/* Match negative overlap spacing used on the Bar (-4px) */
-.top-pocket .checker + .checker {
+/* Negative overlap spacing for base 1-5 checkers */
+.top-pocket .checker + .checker,
+#bar-black .checker + .checker {
     margin-top: -4px;
 }
 
-.bottom-pocket .checker + .checker {
+.bottom-pocket .checker + .checker,
+#bar-white .checker + .checker {
     margin-bottom: -4px;
 }
 
-/* Spacing from outer wooden trim edge */
-.top-pocket .checker:first-child {
-    margin-top: 2px;
-}
-
-.bottom-pocket .checker:first-child {
-    margin-bottom: 2px;
-}
-
-/* Absolute positioning alignment for 6+ overflow checkers */
-.top-pocket .checker.stacked,
-.bottom-pocket .checker.stacked {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-/* ===============================
-    BAR-POINTS
-   ================================== */
-
-#bar-black {
-    width: 100%;
-    height: 190px;
-    display: flex;
-
-    flex-direction: column;
-    align-items: center;    
-    justify-content: flex-start;    
-
-    padding: 0;
-    box-sizing: border-box;
-    z-index: 5;
-    position: relative;
-}
-
-#bar-white {
-  width: 100%;
-  height: 190px;
-  display: flex;
-
-  flex-direction: column-reverse; /* Stack checkers upward from bottom */
-  align-items: center;
-  justify-content: flex-start;  /* Keep first checker pinned to bottom */
-
-  padding: 0;
-  box-sizing: border-box;
-  z-index: 5;
-  position: relative;
-}
-
-/* Bar Piece Sizing & Margins */
-#bar-white .checker,
-#bar-black .checker {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    z-index: 10;
-    cursor: pointer;
-    flex-shrink: 0; /* Prevent checkers from squishing */
-}
-
-/* Tighten stacking on Black bar (top) */
-#bar-black .checker + .checker {
-  margin-top: -4px;
-}
-
-/* Tighten stackin on White bar (botom) */
-#bar-white .checker + .checker {
-  margin-bottom: -4px;
-}
-
-/* Spacing from wooden board trim (outer frame edges) */
+/* Edge spacing from outer wooden frame */
+.top-pocket .checker:first-child,
 #bar-black .checker:first-child {
     margin-top: 2px;
 }
 
+.bottom-pocket .checker:first-child,
 #bar-white .checker:first-child {
     margin-bottom: 2px;
+}
+
+/* Absolute positioning base for 6+ staggered overflow checkers */
+.bear-off-pocket .checker.stacked,
+#bar-black .checker.stacked,
+#bar-white .checker.stacked {
+    position: absolute;
+    left: 50%;
 }
 
 /* ==========================================
