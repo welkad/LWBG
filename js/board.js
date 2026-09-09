@@ -142,7 +142,7 @@ function renderTrayCheckers(containerEl, count, colorClass, isTop) {
 
       const offsetX = colIndex * 4;       // Slight horizontal offset
       const colStaggerY = colIndex * 8;   // Vertical shift per column
-      const rowSpacingY = rowIndex * 28;  // Overlap spacing
+      const rowSpacingY = rowIndex * 32;  // Overlap spacing
       const totalOffsetY = colStaggerY + rowSpacingY;
 
       checker.classList.add('stacked');
@@ -161,8 +161,8 @@ function renderTrayCheckers(containerEl, count, colorClass, isTop) {
 
 // Show checkers on the BAR point
 function renderBar() {
-  const blackBarEl = document.getElementById('black-bar');
-  const whiteBarEl = document.getElementById('white-bar');
+  const blackBarEl = document.getElementById('bar-black');
+  const whiteBarEl = document.getElementById('bar-white');
   const blackCount = state.bar.black || 0;
   const whiteCount = state.bar.white || 0;
 
@@ -252,3 +252,20 @@ export function updatePointLabels(currentPlayer) {
         topRight.innerHTML = createSpans([6, 5, 4, 3, 2, 1]);
     }
 }
+
+// debugSetBearOff(); // Instantly loads black and white checkers in pockets
+window.debugSetBearOff = function(blackCount = 5, whiteCount = 5) {
+  state.borneOff.black = blackCount;
+  state.borneOff.white = whiteCount;
+  renderBearOff('black');
+  renderBearOff('white');
+  console.log(`Bear-off updated -> Black: ${blackCount}, White: ${whiteCount}`);
+};
+
+// debugSetBar(); // Instantly loads black and white checkers onto the Bar
+window.debugSetBar = function(blackCount = 3, whiteCount = 3) {
+  state.bar.black = blackCount;
+  state.bar.white = whiteCount;
+  renderBar();
+  console.log(`Bar updated -> Black: ${blackCount}, White: ${whiteCount}`);
+};

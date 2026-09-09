@@ -59,7 +59,7 @@
 #bar-black,
 #bar-white {
     width: 32px;
-    height: 190px;
+    height: 180px;
     display: flex;
     box-sizing: border-box;
     padding: 0;
@@ -74,7 +74,7 @@
     box-shadow: inset 2px 2px 5px rgba(0,0,0,0.6), 1px 1px 1px rgba(255,255,255,0.05);
 }
 
-/* Top Trays (White Bar / White Pocket): Stack top-to-bottom */
+/* Center Separation Padding for Top and Bottom Trays */
 .top-pocket,
 #bar-black {
     flex-direction: column;
@@ -82,7 +82,6 @@
     align-items: center;
 }
 
-/* Bottom Trays (Black Bar / Black Pocket): Stack bottom-to-top */
 .bottom-pocket,
 #bar-white {
     flex-direction: column-reverse;
@@ -102,18 +101,18 @@
     cursor: pointer;
 }
 
-/* Negative overlap spacing for base 1-5 checkers */
+/* Overlap spacing for base 1-5 checkers */
 .top-pocket .checker + .checker,
 #bar-black .checker + .checker {
-    margin-top: -4px;
+    margin-top: -2px;
 }
 
 .bottom-pocket .checker + .checker,
 #bar-white .checker + .checker {
-    margin-bottom: -4px;
+    margin-bottom: -2px;
 }
 
-/* Edge spacing from outer wooden frame */
+/* Edge spacing from pocket inner border */
 .top-pocket .checker:first-child,
 #bar-black .checker:first-child {
     margin-top: 2px;
