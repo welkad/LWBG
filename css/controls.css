@@ -116,6 +116,7 @@ body.game-over-phase .doubling-cube {
 /* ==========================================
    PLAYER DICE ZONES
    ========================================== */
+/* Base Player Dice Zone */
 .player-dice-zone {
     display: flex;
     justify-content: center;
@@ -125,23 +126,55 @@ body.game-over-phase .doubling-cube {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 100; /* Sit above board quadrants */
+    z-index: 100;
     cursor: pointer;
     pointer-events: auto;
     min-height: 40px;
 }
 
-.player-dice-zone:active .die {
-    transform: scale(0.95);
-}
-
-.player-dice-zone.swappable {
+/* Base Die styling with smooth transitions */
+.die {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    user-select: none;
+    box-sizing: border-box;
+    pointer-events: auto;
     cursor: pointer;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 -2px 2px rgba(0,0,0,0.1);
+
+    /* Single transition definition for smooth motion */
+    transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
-.player-dice-zone.swappable:hover .die {
-    transform: translateY(-2px);
-    transition: transform 0.15s ease;
+/* Standard Used Die state (no transform overrides) */
+.die.used {
+    background-color: #4a4a4a;
+    color: #d1d1d1;
+    opacity: 0.8;
+}
+
+.die.used:hover {
+    background-color: #d32f2f;
+    color: #ffffff;
+}
+
+/* High-specificity parent hover: Lifts ALL dice in unison without !important */
+#white-dice-zone.player-dice-zone:hover .die,
+#black-dice-zone.player-dice-zone:hover .die {
+    transform: translateY(-3px);
+}
+
+/* Active click state: Press effect applied to both dice simultaneously */
+#white-dice-zone.player-dice-zone:active .die,
+#black-dice-zone.player-dice-zone:active .die {
+    transform: translateY(-3px) scale(0.95);
 }
 
 /* ==========================================
