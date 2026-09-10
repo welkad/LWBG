@@ -8,23 +8,22 @@ export function renderBoard() {
   const bottomLeft = document.getElementById('bottom-left');
   const bottomRight = document.getElementById('bottom-right');
   
-  topLeft.innerHTML = ''; 
-  topRight.innerHTML = '';
-  bottomLeft.innerHTML = ''; 
-  bottomRight.innerHTML = '';
+  topLeft && (topLeft.innerHTML = ''); 
+  topRight && (topRight.innerHTML = '');
+  bottomLeft && (bottomLeft.innerHTML = '');
+  bottomRight && (bottomRight.innerHTML = '');
 
   // Top Left: Points 12 to 17
-  for (let i = 12; i <= 17; i++) topLeft.appendChild(createPointDOM(i));    
+  for (let i = 12; i <= 17; i++) topLeft?.appendChild(createPointDOM(i));    
   // Top Right: Points 18 to 23
-  for (let i = 18; i <= 23; i++) topRight.appendChild(createPointDOM(i));    
+  for (let i = 18; i <= 23; i++) topRight?.appendChild(createPointDOM(i));    
   // Bottom Left: Points 11 down to 6
-  for (let i = 11; i >= 6; i--) bottomLeft.appendChild(createPointDOM(i));    
+  for (let i = 11; i >= 6; i--) bottomLeft?.appendChild(createPointDOM(i));    
   // Bottom Right: Points 5 down to 0
-  for (let i = 5; i >= 0; i--) bottomRight.appendChild(createPointDOM(i));
+  for (let i = 5; i >= 0; i--) bottomRight?.appendChild(createPointDOM(i));
 
   // Render bar sections
-  renderBar('black');
-  renderBar('white');    
+  renderBar();
 
   // Render home/bear-off tray sections
   renderBearOff('black');
@@ -41,24 +40,27 @@ export function updateScoreBoardUI() {
   const blackScoreEl = document.getElementById('score-black');
   const whiteScoreEl = document.getElementById('score-white');
 
-  if (blackPipEl) blackPipEl.textContent = calculatePipCount('black');
-  if (whitePipEl) whitePipEl.textContent = calculatePipCount('white');
-  if (blackScoreEl) blackScoreEl.textContent = state.scores.black;
-  if (whiteScoreEl) whiteScoreEl.textContent = state.scores.white;
+  if (blackPipEl) blackPipEl.textContent = `${calculatePipCount('black')}`;
+  if (whitePipEl) whitePipEl.textContent = `${calculatePipCount('white')}`;
+  if (blackScoreEl) blackScoreEl.textContent = `${state.scores.black}`;
+  if (whiteScoreEl) whiteScoreEl.textContent = `${state.scores.white}`;
 }
 
 // Update point and checker listeners
+/**
+ * @param {number} index
+ */
 function createPointDOM(index) {
   const pointEl = document.createElement('div');
 
   // Global index 0, 2, 4... -> even | 1, 3, 5... -> odd
   const pointColorClass = (index % 2 === 0) ? 'point-even' : 'point-odd';
   pointEl.className = `point ${pointColorClass}`; // Board triangle color class
-  pointEl.dataset.index = index;
+  pointEl.dataset.index = String(index);
 
   // Adjust Z-Index so point stacks overflow on top of adjacent triangles
   // Top row (12-23) & bottom row (11-0) layering order
-  pointEl.style.zIndex = index >= 12 ? (30 - index) : (index + 10);
+  pointEl.style.zIndex = String(index >= 12 ? (30 - index) : (index + 10));
 
   const pointData = state.boardState[index];
   const isOwner = pointData && pointData.player === state.currentPlayer && pointData.count > 0;
@@ -114,7 +116,7 @@ function createPointDOM(index) {
           checkerEl.style.bottom = `${totalOffsetY}px`;
         }
         // Keep layered  checkers above the base stack
-        checkerEl.style.zIndex = 10 + i;
+        checkerEl.style.zIndex = String(10 + i);
       }
       pointEl.appendChild(checkerEl);
     }
@@ -126,6 +128,12 @@ function createPointDOM(index) {
 
 /**
  *  Shared renderer for vertical trays (bar & bear-off pockets) 
+ */
+/**
+ * @param {HTMLElement | null} containerEl
+ * @param {number} count
+ * @param {string} colorClass
+ * @param {boolean} isTop
  */
 function renderTrayCheckers(containerEl, count, colorClass, isTop) {
   if (!containerEl) return;
@@ -153,7 +161,7 @@ function renderTrayCheckers(containerEl, count, colorClass, isTop) {
       } else {
         checker.style.bottom = `${totalOffsetY}px`;
       }
-      checker.style.zIndex = 10 + i;
+      checker.style.zIndex = String(10 + i);
     }
     containerEl.appendChild(checker);
   }
@@ -174,16 +182,19 @@ function renderBar() {
   if (blackBarEl) {
     const isBlackActive = state.currentPlayer === 'black' && blackCount > 0;
     blackBarEl.classList.toggle('clickable', isBlackActive);
-    blackBarEl.onclick = isBlackActive ? () => handleBarClick('black') : null;
+    blackBarEl.onclick = isBlackActive ? () => handlePointClick('black') : null;
   }
   if (whiteBarEl) {
     const isWhiteActive = state.currentPlayer === 'white' && whiteCount > 0;
     whiteBarEl.classList.toggle('clickable', isWhiteActive);
-    whiteBarEl.onclick = isWhiteActive ? () => handleBarClick('white') : null;
+    whiteBarEl.onclick = isWhiteActive ? () => handlePointClick('white') : null;
   }
 }
 
 // Show borne-off checkers and enable bear-off targets
+/**
+ * @param {'black' | 'white'} player
+ */
 export function renderBearOff(player) {
   const pocketId = player === 'black' ? 'home-bottom-pocket' : 'home-top-pocket';
   const bearOffEl = document.getElementById(pocketId);
@@ -226,35 +237,36 @@ export function updatePointLabels(currentPlayer) {
 
     // Clear numbers if opening roll (no turn assigned yet)
     if (!currentPlayer || state.gamePhase === 'game_over') {
-        topLeft.innerHTML = '';
-        topRight.innerHTML = '';
-        bottomLeft.innerHTML = '';
-        bottomRight.innerHTML = '';
+        topLeft && (topLeft.innerHTML = '');
+        topRight && (topRight.innerHTML = '');
+        bottomLeft && (bottomLeft.innerHTML = '');
+        bottomRight && (bottomRight.innerHTML = '');
         return;
     }
 
     // Helper to build span HTML array
+    /** @param {Array<number | string>} arr */
     const createSpans = (arr) => arr.map(n => `<span>${n}</span>`).join('');
 
     if (currentPlayer === 'black') {  // Counter-clockwise
         // Black moves top-right (19-24) -> top-left (13-18) 
-        topRight.innerHTML = createSpans([19, 20, 21, 22, 23, 24]);
-        topLeft.innerHTML = createSpans([13, 14, 15, 16, 17, 18]);
+        topRight && (topRight.innerHTML = createSpans([19, 20, 21, 22, 23, 24]));
+        topLeft && (topLeft.innerHTML = createSpans([13, 14, 15, 16, 17, 18]));
         // Black moves bottom-left (12-7) -> bottom-right (6-1)
-        bottomLeft.innerHTML = createSpans([12, 11, 10, 9, 8, 7]);
-        bottomRight.innerHTML = createSpans([6, 5, 4, 3, 2, 1]);
+        bottomLeft && (bottomLeft.innerHTML = createSpans([12, 11, 10, 9, 8, 7]));
+        bottomRight && (bottomRight.innerHTML = createSpans([6, 5, 4, 3, 2, 1]));
     } else if (currentPlayer === 'white') {  // Clockwise
         // White moves bottom-right (19-24) -> bottom-left (13-18)
-        bottomRight.innerHTML = createSpans([19, 20, 21, 22, 23, 24]);
-        bottomLeft.innerHTML = createSpans([13, 14, 15, 16, 17, 18]);
+        bottomRight && (bottomRight.innerHTML = createSpans([19, 20, 21, 22, 23, 24]));
+        bottomLeft && (bottomLeft.innerHTML = createSpans([13, 14, 15, 16, 17, 18]));
         // White moves top-left (12-7) -> top-right (6-1)
-        topLeft.innerHTML = createSpans([12, 11, 10, 9, 8, 7]);
-        topRight.innerHTML = createSpans([6, 5, 4, 3, 2, 1]);
+        topLeft && (topLeft.innerHTML = createSpans([12, 11, 10, 9, 8, 7]));
+        topRight && (topRight.innerHTML = createSpans([6, 5, 4, 3, 2, 1]));
     }
 }
 
 // debugSetBearOff(); // Instantly loads black and white checkers in pockets
-window.debugSetBearOff = function(blackCount = 5, whiteCount = 5) {
+/** @type {any} */ (window).debugSetBearOff = function(blackCount = 5, whiteCount = 5) {
   state.borneOff.black = blackCount;
   state.borneOff.white = whiteCount;
   renderBearOff('black');
@@ -263,7 +275,7 @@ window.debugSetBearOff = function(blackCount = 5, whiteCount = 5) {
 };
 
 // debugSetBar(); // Instantly loads black and white checkers onto the Bar
-window.debugSetBar = function(blackCount = 3, whiteCount = 3) {
+/** @type {any} */ (window).debugSetBar = function(blackCount = 3, whiteCount = 3) {
   state.bar.black = blackCount;
   state.bar.white = whiteCount;
   renderBar();

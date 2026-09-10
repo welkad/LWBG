@@ -15,7 +15,8 @@ export const state = {
     bar: { white: 0, black: 0 },      // Checkers waiting on the bar
     borneOff: { white: 0, black: 0 }, // Checkers safely borne off
     scores: { white: 0, black: 0 },   // How many games won
-    selectedPoint: null,              // Point index (0-23) or 'bar'
+    selectedPoint: null,              // Point index (0-23) or 'bar'    
+    /** @type {(number | string)[]} */
     validMoves: [],                   // Target indices (0-23 or 'off') for checkers
     moveHistory:[],                   // Holds snapshots of boardState, bar, currentRoll
 
