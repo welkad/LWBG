@@ -227,7 +227,7 @@ export function renderBearOff(player) {
 
 /**
  * Updates or clears the border point numbers depending on game state and current player.
- * @param {string|null} currentPlayer - 'black', 'white', or null/undefined for opening roll.
+ * @param {PlayerColor} currentPlayer - 'black', 'white', or null/undefined for opening roll.
  */
 export function updatePointLabels(currentPlayer) {
     const topLeft = document.querySelector('.top-left-numbers');

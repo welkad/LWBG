@@ -6,6 +6,10 @@ import { updateLegendUI } from './ui.js';
 //  RENDER PIPS & TEXT CODES
 // ===============================
 
+/**
+ * @param {HTMLElement | null} element 
+ * @param {string | number | null} value 
+ */
 export function setDieValue(element, value) {
   if (!element) return;
 
@@ -14,7 +18,7 @@ export function setDieValue(element, value) {
 
   // If it's a valid die roll (1 through 6) render pips
   if (!isNaN(numValue) && numValue >= 1 && numValue <= 6) {
-    element.dataset.value = numValue;
+    element.dataset.value = String(numValue);
     element.textContent = ""; // Clear previous text content
     for (let i = 0; i < numValue; i++) {
       const pip = document.createElement("span");
@@ -25,7 +29,7 @@ export function setDieValue(element, value) {
     // Otherwise, render text code (e.g. "R" - roll, "U" - undo, "D" - done, etc.)
     element.removeAttribute("data-value");
     element.innerHTML = "";
-    element.textContent = value || "";
+    element.textContent = value != null ? String(value) : "";
   }
 }
 
@@ -33,7 +37,12 @@ export function setDieValue(element, value) {
 //  DOM HELPERS (module-scoped)
 // ====================================
 
-// Helper: get or create a die
+/** 
+ * Helper: get or create a die
+ * @param {'black' | 'white'} playerColor
+ * @param {number} index
+ * @returns {HTMLElement | null}
+ */
 function getOrCreateDie(playerColor, index) {
   const dieId = `${playerColor}-die-${index + 1}`;
   let dieEl = document.getElementById(dieId);
@@ -51,7 +60,11 @@ function getOrCreateDie(playerColor, index) {
   return dieEl;
 }
 
-// Helper: remove dice above requested count
+/**
+ * Helper: remove dice above requested count
+ * @param {'black' | 'white'} playerColor 
+ * @param {number} count 
+ */
 function removeExtraDice(playerColor, count) {
   const targetZone = document.getElementById(`${playerColor}-dice-zone`);
   if (!targetZone) return;
@@ -98,7 +111,9 @@ export function renderDiceUI() {
   // --- RESIGN OFFER PENDING STATE ---
   if (state.isResignOffered) {
     const resigningPlayer = state.resignOfferedBy;
-    renderChoiceDice(resigningPlayer, 'resign-confirm', 'resign-cancel');   
+    if (resigningPlayer) {
+      renderChoiceDice(resigningPlayer, 'resign-confirm', 'resign-cancel');
+    }
     return;
   }
 
@@ -120,9 +135,11 @@ export function renderDiceUI() {
 
   // Opening Roll Phase
   if (state.gamePhase === "opening_roll") {
-    ["white", "black"].forEach((playerColor) => {
+    /** @type {('black' | 'white')[]} */
+    const openingPlayers = ["white", "black"];
+    openingPlayers.forEach((playerColor) => {       
       const die1 = getOrCreateDie(playerColor, 0);
-      const die2 = getOrCreateDie(playerColor, 1);
+      const die2 = getOrCreateDie(playerColor, 1);      
 
       // Only one die is needed during opening roll
       if (die2) die2.style.display = "none";
@@ -179,7 +196,8 @@ export function renderDiceUI() {
   if (state.isDouble) {
     // Total individual dice consumed across snapshots
     const usedCount = state.moveHistory.reduce((total, snapshot) => {
-      return total + (snapshot.consumedDice ? snapshot.consumedDice.length : 1);
+      const consumed = /** @type {any} */ (snapshot).consumedDice;
+      return total + (consumed ? consumed.length : 1);
     }, 0);
 
     // When all 4 moves are finished -> show U U U D
@@ -266,7 +284,11 @@ export function renderDiceUI() {
 // ========================================
 // OPENING ROLL RESULT
 // ========================================
-
+/**
+ * @param {'black' | 'white'} winner 
+ * @param {number} higherVal 
+ * @param {number} lowerVal 
+ */
 export function renderWinnerOpeningDice(winner, higherVal, lowerVal) {
   const loser = winner === 'black' ? 'white' : 'black';
   
@@ -311,8 +333,11 @@ export function renderWinnerOpeningDice(winner, higherVal, lowerVal) {
 function renderChoiceDice(targetPlayers, yesAction = 'yes', noAction = 'no') {
   const players = Array.isArray(targetPlayers) ? targetPlayers : [targetPlayers];
 
+  /** @type {('black' | 'white')[]} */
+  const allPlayers = ['black', 'white'];
+
   // Configure visibility for both dice zones
-  ['black', 'white'].forEach(player => {
+  allPlayers.forEach(player => {
     const zone = document.getElementById(`${player}-dice-zone`);
     if (!zone) return;
 
