@@ -10,13 +10,13 @@ import { updateCubePositionUI } from './doubling-cube.js';
 import { logStatus, clearStatusQueue, updateLegendUI } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
 
+/** @type {GameState} */
 export const state = {
     boardState: Array(24).fill(null).map(() => ({ player: null, count: 0 })),
     bar: { white: 0, black: 0 },      // Checkers waiting on the bar
     borneOff: { white: 0, black: 0 }, // Checkers safely borne off
     scores: { white: 0, black: 0 },   // How many games won
     selectedPoint: null,              // Point index (0-23) or 'bar'    
-    /** @type {(number | string)[]} */
     validMoves: [],                   // Target indices (0-23 or 'off') for checkers
     moveHistory:[],                   // Holds snapshots of boardState, bar, currentRoll
 
@@ -83,7 +83,10 @@ export function initBoardState() {
     state.boardState[23] = { player: 'black', count: 2 }; // Point 24
 }
 
-// Call handleGameEnd function if player resigns
+/**
+ * Call handleGameEnd function if player resigns
+ * @param {PlayerColor} resigningPlayer
+ */
 export function handleResignation(resigningPlayer) {
   const winner = resigningPlayer === 'black' ? 'white' : 'black';
   handleGameEnd(winner, resigningPlayer);
@@ -138,6 +141,8 @@ export function switchTurn() {
  *  Calculate the total PIP count for a given player.
  *  White moves from index 0 -> 23 (bears off past 23).
  *  Black moves from index 23 -> 0 (bears off past 0).
+ *  @param {'black' | 'white'} player
+ *  @returns {number}
  */
 export function calculatePipCount(player) {
     let pips = 0;
