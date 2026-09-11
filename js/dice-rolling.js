@@ -6,11 +6,21 @@ import { renderDiceUI, setDieValue, renderWinnerOpeningDice } from './dice-rende
 import { updateCubePositionUI } from './doubling-cube.js';
 import { autoSelectBarIfRequired } from './moves.js';
 
+/**
+ * @typedef {Object} DieConfig
+ * @property {HTMLElement | null} element
+ * @property {number} finalValue
+ */
+
 // ==========================================
 // ROLL LOGIC & OPENING ROLL
 // ==========================================
 
-// Helper function for easing roll animation (slows down gradually)
+/**
+ * Helper function for easing roll animation (slows down gradually)
+ * @param {DieConfig[]} dieConfigs
+ * @param {Function} onComplete
+ */
 function animateDiceRoll(dieConfigs, onComplete) {
   let currentDelay = 40; // Initial fast tick speed (ms)
   const delayStep = 25; // Time added per tick
@@ -39,6 +49,9 @@ function animateDiceRoll(dieConfigs, onComplete) {
   tick(); // Start the recursive animation loop
 }
 
+/**
+ * @param {NonNullable<PlayerColor>} player
+ */
 export function handleOpeningRoll(player) {
   // Ignore click if player has already rolled or is currently rolling
   const die1El = document.getElementById(`${player}-die-1`);
@@ -72,7 +85,8 @@ export function handleOpeningRoll(player) {
       const whiteDie = document.getElementById("white-die-1");
       const blackDie = document.getElementById("black-die-1");
 
-      if (!whiteDie.dataset.animating && !blackDie.dataset.animating) {
+      if (whiteDie?.dataset.animating !== "true"
+          && blackDie?.dataset.animating !== "true") {
         evaluateOpeningRoll();
       }
     } else {
@@ -83,7 +97,9 @@ export function handleOpeningRoll(player) {
 }
 
 function evaluateOpeningRoll() {
-  const { white, black } = state.openingRolls;
+  const { black, white } = state.openingRolls;
+
+  if (black === null || white === null) return;
 
   if (white > black) {
     state.currentPlayer = "white";
@@ -127,6 +143,9 @@ function evaluateOpeningRoll() {
   }
 }
 
+/**
+ * @param {PlayerColor} player
+ */
 export function handleDiceRoll(player) {
   // If still in opening phase, route keypresses to handleOpeningRoll
   if (state.gamePhase !== 'turns') {
@@ -200,7 +219,10 @@ export function handleDiceRoll(player) {
   );
 }
 
-// Toggle die order for the current active roller
+/**
+ * Toggle die order for the current active roller
+ * @param {PlayerColor} player 
+ */
 export function toggleDiceOrder(player) {
     // Only allow swapping during regular turns, after rolling, and if not doubles
     if (
