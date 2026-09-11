@@ -4,8 +4,13 @@
 // js/types.js - Central JSDoc type definitions for VS Code checkJs static analysis
 
 /**
+ * Represents a definite player color.
+ * @typedef {'black' | 'white'} Player
+ */
+
+/**
  * Represents a player color or null if unassigned.
- * @typedef {'black' | 'white' | null} PlayerColor
+ * @typedef {Player | null} PlayerColor
  */
 
 /**

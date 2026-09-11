@@ -7,6 +7,7 @@ import { updateCubePositionUI } from './doubling-cube.js';
 import { autoSelectBarIfRequired } from './moves.js';
 
 /**
+ * @typedef {import('./types.js').PlayerColor} PlayerColor
  * @typedef {Object} DieConfig
  * @property {HTMLElement | null} element
  * @property {number} finalValue
@@ -50,7 +51,7 @@ function animateDiceRoll(dieConfigs, onComplete) {
 }
 
 /**
- * @param {NonNullable<PlayerColor>} player
+ * @param {PlayerColor} player
  */
 export function handleOpeningRoll(player) {
   // Ignore click if player has already rolled or is currently rolling
@@ -224,26 +225,26 @@ export function handleDiceRoll(player) {
  * @param {PlayerColor} player 
  */
 export function toggleDiceOrder(player) {
-    // Only allow swapping during regular turns, after rolling, and if not doubles
-    if (
-        state.gamePhase !== 'turns' ||
-        player !== state.currentPlayer ||
-        !state.hasRolled ||
-        state.currentRoll.length !== 2 ||
-        state.currentRoll[0] === state.currentRoll[1]
-    ) {
-        return;
-    }
+  // Only allow swapping during regular turns, after rolling, and if not doubles
+  if (
+    state.gamePhase !== 'turns' ||
+    player !== state.currentPlayer ||
+    !state.hasRolled ||
+    state.currentRoll.length !== 2 ||
+    state.currentRoll[0] === state.currentRoll[1]
+  ) {
+    return;
+  }
 
-    // Swap the values in state
-    state.currentRoll.reverse();
+  // Swap the values in state
+  state.currentRoll.reverse();
 
-    // Update DOM display
-    const die1El = document.getElementById(`${player}-die-1`);
-    const die2El = document.getElementById(`${player}-die-2`);
+  // Update DOM display
+  const die1El = document.getElementById(`${player}-die-1`);
+  const die2El = document.getElementById(`${player}-die-2`);
 
-    if (die1El && die2El) {
-        setDieValue(die1El, state.currentRoll[0]);
-        setDieValue(die2El, state.currentRoll[1]);
-    }
+  if (die1El && die2El) {
+    setDieValue(die1El, state.currentRoll[0]);
+    setDieValue(die2El, state.currentRoll[1]);
+  }
 }
