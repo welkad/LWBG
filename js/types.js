@@ -31,6 +31,7 @@
  * @property {PointData[]} boardState - Array of 24 points describing checker layout.
  * @property {{ white: number, black: number }} bar - Count of checkers on the bar per player.
  * @property {number[]} currentRoll - Remaining unused dice for the active turn.
+ * @property {number[]} [consumedDice] - Array of die values used/consumed during this move.
  */
 
 /**

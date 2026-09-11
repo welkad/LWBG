@@ -196,7 +196,7 @@ export function renderDiceUI() {
   if (state.isDouble) {
     // Total individual dice consumed across snapshots
     const usedCount = state.moveHistory.reduce((total, snapshot) => {
-      const consumed = /** @type {any} */ (snapshot).consumedDice;
+      const consumed = snapshot.consumedDice;
       return total + (consumed ? consumed.length : 1);
     }, 0);
 
