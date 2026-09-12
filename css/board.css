@@ -423,22 +423,19 @@ body {
 }
 
 /* ==========================================
-   HOME POCKET LAYOUT LOCK & OVERLAY
+   HOME POCKET LAYOUT & OVERLAY
    ========================================== */
 
-/* Prevent valid-target state from changing background/border of parent pocket container */
 .bear-off-pocket.valid-target {
-  background-color: #2d2016 !important; /* Keep original recessed wood background */
+  background-color: #2d2016 !important;
   box-shadow: inset 2px 2px 5px rgba(0,0,0,0.6), 1px 1px 1px rgba(255,255,255,0.05) !important;
   cursor: pointer;
 }
 
-/* Hide generic point target indicators (dot marker) on home pockets */
 .bear-off-pocket.valid-target::after {
   display: none !important;
 }
 
-/* Dedicated target overlay styling (absolutely positioned inside the locked 180px pocket) */
 .bear-off-target-overlay {
   position: absolute;
   left: 0;
@@ -450,16 +447,15 @@ body {
   box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
   pointer-events: none;
   z-index: 10;
+  transition: height 0.15s ease; /* Smooth expansion as checkers are added */
 }
 
-/* White (Top Right - home-top-pocket): Anchor to top, span 152px for 5 checkers */
+/* White (Top Right): Anchor to top edge */
 #home-top-pocket .bear-off-target-overlay {
   top: 0;
-  height: 152px;
 }
 
-/* Black (Bottom Right - home-bottom-pocket): Anchor to bottom, span 152px for 5 checkers */
+/* Black (Bottom Right): Anchor to bottom edge */
 #home-bottom-pocket .bear-off-target-overlay {
   bottom: 0;
-  height: 152px;
 }

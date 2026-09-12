@@ -199,7 +199,7 @@ function renderBar() {
 
 // Show borne-off checkers and enable bear-off targets
 /**
- * @param {'black' | 'white'} player
+ * @param {Player} player
  */
 export function renderBearOff(player) {
   const pocketId = player === 'black' ? 'home-bottom-pocket' : 'home-top-pocket';
@@ -230,6 +230,16 @@ export function renderBearOff(player) {
     // Inject dedicated target overlay element
     const overlay = document.createElement('div');
     overlay.className = 'bear-off-target-overlay';
+
+    // Three height steps
+    let overlayHeight = 160;
+    if (count >= 11) {
+      overlayHeight = 180;
+    } else if (count >= 6) {
+      overlayHeight = 170;
+    }
+    overlay.style.height = `${overlayHeight}px`;
+
     bearOffEl.appendChild(overlay);
   } else {
     bearOffEl.classList.remove('valid-target', 'clickable');
