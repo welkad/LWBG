@@ -181,11 +181,17 @@ function renderBar() {
   // Attach interactivity states & click handlers for Bar pieces
   if (blackBarEl) {
     const isBlackActive = state.currentPlayer === 'black' && blackCount > 0;
+    const isSelected = state.selectedPoint === 'bar' && state.currentPlayer === 'black';
+
+    blackBarEl.classList.toggle('selected', isSelected);
     blackBarEl.classList.toggle('clickable', isBlackActive);
     blackBarEl.onclick = isBlackActive ? () => handlePointClick('black') : null;
   }
   if (whiteBarEl) {
     const isWhiteActive = state.currentPlayer === 'white' && whiteCount > 0;
+    const isSelected = state.selectedPoint === 'bar' && state.currentPlayer === 'white';
+
+    whiteBarEl.classList.toggle('selected', isSelected);
     whiteBarEl.classList.toggle('clickable', isWhiteActive);
     whiteBarEl.onclick = isWhiteActive ? () => handlePointClick('white') : null;
   }

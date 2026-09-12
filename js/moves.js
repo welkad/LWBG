@@ -260,8 +260,22 @@ export function handlePointClick(pointIndex) {
     return;
   }
 
-  // Do not de-select BAR point if clicking any other invalid target or point
-  if (playerHasBarCheckers) {
+  // Determine ownership of clicked point
+  let pointOwner = null;
+  let pointCount = 0;
+
+  if (pointIndex === 'bar') {
+    pointOwner = state.currentPlayer;
+    pointCount = state.bar[player];
+  } else if (typeof pointIndex === 'number' || !isNaN(Number(pointIndex))) {
+    const pt = state.boardState[Number(pointIndex)];
+    pointOwner = pt.player;
+    pointCount = pt.count;
+  }
+
+  // Warn if player selects checker on board instead of BAR point
+  if (playerHasBarCheckers && pointIndex !=='bar'
+      && pointOwner === player && pointCount > 0) {
     logStatus("You must enter checkers from the BAR point first!", 2000);
     state.selectedPoint = 'bar';
     state.validMoves = getValidMovesForPoint('bar');
@@ -269,17 +283,12 @@ export function handlePointClick(pointIndex) {
     return;
   }
 
-  // Otherwise, determine ownership and select a new piece
-  let pointOwner = null;
-  let pointCount = 0;
-
-  if (pointIndex === 'bar') {
-    pointOwner = state.currentPlayer;
-    pointCount = state.bar[player];
-  } else {
-    const pt = state.boardState[Number(pointIndex)];
-    pointOwner = pt.player;
-    pointCount = pt.count;
+  // Otherwise, don't warn if player has bar checkers and clicks anywhere else
+  if (playerHasBarCheckers && pointIndex !=='bar') {
+    state.selectedPoint = 'bar';
+    state.validMoves = getValidMovesForPoint('bar');
+    renderBoard();
+    return;
   }
 
   // Allow selecting only own pieces

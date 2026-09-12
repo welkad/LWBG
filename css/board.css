@@ -324,15 +324,15 @@ body {
     position: relative;
 }
 
-/* Black/top bar: leave 10px gap at bottom */
+/* Black/top bar selection hightlight */
 #bar-black.selected::after {
     content: '';
     position: absolute;
 
-    left: 0;
-    right: 0;
+    left: -4px;   /* Shifted out slightly for more width */
+    right: -4px;  /* Shifted out slightly for more width */
     top: 0;
-    bottom: 10px;
+    bottom: 10px; /* Leave gap for cube */
 
     background-color: rgba(255, 235, 59, 0.28);
     border: 2px solid #ffeb3b;
@@ -343,14 +343,14 @@ body {
     z-index: 15;
 }
 
-/* White/bottom bar: leave 10px gap at top */
+/* White/bottom bar selection highlight */
 #bar-white.selected::after {
     content: '';
     position: absolute;
 
-    left: 0;
-    right: 0;
-    top: 10px;
+    left: -4px;   /* Shifted out slightly for more width */
+    right: -4px;  /* Shifted out slightly for more width */
+    top: 10px;    /* Leave gap for cube */
     bottom: 0;
 
     background-color: rgba(255, 235, 59, 0.28);
