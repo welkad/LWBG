@@ -255,7 +255,7 @@ export function handlePointClick(pointIndex) {
     }
     state.selectedPoint = null;
     state.validMoves = [];
-    logStatus("Selection cleared.");
+    logStatus("Selection cleared.", -1);
     renderBoard();
     return;
   }
