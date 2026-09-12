@@ -19,7 +19,8 @@ import { undoLastMove } from './moves.js';
 
 export function setupKeyboardListeners() {
   document.addEventListener('keydown', (event) => {
-    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+    const activeEl = document.activeElement;
+    if (activeEl && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName)) {
       return;
     }
 
