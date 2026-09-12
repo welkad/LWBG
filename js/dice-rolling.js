@@ -7,7 +7,6 @@ import { updateCubePositionUI } from './doubling-cube.js';
 import { autoSelectBarIfRequired } from './moves.js';
 
 /**
- * @param {PlayerColor} color
  * @typedef {Object} DieConfig
  * @property {HTMLElement | null} element
  * @property {number} finalValue

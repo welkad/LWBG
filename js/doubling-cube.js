@@ -5,6 +5,9 @@ import { renderDiceUI } from "./dice-renderer.js";
 
 const DISPLAY_TIME = 2000; // Temporary message duration
 
+/**
+ * @param {PlayerColor} player
+ */
 export function handleCubeClick(player) {
   // Disable cube if game is over or an offer is pending
   if (
@@ -72,6 +75,11 @@ export function handleCubeClick(player) {
 /**
  * Handles the opponent's accept or decline decision.
  */
+/**
+ * 
+ * @param {boolean} accepted 
+ * @param {number} targetValue 
+ */
 export function resolveCubeOffer(accepted, targetValue) {
   const offeringPlayer = state.cubeOfferedBy;
   const opponent = offeringPlayer === "black" ? "white" : "black";
@@ -130,7 +138,7 @@ export function updateCubePositionUI() {
   }
 
   // Display 64 when value is 1 (standard physical set display)
-  cubeEl.textContent = state.cubeValue === 1 ? 64 : state.cubeValue;
+  cubeEl.textContent = state.cubeValue === 1 ? '64' : `${state.cubeValue}`;
 
   // Set data attribute for CSS targeting
   cubeEl.setAttribute("data-owner", state.cubeOwner);
