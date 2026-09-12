@@ -157,6 +157,31 @@ export function getValidMovesForPoint(fromIndex) {
 }
 
 /**
+ * Checks if the current player has any valid moves anywhere on the board
+ * @returns {boolean}
+ */
+function hasAnyLegalMoves() {
+  const player = state.currentPlayer;
+  if (!player || state.currentRoll.length === 0) return false;
+
+  // If trapped on the bar, only check valid bar entry moves
+  if (state.bar[player] > 0) {
+    return getValidMovesForPoint('bar').length > 0;
+  }
+
+  // Check every point  on the board for valid moves
+  for (let i = 0; i <= 23; i++) {
+    if (state.boardState[i].player === player && state.boardState[i].count > 0) {
+      if (getValidMovesForPoint(i).length > 0) {
+        return true;  // Found a playable move!
+      }
+    }
+  }
+  // No legal moves remain on any point
+  return false; 
+}
+
+/**
  * Find sequence of individual die values required based on toIndex and fromIndex.
  * @param {number|string} fromIndex - Starting position (0-23 or 'bar')
  * @param {number|string} toIndex - Ending destination (0-23 or 'off')
@@ -494,6 +519,25 @@ export function executeMove(fromIndex, toIndex) {
   // Refresh remaining UI components
   renderDiceUI();
   updateScoreBoardUI(); // Refresh pip count immediately
+
+  // --- AUTOMATIC TURN END CHECK ---
+  // Check if player ran out of dice or has zero valid moves remaining
+  if (state.currentRoll.length === 0 || !hasAnyLegalMoves()) {
+    if (state.currentRoll.length > 0) {
+      logStatus('No legal moves availabe for remaining roll ' +
+        [state.currentRoll.join(', ')], 3000
+      );
+    }
+    // Reset selections and remaining dice, then pass turn
+    state.selectedPoint = null;
+    state.validMoves = [];
+    state.currentRoll = [];
+
+    // Brief timeout so player can see the message before turn switches
+    setTimeout(() => {
+      switchTurn();
+    }, 3000);
+  }
 }
 
 /**
