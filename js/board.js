@@ -213,14 +213,16 @@ export function renderBearOff(player) {
   // Delegate rendering to shared function
   renderTrayCheckers(bearOffEl, count, colorClass, isTop);
 
+  // Clean up any existing overlay element
+  const existingOverlay = bearOffEl.querySelector('.bear-off-target-overlay');
+  if (existingOverlay) {
+    existingOverlay.remove();
+  }
+
   // Handle interactivity state for bearing off
   const isCurrentPlayer = state.currentPlayer === player;
   const isValidTarget = isCurrentPlayer &&
     state.validMoves && state.validMoves.includes('off');
-
-  // Clean up any existing overlay element
-  const existingOverlay = bearOffEl.querySelector('.bear-off-target-overlay');
-  if (existingOverlay) existingOverlay.remove();
   
   if (isValidTarget) {
     bearOffEl.classList.add('valid-target', 'clickable');
