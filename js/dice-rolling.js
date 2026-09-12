@@ -7,7 +7,7 @@ import { updateCubePositionUI } from './doubling-cube.js';
 import { autoSelectBarIfRequired } from './moves.js';
 
 /**
- * @typedef {import('./types.js').PlayerColor} PlayerColor
+ * @param {PlayerColor} color
  * @typedef {Object} DieConfig
  * @property {HTMLElement | null} element
  * @property {number} finalValue
@@ -59,8 +59,9 @@ export function handleOpeningRoll(player) {
   if (!die1El) return;
 
   if (
-    state.openingRolls[player] !== null ||
-    die1El.dataset.animating === "true"
+    player &&
+    (state.openingRolls[player] !== null ||
+    die1El.dataset.animating === "true")
   ) {
     return;
   }
@@ -71,6 +72,7 @@ export function handleOpeningRoll(player) {
 
   // Pass the element and its intended final value
   animateDiceRoll([{ element: die1El, finalValue: finalVal }], () => {
+    if (!player) return;
     state.openingRolls[player] = finalVal;
     delete die1El.dataset.animating; // Clear animation flag
 

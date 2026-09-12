@@ -2,7 +2,8 @@
   "compilerOptions": {
     "checkJs": true,
     "target": "ES6",
-    "lib": ["dom", "ES2016"]
+    "lib": ["dom", "ES2016"]    
   },
+  "indlude": ["js/**/*"],
   "exclude": ["node_modules"]
 }
