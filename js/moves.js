@@ -14,6 +14,8 @@ const DIRECTIONS = {
  * Checks if all checkers of a given player are in their home board or borne off.
  * Black home board: indices 0-5
  * White home board: indices 18-23
+ * @param {Player} player 
+ * @returns {boolean}
  */
 export function canPlayerBearOff(player) {
   if (state.bar[player] > 0) return false;
@@ -32,6 +34,9 @@ export function canPlayerBearOff(player) {
 
 /**
  * Checks if a specific point-index is open for the current player to land on.
+ * @param {number} targetIndex
+ * @param {PlayerColor} player 
+ * @returns 
  */
 function isPointOpen(targetIndex, player) {
   if (targetIndex < 0 || targetIndex > 23) return false;
@@ -46,6 +51,9 @@ function isPointOpen(targetIndex, player) {
 
 /**
  * Helper: Check if on furthest active point in the home board.
+ * @param {number} fromIndex 
+ * @param {PlayerColor} player 
+ * @returns {boolean}
  */
 function isCheckerOnHighestPoint(fromIndex, player) {
   if (player === 'black') {
@@ -66,13 +74,12 @@ function isCheckerOnHighestPoint(fromIndex, player) {
 
 /**
  * Calculates valid destinations for a selected point or bar piece.
- * @param {number|string} fromIndex - Index (0-23) or 'bar'
+ * @param {number|string} fromIndex - Index (0-23) or 'bar' * 
  * @returns {Array<number>} Array of valid target indices
  */
 export function getValidMovesForPoint(fromIndex) {
-  if (!state.hasRolled || state.currentRoll.length === 0) return [];
-
   const player = state.currentPlayer;
+  if (!player || !state.hasRolled || state.currentRoll.length === 0) return [];  
   const dir = DIRECTIONS[player];
 
   // Rule: Must enter from bar first if checkers are hit
@@ -84,7 +91,12 @@ export function getValidMovesForPoint(fromIndex) {
   const availableDice = [...state.currentRoll]; // Unique die values available
   const isBearOffEligible = canPlayerBearOff(player);  // Check if bear-off possible
 
-  // Helper function to recursively traverse possible die paths
+  /**
+   * Helper function to recursively traverse possible die paths
+   * @param {number|string} currentIndex 
+   * @param {Array<number>} remainingDice 
+   * @returns 
+   */
   function findPaths(currentIndex, remainingDice) {
     if (remainingDice.length === 0) return;
 
@@ -98,7 +110,8 @@ export function getValidMovesForPoint(fromIndex) {
       if (currentIndex === 'bar') {
         nextIndex = player === 'white' ? dieValue - 1 : 24 - dieValue;
       } else {
-        nextIndex = currentIndex + (dieValue * dir);
+        // Convert currentIndex to a number for addition
+        nextIndex = Number(currentIndex) + (dieValue * dir);
       }
 
       // If the intermediate or final step is open, add it and explore other steps
@@ -125,7 +138,7 @@ export function getValidMovesForPoint(fromIndex) {
           validTargets.add('off');
         } else if (isOverShootBearOff) {
           // Can only bear-off with higher die if no checkers exist on higher point
-          const isHighestChecker = isCheckerOnHighestPoint(fromIndex, player);
+          const isHighestChecker = isCheckerOnHighestPoint(Number(fromIndex), player);
           if (isHighestChecker) {
             validTargets.add('off');
           }
@@ -142,18 +155,28 @@ export function getValidMovesForPoint(fromIndex) {
  * @param {number|string} fromIndex - Starting position (0-23 or 'bar')
  * @param {number|string} toIndex - Ending destination (0-23 or 'off')
  * @param {Array<number>} availableDice - Active roll values remaining in state
- * @param {string} player - Current player ('black' | 'white')
+ * @param {Player} player - Current player ('black' | 'white')
  * @returns {Array<number>|null} Ordered array of dice used or null if invalid.
  */
 function findDiceSequenceForMove(fromIndex, toIndex, availableDice, player) {
   const dir = DIRECTIONS[player];
   const isBearOffEligible = canPlayerBearOff(player);
 
+  /**
+   * Helper function to recursively search for a valid dice sequence.
+   * @param {number|string} currentIndex - Current index position or 'bar'
+   * @param {Array<number>} remainingDice - Remaining available dice values
+   * @param {Array<number>} path - Sequence of dice used so far
+   * @returns {Array<number>|null} Valid dice path sequence or null if search fails
+   */
   function search(currentIndex, remainingDice, path) {
     // Base condition: Check if current step matches the desired destination
     if (path.length > 0) {
       if (toIndex === 'off') {
-        if (currentIndex < 0 || currentIndex > 23) return path;
+        if (typeof currentIndex === 'number'
+          && (currentIndex < 0 || currentIndex > 23)) {
+          return path;
+        }
       } else if (currentIndex === toIndex) {
         return path;
       }
@@ -171,7 +194,7 @@ function findDiceSequenceForMove(fromIndex, toIndex, availableDice, player) {
       if (currentIndex === 'bar') {
         nextIndex = player === 'white' ? dieValue - 1 : 24 - dieValue;
       } else {
-        nextIndex = currentIndex + (dieValue * dir);
+        nextIndex = Number(currentIndex) + (dieValue * dir);
       }
 
       // Standard board move: Continue if intermediate point is open
@@ -188,7 +211,8 @@ function findDiceSequenceForMove(fromIndex, toIndex, availableDice, player) {
         const isOvershoot = (player === 'black' && nextIndex < -1)
           || (player === 'white' && nextIndex > 24);
         
-        if (isExact || (isOvershoot && isCheckerOnHighestPoint(currentIndex, player))) {
+        if (isExact || (isOvershoot 
+          && isCheckerOnHighestPoint(Number(currentIndex), player))) {
           return [...path, dieValue];
         }
         // If not bearing off directly, ensure interemediate point is open
@@ -210,9 +234,11 @@ function findDiceSequenceForMove(fromIndex, toIndex, availableDice, player) {
  * @param {number|string} pointIndex - 0-23 or 'bar'
  */
 export function handlePointClick(pointIndex) {
-  if (!state.hasRolled || state.currentRoll.length === 0) return;
+  const player = state.currentPlayer;
+  // Guard: ensure active player exists before proceeding or indexing state
+  if (!player || !state.hasRolled || state.currentRoll.length === 0) return;
 
-  const playerHasBarCheckers = state.bar[state.currentPlayer] > 0;
+  const playerHasBarCheckers = state.bar[player] > 0;
 
   // Deselect if clicking the same point again
   if (state.selectedPoint === pointIndex) {
@@ -249,9 +275,9 @@ export function handlePointClick(pointIndex) {
 
   if (pointIndex === 'bar') {
     pointOwner = state.currentPlayer;
-    pointCount = state.bar[state.currentPlayer];
+    pointCount = state.bar[player];
   } else {
-    const pt = state.boardState[pointIndex];
+    const pt = state.boardState[Number(pointIndex)];
     pointOwner = pt.player;
     pointCount = pt.count;
   }
@@ -276,7 +302,7 @@ export function handlePointClick(pointIndex) {
 
     // Extract valid point numbers, sort them smallest to largest, and handle 'off'
     const sortedMoves = state.validMoves
-      .map(idx => (idx === 'off' ? 'OFF' : idx + 1))
+      .map(idx => (idx === 'off' ? 'OFF' : Number(idx) + 1))
       .sort((a, b) => {
         if (a === 'OFF') return 1;  // Keep 'OFF' at the end of the list
         if (b === 'OFF') return -1;
@@ -288,7 +314,7 @@ export function handlePointClick(pointIndex) {
 
     // Log move options to console only
     console.log(`Point selected ${pointIndex === 'bar'
-      ? 'BAR' : pointIndex + 1}. Valid moves: [ ${ formattedMoves } ]`);
+      ? 'BAR' : Number(pointIndex) + 1}. Valid moves: [ ${ formattedMoves } ]`);
   } else {
     // Remove selection if player clicked empty point, opponent checker, or invalid area
     state.selectedPoint = null;
@@ -302,15 +328,19 @@ export function handlePointClick(pointIndex) {
 
 /**
  * Execute a single step, hitting any blots if present
+ * @param {number|string} fromIndex - Starting position (0-23 or 'bar')
+ * @param {number|string} toIndex - Ending destination (0-23 or 'off')
+ * @param {Player} player - Active player moving piece
+ * @param {Array<{opponent: Player, point: number}>|null} [hits] - Optional hit details
  */
 function applySingleStep (fromIndex, toIndex, player, hits) {
   // Remove checker from source (bar or point)
   if (fromIndex === 'bar') {
     state.bar[player]--;
   } else {
-    state.boardState[fromIndex].count--;
-    if (state.boardState[fromIndex].count === 0) {
-      state.boardState[fromIndex].player = null;
+    state.boardState[Number(fromIndex)].count--;
+    if (state.boardState[Number(fromIndex)].count === 0) {
+      state.boardState[Number(fromIndex)].player = null;
     }
   }
   // Place checker at target destination (bear-off or point)
@@ -318,18 +348,16 @@ function applySingleStep (fromIndex, toIndex, player, hits) {
     state.borneOff[player]++;
     logStatus(`${player} bore off a checker! (${state.borneOff[player]}/15)`);
   } else {
-    const targetPoint = state.boardState[toIndex];
+    const targetPoint = state.boardState[Number(toIndex)];
     // HIT LOGIC: If landing on an opponent's single checker (blot)
     if (targetPoint.player && targetPoint.player !== player 
         && targetPoint.count === 1) {
       const opponent = targetPoint.player;
       state.bar[opponent]++;  // Send opponent to bar
-
       // Collect 1-indexed point for formatted summary log
       if (hits) {
-        hits.push({ opponent, point: toIndex + 1 });
+        hits.push({ opponent, point: Number(toIndex) + 1 });
       }
-
       // logStatus(`${player} hit ${opponent}'s blot on the ${toIndex + 1} point!`);
       targetPoint.player = player;
       targetPoint.count = 1;
@@ -343,6 +371,9 @@ function applySingleStep (fromIndex, toIndex, player, hits) {
 
 /**
  * Helper to construct readable status for single or multiple hits
+ * @param {Player} player - Active player executing the hit
+ * @param {Array<{opponent: Player, point: number}>} hits - Details of hits made
+ * @returns 
  */
 function logHitSummary(player, hits) {
   if (!hits || hits.length === 0) return;
@@ -370,9 +401,13 @@ function logHitSummary(player, hits) {
  * Executes a checker move, handles hits, bear-offs, consumed dice,
  * updates board state and turn flow, including win checking. Refactored to ensure
  * all blots on intermediate points are hit as the checker moves along the board.
+ * @param {number|string} fromIndex - Starting point index (0-23 or 'bar')
+ * @param {number|string} toIndex - Target point index (0-23 or 'off')
  */
-export function executeMove(fromIndex, toIndex) {
+function executeMove(fromIndex, toIndex) {
   const player = state.currentPlayer;  
+  if (!player) return;  // Guard against null active player before proceeding
+
   const dir = DIRECTIONS[player];
 
   // Resolve exact sequence of individual dice needed for this move
@@ -384,6 +419,7 @@ export function executeMove(fromIndex, toIndex) {
   recordMoveSnapshot(dieSequence);
 
   let currentStepIndex = fromIndex;
+  /** @type {Array<{opponent: Player, point: number}>} */
   const hits = [];  // Array to aggregate hits during this move execution
 
   // Process each die step individually so intermediate points trigger hit logic
@@ -391,19 +427,20 @@ export function executeMove(fromIndex, toIndex) {
     let nextStepIndex;
     if (toIndex === 'off') {
       // Calculate remaining distance based on player direction
+      const stepNum = Number(currentStepIndex);
       const distanceToOff = dir === 1
-        ? 24 - currentStepIndex : currentStepIndex + 1;
+        ? 24 - stepNum : stepNum + 1;
       if (dieValue >= distanceToOff) {
         nextStepIndex = 'off';
       } else {
-        nextStepIndex = currentStepIndex + (dieValue * dir);
+        nextStepIndex = stepNum + (dieValue * dir);
       }
     } else {
       // Standard board step calculation
       if (currentStepIndex === 'bar') {
         nextStepIndex = player === 'white' ? dieValue - 1 : 24 - dieValue;
       } else {
-        nextStepIndex = currentStepIndex + (dieValue * dir);
+        nextStepIndex = Number(currentStepIndex) + (dieValue * dir);
       }
     }
     // Apply board state changes and hit detection for this specific step
@@ -451,6 +488,8 @@ export function executeMove(fromIndex, toIndex) {
  */
 export function autoSelectBarIfRequired() {
   const player = state.currentPlayer;
+  if (!player) return;
+
   const barCount = state.bar[player] ||  0;
 
   // Auto-select only if checkers exist on the bar and dice are available
@@ -483,6 +522,7 @@ export function autoSelectBarIfRequired() {
 
 /**
  * Save a pre-move state snapshot so each individual step can be reverted independently
+ * @param {number[]} consumedDice - Array of dice values consumed during the move
  */
 function recordMoveSnapshot(consumedDice) {
   state.moveHistory.push({    
@@ -505,6 +545,7 @@ export function undoLastMove() {
 
   // Pop only the most recent single-step snapshot
   const previousState = state.moveHistory.pop();
+  if (!previousState) return;
 
   // Restore state to what it was before single step made
   state.boardState = previousState.boardState;
