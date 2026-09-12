@@ -3,13 +3,20 @@
 // ============================================
 import { state } from './state.js';
 
+/** @type {string[]} */
 let messageQueue = [];
 let isDisplaying = false;
 let currentMessage = '';    // Track active message in status bar
+
+/** @type {ReturnType<typeof setTimeout> | null} */
 let temporaryMessageTimer = null;
 const DISPLAY_DELAY_MS = 1500;  // Delay in milliseconds
 
-// Helper function to capitalize 'white' or 'black'
+/**
+ * Helper function to capitalize 'white' or 'black'
+ * @param {string} message 
+ * @returns {string}
+ */
 function formatPlayerNames(message) {
     if (typeof message !== 'string') return message;
     // Match 'white' or 'black' as whole words (case insensitive)
@@ -18,6 +25,12 @@ function formatPlayerNames(message) {
     });
 }
 
+/**
+ * Log message to status bar and console
+ * @param {string} message
+ * @param {number} [timeout=0]
+ * @returns 
+ */
 export function logStatus(message, timeout = 0) {    
     const formattedMessage = formatPlayerNames(message);  // Capitalize player names
 
@@ -59,6 +72,11 @@ export function logStatus(message, timeout = 0) {
     }
 }
 
+/**
+ * @param {string} tempMessage 
+ * @param {number} duration 
+ * @returns 
+ */
 function showTemporaryStatus(tempMessage, duration) {
     const statusBar = document.getElementById('game-status-bar');
     if (!statusBar) return;
@@ -80,6 +98,9 @@ function showTemporaryStatus(tempMessage, duration) {
     }, duration);
 }
 
+/**
+ * @param {number} [delay=400]
+ */
 export function resetStatusToDefault(delay = 400) {
     // Leave last message on board if game is over (don't reset it)
     if (state.gamePhase === 'game_over') return;
@@ -113,7 +134,9 @@ function processQueue() {
     isDisplaying = true;
     // Grab first message and save as first persistent message
     const nextMessage = messageQueue.shift();
-    currentMessage = nextMessage;    
+    if (nextMessage) {
+      currentMessage = nextMessage;    
+    }
     // Update the DOM
     const statusBar = document.getElementById('game-status-bar');
     if (statusBar) {
