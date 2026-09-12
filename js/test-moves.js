@@ -8,6 +8,10 @@ export function runMoveTests() {
     let passed = 0;
     let total = 0;
 
+    /**
+     * @param {string} description
+     * @param {boolean} condition
+     */
     function assert(description, condition) {
         total++;
         if (condition) {

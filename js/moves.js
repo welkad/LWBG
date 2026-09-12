@@ -404,7 +404,7 @@ function logHitSummary(player, hits) {
  * @param {number|string} fromIndex - Starting point index (0-23 or 'bar')
  * @param {number|string} toIndex - Target point index (0-23 or 'off')
  */
-function executeMove(fromIndex, toIndex) {
+export function executeMove(fromIndex, toIndex) {
   const player = state.currentPlayer;  
   if (!player) return;  // Guard against null active player before proceeding
 
