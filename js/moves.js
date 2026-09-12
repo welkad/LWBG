@@ -57,14 +57,20 @@ function isPointOpen(targetIndex, player) {
  */
 function isCheckerOnHighestPoint(fromIndex, player) {
   if (player === 'black') {
-    for (let i = 23; i > fromIndex; i--) {
-      if (state.boardState[i].player === 'black') {
+    // Black moves from 23-0
+    // Home board is 5-0
+    // Check if Black has any checkers on fromIndex > 5 (or 6 point)
+    for (let i = 5; i > fromIndex; i--) {
+      if (state.boardState[i].player === 'black' && state.boardState[i].count > 0) {
         return false;
       }
     }
   } else {
+    // White moves from 0-23
+    // Home board is 18-23
+    // Check if White has any checkers on fromIndex < 18 (or 19 point)
     for (let i = 18; i < fromIndex; i++) {
-      if (state.boardState[i].player === 'white') {
+      if (state.boardState[i].player === 'white' && state.boardState[i].count > 0) {
         return false;
       }
     }

@@ -217,9 +217,18 @@ export function renderBearOff(player) {
   const isCurrentPlayer = state.currentPlayer === player;
   const isValidTarget = isCurrentPlayer &&
     state.validMoves && state.validMoves.includes('off');
+
+  // Clean up any existing overlay element
+  const existingOverlay = bearOffEl.querySelector('.bear-off-target-overlay');
+  if (existingOverlay) existingOverlay.remove();
   
   if (isValidTarget) {
     bearOffEl.classList.add('valid-target', 'clickable');
+
+    // Inject dedicated target overlay element
+    const overlay = document.createElement('div');
+    overlay.className = 'bear-off-target-overlay';
+    bearOffEl.appendChild(overlay);
   } else {
     bearOffEl.classList.remove('valid-target', 'clickable');
   }
@@ -275,9 +284,26 @@ export function updatePointLabels(currentPlayer) {
 /** @type {any} */ (window).debugSetBearOff = function(blackCount = 5, whiteCount = 5) {
   state.borneOff.black = blackCount;
   state.borneOff.white = whiteCount;
-  renderBearOff('black');
-  renderBearOff('white');
-  console.log(`Bear-off updated -> Black: ${blackCount}, White: ${whiteCount}`);
+
+  // Mock active game state
+  state.currentPlayer = state.currentPlayer || 'black';
+  state.hasRolled = true;
+  state.currentRoll = [6, 4];
+  state.selectedPoint = 5; // Mock selected point
+  state.validMoves = ['off'];
+
+  // Force re-render
+  if (typeof renderBoard === 'function') {
+    renderBoard();
+  }
+
+  // Force class fallback if re-render clears it
+  const playerPocket = document.getElementById(`bear-off-${state.currentPlayer}`);
+  if (playerPocket) {
+    playerPocket.classList.add('valid-target');
+  }
+
+  console.log(`Bear-off debug updated -> Black: ${blackCount}, White: ${whiteCount} (Active state set)`);
 };
 
 // debugSetBar(); // Instantly loads black and white checkers onto the Bar

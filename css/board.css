@@ -422,9 +422,9 @@ body {
   to { transform: translateX(-50%) scale(1.15); opacity: 1; }
 }
 
-// ==========================================================
-//  HOME POCKET STYLING
-// ==========================================================
+/* ==========================================
+   HOME POCKET LAYOUT LOCK & OVERLAY
+   ========================================== */
 
 /* Bear-off tray interaction highlights */
 .bear-off-pocket {
@@ -437,3 +437,15 @@ body {
   box-shadow: inset 0 0 0 2px #4caf50;
   cursor: pointer;
 }
+
+/* Black (Bottom Right Home Pocket): anchor highlight to the top edge */
+#bear-off-black.valid-target::after {
+  top: 0;
+  height: 150px; /* Adjust height to flush with the 5th bottom checker */
+}
+
+/* White (Top Right Home Pocket): anchor highlight to the bottom edge */
+#bear-off-white.valid-target::after {
+  bottom: 0;
+  height: 150px; /* Adjust height to flush with the 5th top checker */
+} 
