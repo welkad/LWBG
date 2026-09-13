@@ -127,6 +127,7 @@ export function switchTurn() {
     state.isResignOffered = false;
     state.resignOfferedBy = null;
 
+    clearStatusQueue(); // Cancel any queue delays from previous message
     logStatus(`Turn switched. It is now ${state.currentPlayer}'s turn.`);
 
     // Clear dice DOM elements, update status, and re-render board

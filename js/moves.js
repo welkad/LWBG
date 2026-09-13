@@ -1,8 +1,8 @@
 // js/moves.js
 import { state, handleGameEnd, switchTurn } from './state.js';
 import { renderBoard, updateScoreBoardUI } from './board.js';
+import { clearStatusQueue, logStatus } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
-import { logStatus } from './ui.js';
 
 // Direction vectors
 const DIRECTIONS = {
@@ -162,9 +162,8 @@ export function getValidMovesForPoint(fromIndex) {
  */
 function hasAnyLegalMoves() {
   const player = state.currentPlayer;
-  if (!player || !state.hasRolled || state.currentRoll.length === 0) {
-    return false;
-  }
+  if (!player || !state.hasRolled || !state.currentRoll 
+    || state.currentRoll.length === 0) return false;
 
   // If trapped on the bar, only check valid bar entry moves
   if (state.bar[player] > 0) {
@@ -528,20 +527,29 @@ export function executeMove(fromIndex, toIndex) {
     // Normal turn completion: all dice used        
     state.selectedPoint = null;
     state.validMoves = [];
-    switchTurn();
+    renderBoard();
+    clearStatusQueue(); // Clear any queued messages
+    logStatus("Turn complete. Press Undo to revert or Done to finish.")
   } else if (!hasAnyLegalMoves()) {
     // Turn stuck: remaining dice have no valid moves
+    clearStatusQueue(); // Cancel pending queue delays in ui.js
     logStatus('No legal moves availabe for remaining roll ' +
       [state.currentRoll.join(', ')], 3000
     );
-    state.selectedPoint = null;
-    state.validMoves = [];
-    state.currentRoll = [];
-
     // Brief timeout so player can see the message before turn switches
     setTimeout(() => {
+      // Keep state intact while message displays, then clear and switch
+      state.selectedPoint = null;
+      state.validMoves = [];
+      state.currentRoll = [];
       switchTurn();
     }, 3000);
+  } else {
+    // Move made but dice remain: update current message
+    clearStatusQueue();
+    const pipsMoved = dieSequence.reduce((sum, val) => sum +  val, 0);
+    logStatus(`Checker moved ${pipsMoved} ${pipsMoved === 1 ? 'pip' : 'pips'}. ` +
+      `Dice value remaining: [${state.currentRoll.join(', ')}].`);
   }
 }
 
@@ -619,6 +627,10 @@ export function undoLastMove() {
 
   state.selectedPoint = null;
   state.validMoves = [];
+
+  // Update UI banner on undo
+  clearStatusQueue(); // Reset ui.js queue
+  logStatus(`Last move undone. Remaining dice: [${state.currentRoll.join(', ')}]`);
 
   console.log("Last move undone.");
   renderBoard();
