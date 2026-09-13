@@ -17,7 +17,7 @@ const DIRECTIONS = {
  * @param {Player} player 
  * @returns {boolean}
  */
-export function canPlayerBearOff(player) {
+function canPlayerBearOff(player) {
   if (state.bar[player] > 0) return false;
 
   const outsideHomeRange = player === 'black'
@@ -83,7 +83,7 @@ function isCheckerOnHighestPoint(fromIndex, player) {
  * @param {number|string} fromIndex - Index (0-23) or 'bar' * 
  * @returns {Array<number>} Array of valid target indices
  */
-export function getValidMovesForPoint(fromIndex) {
+function getValidMovesForPoint(fromIndex) {
   const player = state.currentPlayer;
   if (!player || !state.hasRolled || state.currentRoll.length === 0) return [];  
   const dir = DIRECTIONS[player];
@@ -451,7 +451,7 @@ function logHitSummary(player, hits) {
  * @param {number|string} fromIndex - Starting point index (0-23 or 'bar')
  * @param {number|string} toIndex - Target point index (0-23 or 'off')
  */
-export function executeMove(fromIndex, toIndex) {
+function executeMove(fromIndex, toIndex) {
   const player = state.currentPlayer;  
   if (!player) return;  // Guard against null active player before proceeding
 
