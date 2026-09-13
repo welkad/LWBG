@@ -72,6 +72,7 @@ export function initBoardState() {
     state.resignOfferedBy = null;
     state.playAgainChoices = { black: null, white: null };
     state.awaitingPlayAgainPrompt = false;
+    state.isInputLocked = false;
 
     updateCubePositionUI(); // Update cube position AFTER state resets
 

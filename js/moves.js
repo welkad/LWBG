@@ -341,7 +341,7 @@ export function autoSelectBarIfRequired() {
       state.isInputLocked = true; // Lock input during 3s message window
 
       setTimeout(() => {
-        switchTurn();
+        switchTurn(); // Automatically resets isInputLocked = false
       }, 3000);
       return false; // Signal that no valid moves exist
     }
