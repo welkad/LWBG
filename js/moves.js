@@ -101,9 +101,9 @@ export function getValidMovesForPoint(fromIndex) {
    * Helper function to recursively traverse possible die paths
    * @param {number|string} currentIndex 
    * @param {Array<number>} remainingDice 
-   * @returns 
+   * @param {number} currentBarCount - Track remaining bar checkers in path sequence
    */
-  function findPaths(currentIndex, remainingDice) {
+  function findPaths(currentIndex, remainingDice, currentBarCount) {
     if (remainingDice.length === 0) return;
 
     // Use a Set of remaining dice values to avoid duplicate
@@ -122,7 +122,10 @@ export function getValidMovesForPoint(fromIndex) {
 
       // If the intermediate or final step is open, add it and explore other steps
       if (isPointOpen(nextIndex, player)) {
-        validTargets.add(nextIndex);
+        // Only add to valid target points reached directly from bar point
+        if (currentIndex === 'bar') {
+          validTargets.add(nextIndex);
+        }
 
         // Remove one instance of dieValue for subsequent step calculations
         const nextRemaining = [...remainingDice];
@@ -130,7 +133,20 @@ export function getValidMovesForPoint(fromIndex) {
 
         // Bar pieces must move onto the board first before other steps
         if (nextRemaining.length > 0 && nextIndex >= 0 && nextIndex <= 23) {
-          findPaths(nextIndex, nextRemaining);
+          if (currentIndex === 'bar') {
+            const remainingBar = currentBarCount - 1;
+
+            if (remainingBar > 0) {
+              // Checkers still remain on the bar
+              findPaths('bar', nextRemaining, remainingBar);
+            } else {
+              // Single checker on bar can continue moving
+              findPaths(nextIndex, nextRemaining, 0);
+            }
+          } else {
+            // Continuation from normal board point
+            findPaths(nextIndex, nextRemaining, 0);
+          }
         }
       }
       // Handle bear-off logic
@@ -152,7 +168,7 @@ export function getValidMovesForPoint(fromIndex) {
       }
     });
   }
-  findPaths(fromIndex, availableDice);
+  findPaths(fromIndex, availableDice, state.bar[player]);
   return Array.from(validTargets);
 }
 
