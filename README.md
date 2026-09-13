@@ -17,7 +17,8 @@ A lightweight, vanilla JavaScript implementation of Backgammon designed to run e
     ├── main.js              # Application entry point; initializes game state, board, dice UI, and event listeners
     ├── state.js             # Central game state, initial board setup, turn switching, and game-phase management
     ├── board.js             # Board creation, point rendering, checker placement, and board DOM updates
-    ├── moves.js             # Move validation, legal destination calculation, move execution, and undo history
+    ├── moves.js             # User interaction, move execution, hit handling, and undo history management
+    ├── rules.js             # Core rules, pathfinding recursive search, bear-off checks, and move validation logic
     │
     ├── dice.js              # Dice interaction controller; handles die clicks, turn UI, dice reset, and dice listeners
     ├── dice-rolling.js      # Dice rolling logic, opening rolls, animated rolling, and generation of roll values

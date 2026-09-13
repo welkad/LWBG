@@ -17,7 +17,6 @@ from './rules.js';
 function recordMoveSnapshot(consumedDice) {
   state.moveHistory.push({    
     consumedDice: consumedDice,
-    // boardState: JSON.parse(JSON.stringify(state.boardState)),
     boardState: structuredClone(state.boardState),
     bar: { ...state.bar },
     borneOff: {...state.borneOff},
