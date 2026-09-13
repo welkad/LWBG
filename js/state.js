@@ -194,9 +194,9 @@ export function handleGameEnd(winner, resigningPlayer = null) {
 
   // Craft victory status message incorporating Gammon / Backgammon situations  
   let message = pointsWon > 1 ? `${pointsWon} points` : 'the game';  
-  (winType === 'Gammon' || winType == 'Backgammon') 
-    ? message = `${winType} and ${message}`
-    : message;
+  if (winType === 'Gammon' || winType === 'Backgammon') {
+    message = `a ${winType} and ${message}`;
+  }
   let winMessage = '';
   if (resigningPlayer) {
     winMessage = `${resigningPlayer} resigned. ${winner} wins ${message}!`;
