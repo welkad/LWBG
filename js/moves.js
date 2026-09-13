@@ -122,10 +122,7 @@ export function getValidMovesForPoint(fromIndex) {
 
       // If the intermediate or final step is open, add it and explore other steps
       if (isPointOpen(nextIndex, player)) {
-        // Only add to valid target points reached directly from bar point
-        if (currentIndex === 'bar') {
-          validTargets.add(nextIndex);
-        }
+        validTargets.add(nextIndex);        
 
         // Remove one instance of dieValue for subsequent step calculations
         const nextRemaining = [...remainingDice];
@@ -133,18 +130,11 @@ export function getValidMovesForPoint(fromIndex) {
 
         // Bar pieces must move onto the board first before other steps
         if (nextRemaining.length > 0 && nextIndex >= 0 && nextIndex <= 23) {
-          if (currentIndex === 'bar') {
-            const remainingBar = currentBarCount - 1;
-
-            if (remainingBar > 0) {
-              // Checkers still remain on the bar
-              findPaths('bar', nextRemaining, remainingBar);
-            } else {
-              // Single checker on bar can continue moving
-              findPaths(nextIndex, nextRemaining, 0);
-            }
+          if (currentIndex === 'bar' && currentBarCount > 1) {   
+            // Checkers still remain on the bar
+            findPaths('bar', nextRemaining, currentBarCount - 1);
           } else {
-            // Continuation from normal board point
+            // Single checker on bar can continue moving
             findPaths(nextIndex, nextRemaining, 0);
           }
         }
@@ -617,6 +607,7 @@ function recordMoveSnapshot(consumedDice) {
 /**
  * Revert exactly one individual step taken during current turn
  */
+
 export function undoLastMove() {
   if (!state.moveHistory || state.moveHistory.length === 0) {
     logStatus("No moves to undo.", -1);
@@ -633,8 +624,15 @@ export function undoLastMove() {
   state.borneOff = previousState.borneOff;
   state.currentRoll = previousState.currentRoll;
 
-  state.selectedPoint = null;
-  state.validMoves = [];
+  // Restore auto-selection if any checkers on bar point
+  const player = state.currentPlayer;
+  if (player && state.bar[player] > 0) {
+    state.selectedPoint = 'bar';
+    state.validMoves = getValidMovesForPoint('bar');
+  } else {
+    state.selectedPoint = null;
+    state.validMoves = [];
+  }
 
   console.log("Last move undone.");
   renderBoard();
