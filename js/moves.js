@@ -162,7 +162,9 @@ export function getValidMovesForPoint(fromIndex) {
  */
 function hasAnyLegalMoves() {
   const player = state.currentPlayer;
-  if (!player || state.currentRoll.length === 0) return false;
+  if (!player || !state.hasRolled || state.currentRoll.length === 0) {
+    return false;
+  }
 
   // If trapped on the bar, only check valid bar entry moves
   if (state.bar[player] > 0) {
@@ -520,15 +522,18 @@ export function executeMove(fromIndex, toIndex) {
   renderDiceUI();
   updateScoreBoardUI(); // Refresh pip count immediately
 
-  // --- AUTOMATIC TURN END CHECK ---
+  // --- POST MOVE TURN END CHECK ---
   // Check if player ran out of dice or has zero valid moves remaining
-  if (state.currentRoll.length === 0 || !hasAnyLegalMoves()) {
-    if (state.currentRoll.length > 0) {
-      logStatus('No legal moves availabe for remaining roll ' +
-        [state.currentRoll.join(', ')], 3000
-      );
-    }
-    // Reset selections and remaining dice, then pass turn
+  if (state.currentRoll.length === 0) {
+    // Normal turn completion: all dice used        
+    state.selectedPoint = null;
+    state.validMoves = [];
+    switchTurn();
+  } else if (!hasAnyLegalMoves()) {
+    // Turn stuck: remaining dice have no valid moves
+    logStatus('No legal moves availabe for remaining roll ' +
+      [state.currentRoll.join(', ')], 3000
+    );
     state.selectedPoint = null;
     state.validMoves = [];
     state.currentRoll = [];
