@@ -528,8 +528,6 @@ export function executeMove(fromIndex, toIndex) {
     state.selectedPoint = null;
     state.validMoves = [];
     renderBoard();
-    clearStatusQueue(); // Clear any queued messages
-    logStatus("Turn complete. Press Undo to revert or Done to finish.")
   } else if (!hasAnyLegalMoves()) {
     // Turn stuck: remaining dice have no valid moves
     clearStatusQueue(); // Cancel pending queue delays in ui.js
@@ -544,12 +542,6 @@ export function executeMove(fromIndex, toIndex) {
       state.currentRoll = [];
       switchTurn();
     }, 3000);
-  } else {
-    // Move made but dice remain: update current message
-    clearStatusQueue();
-    const pipsMoved = dieSequence.reduce((sum, val) => sum +  val, 0);
-    logStatus(`Checker moved ${pipsMoved} ${pipsMoved === 1 ? 'pip' : 'pips'}. ` +
-      `Dice value remaining: [${state.currentRoll.join(', ')}].`);
   }
 }
 
@@ -611,7 +603,7 @@ function recordMoveSnapshot(consumedDice) {
  */
 export function undoLastMove() {
   if (!state.moveHistory || state.moveHistory.length === 0) {
-    logStatus("No moves to undo.");
+    logStatus("No moves to undo.", -1);
     return;
   }
 
@@ -627,10 +619,6 @@ export function undoLastMove() {
 
   state.selectedPoint = null;
   state.validMoves = [];
-
-  // Update UI banner on undo
-  clearStatusQueue(); // Reset ui.js queue
-  logStatus(`Last move undone. Remaining dice: [${state.currentRoll.join(', ')}]`);
 
   console.log("Last move undone.");
   renderBoard();
