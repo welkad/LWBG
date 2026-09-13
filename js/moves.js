@@ -191,6 +191,9 @@ function executeMove(fromIndex, toIndex) {
     logStatus('No legal moves availabe for remaining roll ' +
       [state.currentRoll.join(', ')], 3000
     );
+
+    state.isInputLocked = true; // Lock input during 3s window
+
     // Brief timeout so player can see the message before turn switches
     setTimeout(() => {
       // Keep state intact while message displays, then clear and switch
@@ -211,6 +214,8 @@ function executeMove(fromIndex, toIndex) {
  * @param {number|string} pointIndex - 0-23 or 'bar'
  */
 export function handlePointClick(pointIndex) {
+  if (state.isInputLocked) return;  // Prevent unwanted input
+
   const player = state.currentPlayer;
   // Guard: ensure active player exists before proceeding or indexing state
   if (!player || !state.hasRolled || state.currentRoll.length === 0) return;
@@ -333,6 +338,8 @@ export function autoSelectBarIfRequired() {
 
       // Clear remaining dice and automatically switch turn after a brief delay
       state.currentRoll = [];
+      state.isInputLocked = true; // Lock input during 3s message window
+
       setTimeout(() => {
         switchTurn();
       }, 3000);

@@ -20,7 +20,8 @@ import { undoLastMove } from './moves.js';
 export function setupKeyboardListeners() {
   document.addEventListener('keydown', (event) => {
     const activeEl = document.activeElement;
-    if (activeEl && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName)) {
+    if (activeEl && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName)
+      || state.isInputLocked) {
       return;
     }
 

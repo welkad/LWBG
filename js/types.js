@@ -67,6 +67,7 @@
  * @property {PlayerColor} activeRoller - Player currently executing die roll.
  * @property {boolean} isRolling - True while dice rolling animation is active.
  * @property {boolean} hasRolled - True if player rolled dice during current turn.
+ * @property {boolean} isInputLocked - Block user interaction during transition delays.
  */
 
 /**

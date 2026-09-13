@@ -30,8 +30,10 @@ export const state = {
     currentPlayer: null,              // Set dynamically by opening roll
     isResignOffered: false,           // Resignation state
     resignOfferedBy: null,            // Resigning player
-    playAgainChoices: { black: null, white: null }, // Track Y/N decision for each player
-    awaitingPlayAgainPrompt: false,                 // Delay displaying play again prompt
+    // Track Y/N decision for each player
+    playAgainChoices: { black: null, white: null }, 
+    awaitingPlayAgainPrompt: false,   // Delay displaying play again prompt
+    isInputLocked: false,             // Locking mechanism for player input
 
     openingRolls: { white: null, black: null },
     currentRoll: [],                  // e.g., [5, 3] or [4, 4, 4, 4]
@@ -127,6 +129,7 @@ export function switchTurn() {
     state.cubeOfferedBy = null;
     state.isResignOffered = false;
     state.resignOfferedBy = null;
+    state.isInputLocked = false;  // Allow players to make decisions again
 
     clearStatusQueue(); // Cancel any queue delays from previous message
     logStatus(`Turn switched. It is now ${state.currentPlayer}'s turn.`);

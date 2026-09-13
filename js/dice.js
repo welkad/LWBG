@@ -13,6 +13,8 @@ import { undoLastMove } from './moves.js';
  * @param {Event} [event]
  */
 export function handleDieClick(player, dieNumber, event) {
+  if (state.isInputLocked) return;
+
   // Prevent any clicks if the game has ended
   if (state.gamePhase === 'game_over') {
     handlePostGameDieClick(event, null, player);
