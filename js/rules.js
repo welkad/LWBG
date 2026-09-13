@@ -256,3 +256,50 @@ export function hasAnyLegalMoves() {
   }
   return false; // No legal moves remain on any point
 }
+
+/**
+ * Determine the win type, multiplier, and total points based on current board
+ * @param {'black'|'white'} winner
+ * @param {PlayerColor} [resigningPlayer = null]
+ * @returns {{ winType: string, pointsWon: number }}
+ */
+export function calculateGameOutcome(winner, resigningPlayer = null) {
+  const cube = state.cubeValue;
+  const loser = resigningPlayer || (winner === 'black' ? 'white' : 'black');
+  
+  const winnerBorneOff = state.borneOff[winner] || 0;
+  const loserBorneOff = state.borneOff[loser] || 0;
+
+  // Resignation before winner has borne off any checkers
+  if (resigningPlayer && winnerBorneOff === 0) {
+    return { winType: 'Single Win', pointsWon: cube };
+  }
+
+  // Single win: loser has borne off at least 1 checker
+  if (loserBorneOff > 0) {
+    return { winType: '', pointsWon: cube };
+  }
+
+  // Check if loser has checkers on bar or inside  winner's home board
+  const loserBarCount = state.bar[loser] || 0;
+
+  // Winner's home board indices: Black home (0-5), White home (18-23)
+  const winnerHomeRange = winner === 'black'
+    ? { start: 0, end: 5 }
+    : { start: 18, end: 23 };
+
+  let checkersInWinnerHome = 0;
+  for (let i = winnerHomeRange.start; i <= winnerHomeRange.end; i++) {
+    if (state.boardState[i].player === loser) {
+      checkersInWinnerHome += state.boardState[i].count;
+    }
+  }
+
+  // Backgammon (3x): 0 borne off by loser and checkers on bar or winner's home
+  if (loserBarCount > 0 || checkersInWinnerHome > 0) {
+    return { winType: 'Backgammon', pointsWon: cube * 3 };
+  }
+
+  // Gammon (2x): 0 borne off by loser but all checkers outside winnner's home
+  return { winType: 'Gammon', pointsWon: cube * 2 };
+}

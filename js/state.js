@@ -6,8 +6,9 @@
 
 import { updateTurnUI, refreshDiceForNewTurn } from './dice.js';
 import { renderBoard, updatePointLabels, updateScoreBoardUI } from './board.js';
-import { updateCubePositionUI } from './doubling-cube.js';
 import { logStatus, clearStatusQueue, updateLegendUI } from './ui.js';
+import { updateCubePositionUI } from './doubling-cube.js';
+import { calculateGameOutcome } from './rules.js';
 import { renderDiceUI } from './dice-renderer.js';
 
 /** @type {GameState} */
@@ -171,7 +172,7 @@ export function calculatePipCount(player) {
  */
 export function handleGameEnd(winner, resigningPlayer = null) {
   // Calculate points won (defaults to cube value <- expand for Gammon/Backgammon)
-  const pointsWon = state.cubeValue;
+  const { winType, pointsWon} = calculateGameOutcome(winner, resigningPlayer);
   state.scores[winner] += pointsWon;
 
   // Add phase class to body to scope CSS
@@ -191,9 +192,11 @@ export function handleGameEnd(winner, resigningPlayer = null) {
 
   clearStatusQueue(); // Clear any pending messages
 
-  // Craft victory status message
-  const cube = state.cubeValue;
-  const message = cube > 1 ? `${cube} points` : 'the game';
+  // Craft victory status message incorporating Gammon / Backgammon situations  
+  let message = pointsWon > 1 ? `${pointsWon} points` : 'the game';  
+  (winType === 'Gammon' || winType == 'Backgammon') 
+    ? message = `${winType} and ${message}`
+    : message;
   let winMessage = '';
   if (resigningPlayer) {
     winMessage = `${resigningPlayer} resigned. ${winner} wins ${message}!`;
