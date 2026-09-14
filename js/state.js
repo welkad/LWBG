@@ -11,6 +11,8 @@ import { updateCubePositionUI } from './doubling-cube.js';
 import { calculateGameOutcome } from './rules.js';
 import { renderDiceUI } from './dice-renderer.js';
 
+const GAME_OVER_BANNER_DURATION_MS = 5000;  // Display victory message for 5s
+
 /** @type {GameState} */
 export const state = {
     boardState: Array(24).fill(null).map(() => ({ player: null, count: 0 })),
@@ -208,7 +210,7 @@ export function handleGameEnd(winner, resigningPlayer = null) {
     winMessage = `${winner} bore off all checkers and wins ${message}!`;
   }
 
-  logStatus(winMessage, 5000);  // log initial victory message
+  logStatus(winMessage, GAME_OVER_BANNER_DURATION_MS); // log initial victory message
 
   // Update UI components
   renderBoard();            // Ensure entire DOM enters game_over state
@@ -217,7 +219,7 @@ export function handleGameEnd(winner, resigningPlayer = null) {
   updateCubePositionUI();   // Visually disable doubling cube
   renderDiceUI();           // Trigger renderChoiceDice
 
-  // 2 second delay before prompting to play again
+  // 5 second delay before prompting to play again
   setTimeout(() => {
     if (state.playAgainChoices.black === 'no' || state.playAgainChoices.white === 'no') {
       return;  // Do not display play again prompt if either player declined.
@@ -230,5 +232,5 @@ export function handleGameEnd(winner, resigningPlayer = null) {
       " and White: " + state.scores.white + ". Play again?"
     );
     renderDiceUI(); // Display Y/N dice and update legend
-  }, 2000);  
+  }, GAME_OVER_BANNER_DURATION_MS);  // Wait until Victory message is finished
 }
