@@ -18,58 +18,61 @@ const DISPLAY_DELAY_MS = 1500;  // Delay in milliseconds
  * @returns {string}
  */
 function formatPlayerNames(message) {
-    if (typeof message !== 'string') return message;
-    // Match 'white' or 'black' as whole words (case insensitive)
-    return message.replace(/\b(white|black)\b/gi, (match) => {
-        return match.charAt(0).toUpperCase() + match.slice(1);
-    });
+  if (typeof message !== 'string') return message;
+  // Match 'white' or 'black' as whole words (case insensitive)
+  return message.replace(/\b(white|black)\b/gi, (match) => {
+    return match.charAt(0).toUpperCase() + match.slice(1);
+  });
 }
 
 /**
  * Log message to status bar and console
  * @param {string} message
  * @param {number} [timeout=0]
- * @returns 
  */
 export function logStatus(message, timeout = 0) {    
-    const formattedMessage = formatPlayerNames(message);  // Capitalize player names
+  const formattedMessage = formatPlayerNames(message);  // Capitalize player names
 
-    // Capture caller stack trace
-    const stack = new Error().stack;
-    let origin = 'unknown';
+  // Capture caller stack trace
+  const stack = new Error().stack;
+  let origin = 'unknown';
 
-    if (stack) {
-      const lines = stack.split('\n');
-      // Find first line in call stack that did not originate from ui.js
-      const callerLine = lines.find(line => {
-        return line.includes('.js') && !line.includes('ui.js')
-      });
+  if (stack) {
+    const lines = stack.split('\n');
+    // Find first line in call stack that did not originate from ui.js
+    const callerLine = lines.find(line => {
+      return line.includes('.js') && !line.includes('ui.js')
+    });
 
-      if (callerLine) {
-        // Extract filename.js:line:col
-        const match = callerLine.match(/([\w-]+\.js:\d+:\d+)/);
-        if (match) {
-          origin = match[1];
-        }
+    if (callerLine) {
+      // Extract filename.js:line:col
+      const match = callerLine.match(/([\w-]+\.js:\d+:\d+)/);
+      if (match) {
+        origin = match[1];
       }
     }
+  }
+  // Log message to developer console with call origin details
+  console.log(`${formattedMessage} [${origin}]`);
 
-    // Log message to developer console with call origin details
-    console.log(`${formattedMessage} [${origin}]`);
+  // Console-only message: Skip status bar display if timeout is explicitly -1
+  if (timeout === -1) return;
 
-    // Console-only message: Skip status bar display if timeout is explicitly -1
-    if (timeout === -1) return;
-
-    // Temporary/interrupting message with a specified duration
-    if (timeout > 0) {
-        showTemporaryStatus(formattedMessage, timeout);
-        return;
-    }
-    // Normal persistent status message
-    messageQueue.push(formattedMessage);    
-    if (!isDisplaying) {
-        processQueue(); // Start queue if not currently running
-    }
+  // Temporary/interrupting message with a specified duration
+  if (timeout > 0) {
+    showTemporaryStatus(formattedMessage, timeout);
+    return;
+  }
+  // Override/clear out any previous temporary message with persistent message
+  if (temporaryMessageTimer) {
+    clearTimeout(temporaryMessageTimer);
+    temporaryMessageTimer = null;
+  }
+  // Display normal persistent status message
+  messageQueue.push(formattedMessage);    
+  if (!isDisplaying) {
+    processQueue(); // Start queue if not currently running
+  }
 }
 
 /**
@@ -78,74 +81,74 @@ export function logStatus(message, timeout = 0) {
  * @returns 
  */
 function showTemporaryStatus(tempMessage, duration) {
-    const statusBar = document.getElementById('game-status-bar');
-    if (!statusBar) return;
-    // Clear any active temporary message timer
-    if (temporaryMessageTimer) {
-        clearTimeout(temporaryMessageTimer);
-        temporaryMessageTimer = null;
+  const statusBar = document.getElementById('game-status-bar');
+  if (!statusBar) return;
+  // Clear any active temporary message timer
+  if (temporaryMessageTimer) {
+    clearTimeout(temporaryMessageTimer);
+    temporaryMessageTimer = null;
+  }
+  // Display temporary message immediately
+  statusBar.textContent = tempMessage;
+  // Restore previous message (or resume queue) after timeout
+  temporaryMessageTimer = setTimeout(() => {
+    temporaryMessageTimer = null;
+    if (messageQueue.length > 0) {
+        processQueue();
+    } else {
+        statusBar.textContent = currentMessage;
     }
-    // Display temporary message immediately
-    statusBar.textContent = tempMessage;
-    // Restore previous message (or resume queue) after timeout
-    temporaryMessageTimer = setTimeout(() => {
-        temporaryMessageTimer = null;
-        if (messageQueue.length > 0) {
-            processQueue();
-        } else {
-            statusBar.textContent = currentMessage;
-        }
-    }, duration);
+  }, duration);
 }
 
 /**
  * @param {number} [delay=400]
  */
 export function resetStatusToDefault(delay = 400) {
-    // Leave last message on board if game is over (don't reset it)
-    if (state.gamePhase === 'game_over') return;
+  // Leave last message on board if game is over (don't reset it)
+  if (state.gamePhase === 'game_over') return;
 
-    // Allow immediate revert on events like mouseleave
-    if (temporaryMessageTimer) {
-        clearTimeout(temporaryMessageTimer);
-        temporaryMessageTimer = null;
-    }
-    // Add a slight delay so tempMessage doesn't snap away immediately
-    temporaryMessageTimer = setTimeout(() => {
-        temporaryMessageTimer = null;        
-        const statusBar = document.getElementById('game-status-bar');
-        if (statusBar) {
-            statusBar.textContent = currentMessage;
-        }
-    }, delay);
-}
-
-function processQueue() {
-    // If temp message displayed, pause queue
-    if (temporaryMessageTimer) {
-        isDisplaying = false;
-        return;
-    }
-    // Stop loop and keep displaying last message when done
-    if (messageQueue.length === 0) {
-        isDisplaying = false;
-        return;
-    }
-    isDisplaying = true;
-    // Grab first message and save as first persistent message
-    const nextMessage = messageQueue.shift();
-    if (nextMessage) {
-      currentMessage = nextMessage;    
-    }
-    // Update the DOM
+  // Allow immediate revert on events like mouseleave
+  if (temporaryMessageTimer) {
+    clearTimeout(temporaryMessageTimer);
+    temporaryMessageTimer = null;
+  }
+  // Add a slight delay so tempMessage doesn't snap away immediately
+  temporaryMessageTimer = setTimeout(() => {
+    temporaryMessageTimer = null;        
     const statusBar = document.getElementById('game-status-bar');
     if (statusBar) {
         statusBar.textContent = currentMessage;
     }
-    // Wait for delay, then process next message (if any)
-    setTimeout(() => {
-        processQueue();
-    }, DISPLAY_DELAY_MS);
+  }, delay);
+}
+
+function processQueue() {
+  // If temp message displayed, pause queue
+  if (temporaryMessageTimer) {
+    isDisplaying = false;
+    return;
+  }
+  // Stop loop and keep displaying last message when done
+  if (messageQueue.length === 0) {
+    isDisplaying = false;
+    return;
+  }
+  isDisplaying = true;
+  // Grab first message and save as first persistent message
+  const nextMessage = messageQueue.shift();
+  if (nextMessage) {
+    currentMessage = nextMessage;    
+  }
+  // Update the DOM
+  const statusBar = document.getElementById('game-status-bar');
+  if (statusBar) {
+    statusBar.textContent = currentMessage;
+  }
+  // Wait for delay, then process next message (if any)
+  setTimeout(() => {
+    processQueue();
+  }, DISPLAY_DELAY_MS);
 }
 
 /**
@@ -210,10 +213,11 @@ export function updateLegendUI() {
  *  The doubling prompt will overwrite the status bar immediately.
  */
 export function clearStatusQueue() {
-    messageQueue = [];  // Empty any pending messages
-    isDisplaying = false;
-    if (temporaryMessageTimer) {
-        clearTimeout(temporaryMessageTimer);
-        temporaryMessageTimer = null;
-    }
+  messageQueue = [];  // Empty any pending messages
+  isDisplaying = false;
+  currentMessage = '';  // Clear any stale persistent message reference
+  if (temporaryMessageTimer) {
+    clearTimeout(temporaryMessageTimer);
+    temporaryMessageTimer = null;
+  }
 }

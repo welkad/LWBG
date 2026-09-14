@@ -11,6 +11,7 @@ const DISPLAY_TIME = 2000; // Temporary message duration
 export function handleCubeClick(player) {
   // Disable cube if game is over or an offer is pending
   if (
+    state.isInputLocked ||
     state.isCubeOffered ||
     state.isResignOffered ||
     state.gamePhase === "game_over"

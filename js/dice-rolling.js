@@ -1,6 +1,6 @@
 // js/dice-rolling.js
 import { state } from './state.js';
-import { logStatus } from './ui.js';
+import { logStatus, clearStatusQueue } from './ui.js';
 import { renderBoard, updatePointLabels } from './board.js';
 import { renderDiceUI, setDieValue, renderWinnerOpeningDice } from './dice-renderer.js';
 import { updateCubePositionUI } from './doubling-cube.js';
@@ -116,9 +116,9 @@ function evaluateOpeningRoll() {
     renderWinnerOpeningDice("white", white, black);
     updateCubePositionUI();
 
+    clearStatusQueue(); // Cancel any pending toast timers
     logStatus(
-      `White wins opening roll (${white} vs ${black}) and plays first!`,
-    );
+      `White wins opening roll (${white} vs ${black}) and plays first!`);
   } else if (black > white) {
     state.currentPlayer = "black";
     state.currentRoll = [black, white];
@@ -132,10 +132,12 @@ function evaluateOpeningRoll() {
     renderWinnerOpeningDice("black", black, white);
     updateCubePositionUI();
 
+    clearStatusQueue();
     logStatus(
       `Black wins the opening roll (${black} vs ${white}) and plays first!`,
     );
   } else {
+    clearStatusQueue();
     logStatus(`Tie roll (${white} vs ${black}) - Try again!`);
     // Reset for re-roll after 1 second delay
     setTimeout(() => {
