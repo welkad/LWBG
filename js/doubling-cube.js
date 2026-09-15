@@ -149,6 +149,7 @@ export function updateCubePositionUI() {
   const isGameOver = state.gamePhase === "game_over";
   const isOwnedByOpponent =
     state.cubeOwner !== "center" && state.cubeOwner !== state.currentPlayer;
+  const isAtMaxCubeValue = state.cubeValue >= 64; // Cannot cube past 64
 
   // Apply proper CSS class state
   if (state.isCubeOffered) {
@@ -159,7 +160,8 @@ export function updateCubePositionUI() {
     isOpening ||
     state.hasRolled ||
     isOwnedByOpponent ||
-    state.isResignOffered
+    state.isResignOffered ||
+    isAtMaxCubeValue  // Treat max cube value (64) as disabled
   ) {
     cubeEl.classList.add("disabled");
     cubeEl.classList.remove("active", "pending-offer");
