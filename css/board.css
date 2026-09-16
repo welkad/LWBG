@@ -310,7 +310,14 @@ body {
     align-items: center;
     box-sizing: border-box;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    cursor: pointer;
+}
+
+/* Ensure bar checkers pass pointer clicks through to handlePointClick('bar') */
+.bar-half .checker {
+    cursor: pointer;
+    pointer-events: auto;
 }
 
 /* =====================================

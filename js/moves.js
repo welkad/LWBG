@@ -249,6 +249,10 @@ export function handlePointClick(pointIndex) {
  * @param {number|string} fromIndex - 0-23 or 'bar'
  */
 function attemptAutoMove(fromIndex) {
+  console.log("--- attemptAutoMove triggered ---");
+  console.log("fromIndex:", fromIndex);
+  console.log("currentPlayer:", state.currentPlayer);
+  console.log("currentRoll:", state.currentRoll);
   const player = state.currentPlayer;
   if (!player || !state.currentRoll || state.currentRoll.length === 0) return;
 
