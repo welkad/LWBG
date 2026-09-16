@@ -217,8 +217,13 @@ export function handleDiceRoll(player) {
 
       logStatus(`${player} rolled: ${rollMessage}`);
 
-      // Automatically select the bar if current player is trapped on it
+      // Check if trapped on bar to handle turn-switch if no legal moves exist
       autoSelectBarIfRequired();
+
+      // Force-clear selection state and render clean board
+      state.selectedPoint = null;
+      state.validMoves = [];
+      renderBoard();
     }
   );
 }
