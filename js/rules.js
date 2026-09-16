@@ -78,7 +78,7 @@ export function isCheckerOnHighestPoint(fromIndex, player) {
 /**
  * Calculates valid destinations for a selected point or bar piece.
  * @param {number|string} fromIndex - Index (0-23) or 'bar' * 
- * @returns {Array<number>} Array of valid target indices
+ * @returns {Array<number>|'off'} Array of valid target indices
  */
 export function getValidMovesForPoint(fromIndex) {
   const player = state.currentPlayer;

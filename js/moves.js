@@ -1,14 +1,9 @@
 // js/moves.js - Move validation, legal destination calculation, move execution, and undo history.
+import { DIRECTIONS, getValidMovesForPoint, findDiceSequenceForMove, hasAnyLegalMoves} from './rules.js';
 import { state, handleGameEnd, switchTurn } from './state.js';
 import { renderBoard, updateScoreBoardUI } from './board.js';
 import { clearStatusQueue, logStatus } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
-import { 
-  DIRECTIONS,
-  getValidMovesForPoint,
-  findDiceSequenceForMove,
-  hasAnyLegalMoves}
-from './rules.js';
 
 /**
  * Save a pre-move state snapshot so each individual step can be reverted independently
@@ -210,7 +205,7 @@ function executeMove(fromIndex, toIndex) {
 // ==================================
 
 /**
- * Selects a point, deselects, or triggers a move execution if valid target is clicked.
+ * Triggers an immediate auto-move on point click prioritized by die order.
  * @param {number|string} pointIndex - 0-23 or 'bar'
  */
 export function handlePointClick(pointIndex) {
@@ -222,23 +217,11 @@ export function handlePointClick(pointIndex) {
 
   const playerHasBarCheckers = state.bar[player] > 0;
 
-  // Deselect if clicking the same point again
-  if (state.selectedPoint === pointIndex) {
-    // Do not allow de-selecting the BAR point
-    if (pointIndex === 'bar' && playerHasBarCheckers) {
-      logStatus("You must enter checkers from the BAR point first!", 2000);
-      return;
-    }
-    state.selectedPoint = null;
-    state.validMoves = [];
-    logStatus("Selection cleared.", -1);
-    renderBoard();
-    return;
-  }
-
-  // If piece selected and clicked point is valid target, execute the move
-  if (state.selectedPoint !== null && state.validMoves.includes(pointIndex)) {
-    executeMove(state.selectedPoint, pointIndex);
+  // Enforce bar entry: must click on bar point if any checkers on bar    
+  if (pointIndex !== 'bar' && playerHasBarCheckers) {
+    logStatus("You must enter checkers from the BAR point first!", 2000);
+    // Determine bar auto-move target
+    attemptAutoMove('bar');
     return;
   }
 
@@ -255,66 +238,85 @@ export function handlePointClick(pointIndex) {
     pointCount = pt.count;
   }
 
-  // Warn if player selects checker on board instead of BAR point
-  if (playerHasBarCheckers && pointIndex !=='bar'
-      && pointOwner === player && pointCount > 0) {
-    logStatus("You must enter checkers from the BAR point first!", 2000);
-    state.selectedPoint = 'bar';
-    state.validMoves = getValidMovesForPoint('bar');
-    renderBoard();
-    return;
-  }
-
-  // Otherwise, don't warn if player has bar checkers and clicks anywhere else
-  if (playerHasBarCheckers && pointIndex !=='bar') {
-    state.selectedPoint = 'bar';
-    state.validMoves = getValidMovesForPoint('bar');
-    renderBoard();
-    return;
-  }
-
-  // Allow selecting only own pieces
-  if (pointOwner === state.currentPlayer && pointCount > 0) {
-    // Calculate potential destinations for this point
-    const moves = getValidMovesForPoint(pointIndex);
-
-    // Prevent selection of point if no legal moves available
-    if (moves.length  === 0) {
-      logStatus("You cannot make a valid move from this point.", 1500);
-      state.selectedPoint = null;
-      state.validMoves = [];
-      renderBoard();
-      return;
-    }
-
-    // Valid moves exist: commit selection and store targets
-    state.selectedPoint = pointIndex;
-    state.validMoves = moves;
-
-    // Extract valid point numbers, sort them smallest to largest, and handle 'off'
-    const sortedMoves = state.validMoves
-      .map(idx => (idx === 'off' ? 'OFF' : Number(idx) + 1))
-      .sort((a, b) => {
-        if (a === 'OFF') return 1;  // Keep 'OFF' at the end of the list
-        if (b === 'OFF') return -1;
-        return a - b; // Numeric sort from smallest -> largest
-      });
-
-    const formattedMoves = sortedMoves.length > 0
-      ? sortedMoves.join(', ') : 'None';
-
-    // Log move options to console only
-    console.log(`Point selected ${pointIndex === 'bar'
-      ? 'BAR' : Number(pointIndex) + 1}. Valid moves: [ ${ formattedMoves } ]`);
+  // Ensure player selected their own piece with count > 0
+  if (pointOwner === player && pointCount > 0) {
+    attemptAutoMove(pointIndex);
   } else {
-    // Remove selection if player clicked empty point, opponent checker, or invalid area
+    // Clear selection if clicking empty or opponent point
     state.selectedPoint = null;
     state.validMoves = [];
-    logStatus("Selection cleared.", -1);  // Set timeout to -1 for console only message
+    renderBoard();
+  }
+}
+
+/**
+ * Attempt to automatically move a checker from source point based on dice order.
+ * @param {number|string} fromIndex - 0-23 or 'bar' * 
+ */
+function attemptAutoMove(fromIndex) {
+  const player = state.currentPlayer;
+  if (!player) return;
+
+  const dir = DIRECTIONS[player];
+  const rawMoves = getValidMovesForPoint(fromIndex);
+
+  /** @type {Array<number|string>} */
+  const validMoves = Array.isArray(rawMoves) ? rawMoves : [rawMoves];
+
+  if (validMoves.length === 0) {
+    logStatus("You cannot make a valid move from this point.", 1500);
+    state.selectedPoint = null;
+    state.validMoves = [];
+    renderBoard();
+    return;
   }
 
-  // Apply .selected and .valid-target classes to DOM
-  renderBoard();
+  /**
+   * Helper to calculate target index for a specific die value
+   * @param {number} dieValue
+   * @returns {number|'off'}
+   */
+  const calculateTarget = (dieValue) => {
+    if (fromIndex === 'bar') {
+      return player === 'white' ? dieValue - 1 : 24 - dieValue;
+    }
+    const targetNum = Number(fromIndex) + (dieValue * dir);
+    if (targetNum < 0 || targetNum > 23) {
+      return 'off';
+    }
+    return targetNum;
+  };
+
+  /** @type {number|string|null} */
+  let targetDestination = null;
+
+  // Priority 1: check left die (state.currentRoll[0])
+  if (state.currentRoll.length > 0) {
+    const leftTargetDie = calculateTarget(state.currentRoll[0]);
+    if (validMoves.includes(leftTargetDie)) {
+      targetDestination = leftTargetDie;
+    }
+  }
+
+  // Priority 2: Fall back to right die (state.currentRoll[1])
+  if (!targetDestination && state.currentRoll.length > 1) {
+    const rightDieTarget = calculateTarget(state.currentRoll[1]);
+    if (validMoves.includes(rightDieTarget)) {
+      targetDestination = rightDieTarget;
+    }
+  }
+
+  // Priority 3: Combined dice or bear-off fallback target
+  if (!targetDestination && validMoves.length > 0) {
+    targetDestination = validMoves[0];
+  }
+
+  // Execute movement directly
+  if (targetDestination !== null) {
+    state.selectedPoint = null;
+    state.validMoves = [];
+    executeMove(fromIndex, targetDestination);
+  }
 }
 
 /**
@@ -330,7 +332,9 @@ export function autoSelectBarIfRequired() {
 
   // Auto-select only if checkers exist on the bar and dice are available
   if (barCount > 0 && state.hasRolled && state.currentRoll.length > 0) {
-    const validBarMoves = getValidMovesForPoint('bar');
+    const rawBarMoves = getValidMovesForPoint('bar');
+    /** @type {Array<number|string>} */
+    const validBarMoves = Array.isArray(rawBarMoves) ? rawBarMoves : [rawBarMoves];
 
     // Check if trapped on BAR point with no legal moves available
     if (validBarMoves.length === 0) {
@@ -377,7 +381,8 @@ export function undoLastMove() {
   const player = state.currentPlayer;
   if (player && state.bar[player] > 0) {
     state.selectedPoint = 'bar';
-    state.validMoves = getValidMovesForPoint('bar');
+    const rawBarMoves = getValidMovesForPoint('bar');
+    state.validMoves = Array.isArray(rawBarMoves) ? rawBarMoves : [rawBarMoves];
   } else {
     state.selectedPoint = null;
     state.validMoves = [];
