@@ -60,7 +60,7 @@ function attachClickTracker() {
       const htmlPointEl = pointEl instanceof HTMLElement ? pointEl : null;
       
       console.group('%c[=== DOM CLICK DETECTED ===]',
-         'color: #ffeb3b; font-weight: bold;');
+         'color: orange; font-weight: bold;');
       console.log('Raw Clicked Element:', targetEl);
       console.log("Raw Clicked Element:", targetEl);
       console.log("Closest [data-point] Element:", htmlPointEl);

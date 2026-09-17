@@ -2,6 +2,8 @@
 import { state, initBoardState } from './state.js';
 import { getValidMovesForPoint } from './rules.js';
 import { executeMove } from './moves.js';
+import { renderBoard } from './board.js';
+import { renderDiceUI } from './dice-renderer.js';
 
 export function runMoveTests() {
     console.group('%c 🎲 Backgammon Move Logic Test Suite', 'font-weight: bold; font-size: 14px; color: #4CAF50;');
@@ -129,4 +131,6 @@ export function runMoveTests() {
 
     // Reset clean board state for normal gameplay
     initBoardState();
+    if (typeof renderBoard === 'function') renderBoard();
+    if (typeof renderDiceUI === 'function') renderDiceUI();
 }
