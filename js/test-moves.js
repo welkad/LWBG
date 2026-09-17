@@ -1,6 +1,7 @@
 // js/test-moves.js - Automated move validation test harness
 import { state, initBoardState } from './state.js';
-import { getValidMovesForPoint, executeMove } from './moves.js';
+import { getValidMovesForPoint } from './rules.js';
+import { executeMove } from './moves.js';
 
 export function runMoveTests() {
     console.group('%c 🎲 Backgammon Move Logic Test Suite', 'font-weight: bold; font-size: 14px; color: #4CAF50;');
@@ -35,7 +36,10 @@ export function runMoveTests() {
     // Index 3 (3-die) is open.
     // Index 5 (5-die) is BLOCKED by 5 Black checkers.
     // Index 8 (3+5 composite via index 3) is OPEN.
-    const validFromPoint0 = getValidMovesForPoint(0);
+    const rawFromPoint0 = getValidMovesForPoint(0);
+
+    /** @type {Array<number|'off'>} */
+    const validFromPoint0 = Array.isArray(rawFromPoint0) ? rawFromPoint0 : [rawFromPoint0];
 
     assert(
         'White at index 0 with roll [3, 5] allows open target [3] and composite target [8], while blocking occupied index [5]',
@@ -48,13 +52,22 @@ export function runMoveTests() {
     // TEST 2: Bar Requirement Enforcement
     // -------------------------------------------------------------
     state.bar.white = 1;
-    const blockedBoardMove = getValidMovesForPoint(0);
+    const rawblockedBoardMove = getValidMovesForPoint(0);
+
+    /** @type {Array<number|'off'>} */
+    const blockedBoardMove = Array.isArray(rawblockedBoardMove) 
+      ? rawblockedBoardMove : [rawblockedBoardMove];
+
     assert(
         'Board moves are blocked (return []) when a player has checkers on the bar',
         blockedBoardMove.length === 0
     );
 
-    const validFromBar = getValidMovesForPoint('bar');
+    const rawFromBar = getValidMovesForPoint('bar');
+
+    /** @type {Array<number|'off'>} */
+    const validFromBar = Array.isArray(rawFromBar) ? rawFromBar : [rawFromBar];
+
     assert(
         'Bar entry targets computed correctly for White with roll [3, 5] -> indices [2, 4]',
         validFromBar.includes(2) && validFromBar.includes(4) && validFromBar.length === 2
