@@ -4,15 +4,13 @@ import { renderBoard } from './board.js';
 import { updateTurnUI, initDiceListeners } from './dice.js';
 import { setupKeyboardListeners } from './keyboard.js';
 import { renderDiceUI } from './dice-renderer.js';
+import { initDebugModule } from './debug.js';
 import { logStatus } from './ui.js';
-
-// test-moves.js
-// import { runMoveTests } from './test-moves.js';
-// window.runMoveTests = runMoveTests;
 
 function initApp() {
     // Initialize data
     initBoardState();
+    initDebugModule();  // Initialize debugging mode
 
     // Log game instructions at start
     const statusBar = document.getElementById('game-status-bar');

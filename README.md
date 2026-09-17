@@ -28,4 +28,5 @@ A lightweight, vanilla JavaScript implementation of Backgammon designed to run e
     ├── doubling-cube.js     # Doubling cube offers, accept/decline handling, cube ownership, and cube positioning
     ├── ui.js                # Status messages, game notifications, legend updates, and general UI feedback
     ├── types.js             # Central JSDoc type definitions for state, point data, and custom window objects
+    ├── debug.js             # Developer utilities and trace logging toggleable via keypress ('T')
     └── test-moves.js        # Automated move-validation test harness

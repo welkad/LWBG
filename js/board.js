@@ -168,7 +168,7 @@ function renderTrayCheckers(containerEl, count, colorClass, isTop) {
 }
 
 // Show checkers on the BAR point
-function renderBar() {
+export function renderBar() {
   const blackBarEl = document.getElementById('bar-black');
   const whiteBarEl = document.getElementById('bar-white');
   const blackCount = state.bar.black || 0;
