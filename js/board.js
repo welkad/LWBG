@@ -174,6 +174,10 @@ function renderBar() {
   const blackCount = state.bar.black || 0;
   const whiteCount = state.bar.white || 0;
 
+  // Ensure data-point="bar" is set for event delegation
+  if (blackBarEl) blackBarEl.dataset.point = 'bar';
+  if (whiteBarEl) whiteBarEl.dataset.point = 'bar';
+
   // Top tray for Black player, bottom tray for White player
   renderTrayCheckers(blackBarEl, blackCount|| 0, 'black-piece', true);
   renderTrayCheckers(whiteBarEl, whiteCount || 0, 'white-piece', false);
@@ -185,7 +189,7 @@ function renderBar() {
 
     blackBarEl.classList.toggle('selected', isSelected);
     blackBarEl.classList.toggle('clickable', isBlackActive);
-    blackBarEl.onclick = isBlackActive ? () => handlePointClick('black') : null;
+    blackBarEl.onclick = isBlackActive ? () => handlePointClick('bar') : null;
   }
   if (whiteBarEl) {
     const isWhiteActive = state.currentPlayer === 'white' && whiteCount > 0;
@@ -193,7 +197,7 @@ function renderBar() {
 
     whiteBarEl.classList.toggle('selected', isSelected);
     whiteBarEl.classList.toggle('clickable', isWhiteActive);
-    whiteBarEl.onclick = isWhiteActive ? () => handlePointClick('white') : null;
+    whiteBarEl.onclick = isWhiteActive ? () => handlePointClick('bar') : null;
   }
 }
 
@@ -325,3 +329,18 @@ export function updatePointLabels(currentPlayer) {
   renderBar();
   console.log(`Bar updated -> Black: ${blackCount}, White: ${whiteCount}`);
 };
+
+document.body.addEventListener('click', (e) => {
+  const targetEl = e.target;
+  if (targetEl instanceof HTMLElement) {
+    const pointEl = targetEl.closest('[data-point]');  
+  
+    /** @type {HTMLElement|null} */
+    const htmlPointEl = pointEl instanceof HTMLElement ? pointEl : null;
+
+    console.log("=== DOM CLICK DETECTED ===");
+    console.log("Raw Clicked Element:", targetEl);
+    console.log("Closest [data-point] Element:", pointEl);
+    console.log("data-point value:", htmlPointEl ? htmlPointEl.dataset.point : "NONE");
+  }
+}, true); // 'true' uses capture phase to bypass any stopPropagation calls
