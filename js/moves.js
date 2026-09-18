@@ -1,7 +1,7 @@
 // js/moves.js - Move validation, legal destination calculation, move execution, and undo history.
 import { DIRECTIONS, getValidMovesForPoint, findDiceSequenceForMove, hasAnyLegalMoves} from './rules.js';
 import { state, handleGameEnd, switchTurn } from './state.js';
-import { renderBoard, updateScoreBoardUI } from './board.js';
+import { clearHoverHighlights, renderBoard, updateScoreBoardUI } from './board.js';
 import { clearStatusQueue, logStatus } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
 
@@ -209,6 +209,8 @@ export function executeMove(fromIndex, toIndex) {
  * @param {number|string} pointIndex - 0-23 or 'bar'
  */
 export function handlePointClick(pointIndex) {
+  clearHoverHighlights(); // Clean up hover preview when player clicks
+
   if (state.isInputLocked) return;  // Prevent unwanted input
 
   const player = state.currentPlayer;
@@ -249,10 +251,10 @@ export function handlePointClick(pointIndex) {
  * @param {number|string} fromIndex - 0-23 or 'bar'
  */
 function attemptAutoMove(fromIndex) {
-  console.log("--- attemptAutoMove triggered ---");
-  console.log("fromIndex:", fromIndex);
-  console.log("currentPlayer:", state.currentPlayer);
-  console.log("currentRoll:", state.currentRoll);
+  // console.log("--- attemptAutoMove triggered ---");
+  // console.log("fromIndex:", fromIndex);
+  // console.log("currentPlayer:", state.currentPlayer);
+  // console.log("currentRoll:", state.currentRoll);
   const player = state.currentPlayer;
   if (!player || !state.currentRoll || state.currentRoll.length === 0) return;
 

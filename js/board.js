@@ -1,6 +1,7 @@
 // js/board.js - Handles DOM creation for points and rendering checkers onto the board layout.
 import { state, calculatePipCount } from './state.js';
 import { handlePointClick} from './moves.js';
+import { getValidMovesForPoint } from './rules.js';
 
 export function renderBoard() {
   const topLeft = document.getElementById('top-left');
@@ -56,6 +57,7 @@ function createPointDOM(index) {
   // Global index 0, 2, 4... -> even | 1, 3, 5... -> odd
   const pointColorClass = (index % 2 === 0) ? 'point-even' : 'point-odd';
   pointEl.className = `point ${pointColorClass}`; // Board triangle color class
+  pointEl.dataset.point = String(index);
   pointEl.dataset.index = String(index);
 
   // Adjust Z-Index so point stacks overflow on top of adjacent triangles
@@ -123,6 +125,7 @@ function createPointDOM(index) {
   }
   // Direct event listener invoking move handling logic
   pointEl.addEventListener('click', () => handlePointClick(index));
+  attachPointHoverListeners(pointEl, index);
   return pointEl;
 }
 
@@ -175,8 +178,14 @@ export function renderBar() {
   const whiteCount = state.bar.white || 0;
 
   // Ensure data-point="bar" is set for event delegation
-  if (blackBarEl) blackBarEl.dataset.point = 'bar';
-  if (whiteBarEl) whiteBarEl.dataset.point = 'bar';
+  if (blackBarEl) {
+    blackBarEl.dataset.point = 'bar';
+    attachPointHoverListeners(blackBarEl, 'bar');
+  }
+  if (whiteBarEl) {
+    whiteBarEl.dataset.point = 'bar';
+    attachPointHoverListeners(whiteBarEl, 'bar');
+  }
 
   // Top tray for Black player, bottom tray for White player
   renderTrayCheckers(blackBarEl, blackCount|| 0, 'black-piece', true);
@@ -257,7 +266,7 @@ export function renderBearOff(player) {
 }
 
 /**
- * Updates or clears the border point numbers depending on game state and current player.
+ * Update or clear the border point numbers depending on game state and current player.
  * @param {PlayerColor} currentPlayer - 'black', 'white', or null/undefined for opening roll.
  */
 export function updatePointLabels(currentPlayer) {
@@ -294,4 +303,90 @@ export function updatePointLabels(currentPlayer) {
         topLeft && (topLeft.innerHTML = createSpans([12, 11, 10, 9, 8, 7]));
         topRight && (topRight.innerHTML = createSpans([6, 5, 4, 3, 2, 1]));
     }
+}
+
+/** @type {ReturnType<typeof setTimeout> | null} */
+let hoverTimer = null;
+const DWELL_DELAY_MS = 600; // millisecond threshold for hover highlights
+
+/**
+ * Attach dwell-hover preview logic to point elements.
+ *  @param {HTMLElement} pointEl
+ *  @param {number | 'bar'} pointIndex
+ */
+export function attachPointHoverListeners(pointEl, pointIndex) {
+  pointEl.addEventListener('mouseenter', () => {
+    // Ensure player has rolled and still has remaining dice to play
+    const hasRemainingRolls = state.hasRolled
+      && Array.isArray(state.currentRoll) && state.currentRoll.length > 0;
+    if (!hasRemainingRolls) return;
+
+    // Check if point contains pieces owned by current player
+    let isOwner = false;
+    if (pointIndex === 'bar') {
+      const barCount = state.currentPlayer === 'black'
+        ? state.bar.black : state.bar.white;
+      isOwner = barCount > 0;
+    } else if (typeof pointIndex === 'number') {
+      const pointData = state.boardState[pointIndex];
+      isOwner = pointData && pointData.player === state.currentPlayer
+        && pointData.count > 0;
+    }
+
+    if (!isOwner || !state.hasRolled) return;
+
+    // Start threshold countdown
+    hoverTimer = setTimeout(() => {
+      // Calculate potential valid target points for this piece
+      const rawTargets = getValidMovesForPoint(pointIndex);
+      /** @type {Array<number|'off'>} */
+      const targets = Array.isArray(rawTargets) ? rawTargets : [rawTargets];
+
+      // Do not highlight origin in yellow if no valid targets available
+      if (targets.length === 0) return;
+
+      // Highlight origin point or bar half (yellow)
+      pointEl.classList.add('hover-selected');
+
+      // Higlight valid targets (green)
+      targets.forEach((targetIndex) => {
+        if (targetIndex === 'off') {
+          const pocketId = state.currentPlayer === 'black'
+            ? 'home-bottom-pocket' : 'home-top-pocket';
+          const pocketEl = document.getElementById(pocketId);        
+          if (pocketEl) {
+            pocketEl.classList.add('hover-target');
+            // Inject overlay container if missing
+            if (!pocketEl.querySelector('.bear-off-target-overlay')) {
+              const overlay = document.createElement('div');
+              overlay.className = 'bear-off-target-overlay';
+              pocketEl.appendChild(overlay);
+            }
+          }
+        } else {
+          // Query data-point attribute to match board HTML template
+          const targetEl = document.querySelector(`[data-point="${targetIndex}"],
+            [data-index="${targetIndex}"]`);
+          targetEl?.classList.add('hover-target');
+        }
+      });
+    }, DWELL_DELAY_MS);
+  });
+
+  pointEl.addEventListener('mouseleave', () => {
+    // Cancel timer and remove highlight classes if mouse leaves early
+    if (hoverTimer) {
+      clearTimeout(hoverTimer);
+      hoverTimer = null;
+    }
+    clearHoverHighlights();
+  });
+}
+
+export function clearHoverHighlights() {
+  document.querySelectorAll('.hover-selected, .hover-target').forEach((el) => {
+    el.classList.remove('hover-selected', 'hover-target');
+  });
+  // Clean up injected bear-off overlays
+  document.querySelectorAll('.bear-off-target-overlay').forEach((el) => el.remove());
 }
