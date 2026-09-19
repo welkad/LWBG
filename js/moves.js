@@ -205,45 +205,117 @@ export function executeMove(fromIndex, toIndex) {
 // ==================================
 
 /**
- * Triggers an immediate auto-move on point click prioritized by die order.
+ * Handle point click interactions with hybrid hover awareness:
+ * - Direct fast clicks invoke instant auto-move (first available die).
+ * - Clicking while hover highlights are active locks choices for target selection.
  * @param {number|string} pointIndex - 0-23 or 'bar'
  */
 export function handlePointClick(pointIndex) {
-  clearHoverHighlights(); // Clean up hover preview when player clicks
-
   if (state.isInputLocked) return;  // Prevent unwanted input
 
-  const player = state.currentPlayer;
-  // Guard: ensure active player exists before proceeding or indexing state
+  const player = state.currentPlayer; // Guard: ensure active player exists 
   if (!player || !state.hasRolled || state.currentRoll.length === 0) return;
 
-  // Determine ownership and checker count of clicked point
+  const normalizedIndex = pointIndex === 'bar' ? 'bar' : Number(pointIndex);
+  const playerHasBarCheckers = state.bar[player] > 0;
+
+  // Deslection on clicking the already selected origin
+  if (state.selectedPoint !== null && state.selectedPoint === normalizedIndex) {
+    state.selectedPoint = null;
+    state.validMoves = [];
+    clearHoverHighlights();
+    renderBoard();
+    return;
+  }
+
+  // Bare entry resolution or piece selection
+  const isBarTargetClick = playerHasBarCheckers && state.selectedPoint === null;
+  const activeOrigin = state.selectedPoint !== null
+    ? state.selectedPoint
+    : (isBarTargetClick ? 'bar' : null);
+
+  // Target execution
+  if (activeOrigin !== null && state.validMoves.length > 0) {    
+    const isTargetMatch = state.validMoves.includes(normalizedIndex);
+
+    if (isTargetMatch) {      
+      const originToMove = activeOrigin;
+      state.selectedPoint = null;
+      state.validMoves = [];
+      clearHoverHighlights();
+      executeMove(originToMove, normalizedIndex); // Execute move directly
+      return;
+    }
+  }
+
+  // Scoped hover state verification
+  const targetSelector = normalizedIndex === 'bar'
+    ? '#bar-black, #bar-white'
+    : `[data-point="${normalizedIndex}"], [data-index="${normalizedIndex}"]`;
+  const clickedEl = document.querySelector(targetSelector);
+
+  // Check if hover preview is active
+  const isHoverActive = clickedEl
+    ? clickedEl.classList.contains('hover-selected') ||
+      clickedEl.querySelector('.hover-selected') !== null
+    : false;
+
+  // Clear transient hover preview styles
+  clearHoverHighlights();
+
+  // Ownership & bar entry validation
   let pointOwner = null;
   let pointCount = 0;
 
-  if (pointIndex === 'bar') {
-    pointOwner = state.currentPlayer;
+  if (normalizedIndex === 'bar') {
+    pointOwner = player;
     pointCount = state.bar[player];
-  } else if (typeof pointIndex === 'number' || !isNaN(Number(pointIndex))) {
-    const pt = state.boardState[Number(pointIndex)];
+  } else if (typeof normalizedIndex === 'number') {
+    const pt = state.boardState[normalizedIndex];
     pointOwner = pt.player;
     pointCount = pt.count;
   }
 
   // Ignore clicks on empty points or opponent checkers
   if (pointOwner !== player || pointCount <= 0) {
+    state.selectedPoint = null;
+    state.validMoves = [];
+    renderBoard();
     return;
   }
 
-  // Enforce bar entry: must click on bar point if any checkers on bar    
-  const playerHasBarCheckers = state.bar[player] > 0;  
-  if (pointIndex !== 'bar' && playerHasBarCheckers) {
+  // Enforce bar entry requirement  
+  if (normalizedIndex !== 'bar' && playerHasBarCheckers) {
     logStatus("You must enter checkers from the BAR point first!", 2000);    
     return;
   }
 
-  // Execute auto-move for valid owned checker/bar selection
-  attemptAutoMove(pointIndex);
+  // Calculate valid moves
+  const rawTargets = getValidMovesForPoint(normalizedIndex);
+  /** @type {Array<number|'off'>} */
+  const targets = Array.isArray(rawTargets) ? rawTargets : [rawTargets];
+
+  if (targets.length === 0) {
+    // Notify player if clicked checker has no legal moves
+    logStatus("No valid moves can be made from this point.", 1500);
+    state.selectedPoint = null;
+    state.validMoves = []
+    renderBoard();
+    return;
+  }
+
+  // Hybrid decision:
+  // If hover preview was active and multiple-targets -> lock choices for player  
+  if (isHoverActive && targets.length > 1) {
+    state.selectedPoint = normalizedIndex;
+    state.validMoves = targets;
+    renderBoard();
+    return;
+  }
+  // Otherwise -> Fast auto-move
+  state.selectedPoint = null;
+  state.validMoves = []
+  attemptAutoMove(normalizedIndex);     
 }
 
 /**
