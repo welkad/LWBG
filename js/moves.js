@@ -219,12 +219,14 @@ export function executeMove(fromIndex, toIndex) {
  * @param {number|string} pointIndex - 0-23 or 'bar'
  */
 export function handlePointClick(pointIndex) {
-  if (state.isInputLocked) return;  // Prevent unwanted input
+  if (!pointIndex || state.isInputLocked) return;  // Prevent unwanted input
 
   const player = state.currentPlayer; // Guard: ensure active player exists 
   if (!player || !state.hasRolled || state.currentRoll.length === 0) return;
 
-  const normalizedIndex = pointIndex === 'bar' ? 'bar' : Number(pointIndex);
+  const normalizedIndex = (pointIndex === 'bar' || pointIndex === 'off')
+    ? pointIndex : Number(pointIndex);
+
   const playerHasBarCheckers = state.bar[player] > 0;
 
   // Deslection on clicking the already selected origin
@@ -234,7 +236,7 @@ export function handlePointClick(pointIndex) {
     return;
   }
 
-  // Bare entry resolution or piece selection
+  // Bar entry resolution or piece selection
   const isBarTargetClick = playerHasBarCheckers && state.selectedPoint === null;
   const activeOrigin = state.selectedPoint !== null
     ? state.selectedPoint
@@ -252,9 +254,15 @@ export function handlePointClick(pointIndex) {
     }
   }
 
+  // Prevent clicking bear-off tray as an origin point to select checkers
+  if (normalizedIndex === 'off') {
+    resetSelectionState();
+    renderBoard();
+    return;
+  }
+
   // Scoped hover state verification
   let isHoverActive = false;
-
   if (normalizedIndex === 'bar') {
     // Check if element inside either bar container has the hover class
     const hoveredBarEl = document.querySelector(`
@@ -268,7 +276,7 @@ export function handlePointClick(pointIndex) {
     const clickedEl = document.querySelector(targetSelector);
     isHoverActive = clickedEl  
       ? clickedEl.classList.contains('hover-selected') ||
-        clickedEl.querySelector('.hover-selected') !== null
+      clickedEl.querySelector('.hover-selected') !== null
       : false;
   }
 

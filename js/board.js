@@ -316,6 +316,7 @@ const DWELL_DELAY_MS = 750; // millisecond threshold for hover highlights
  */
 export function attachPointHoverListeners(pointEl, pointIndex) {
   pointEl.addEventListener('mouseenter', () => {
+    if (state.selectedPoint !==null) return;  // Suppress hover preview if point selected
     // Ensure player has rolled and still has remaining dice to play
     const hasRemainingRolls = state.hasRolled
       && Array.isArray(state.currentRoll) && state.currentRoll.length > 0;
@@ -337,6 +338,7 @@ export function attachPointHoverListeners(pointEl, pointIndex) {
 
     // Start threshold countdown
     hoverTimer = setTimeout(() => {
+      if (state.selectedPoint !== null) return; // Guard double selections during delay
       // Calculate potential valid target points for this piece
       const rawTargets = getValidMovesForPoint(pointIndex);
       /** @type {Array<number|'off'>} */

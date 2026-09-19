@@ -23,10 +23,10 @@ A lightweight, vanilla JavaScript implementation of Backgammon designed to run e
     ├── dice.js              # Dice interaction controller; handles die clicks, turn UI, dice reset, and dice listeners
     ├── dice-rolling.js      # Dice rolling logic, opening rolls, animated rolling, and generation of roll values
     ├── dice-renderer.js     # Creates and updates dice DOM elements, pip rendering, and dice state display
-    ├── keyboard.js          # Global keyboard shortcuts for game actions
-    │
-    ├── doubling-cube.js     # Doubling cube offers, accept/decline handling, cube ownership, and cube positioning
+    ├── doubling-cube.js     # Doubling cube offers, accept/decline handling, cube ownership, and cube positioning    
+    │        
     ├── ui.js                # Status messages, game notifications, legend updates, and general UI feedback
+    ├── keyboard.js          # Global keyboard shortcuts for game actions
     ├── types.js             # Central JSDoc type definitions for state, point data, and custom window objects
     ├── debug.js             # Developer utilities and trace logging toggleable via keypress ('T')
     └── test-moves.js        # Automated move-validation test harness

@@ -471,7 +471,8 @@ body {
    HOME POCKET HIGHLIGHTS - ACTIVATE VIA DWELL HOVER
    ================================================== */
 
-.bear-off-pocket.hover-target {
+.bear-off-pocket.valid-target .bear-off-target-overlay,
+.bear-off-pocket.hover-target .bear-off-target-overlay {
   background-color: #2d2016 !important;
   box-shadow: inset 2px 2px 5px rgba(0,0,0,0.6), 1px 1px 1px rgba(255,255,255,0.05) !important;
   cursor: pointer;
@@ -496,11 +497,13 @@ body {
 }
 
 /* White (Top Right): Anchor to top edge */
+#home-top-pocket.valid-target .bear-off-target-overlay,
 #home-top-pocket.hover-target .bear-off-target-overlay {
   top: 0;
 }
 
 /* Black (Bottom Right): Anchor to bottom edge */
+#home-bottom-pocket.valid-target .bear-off-target-overlay,
 #home-bottom-pocket.hover-target .bear-off-target-overlay {
   bottom: 0;
 }
