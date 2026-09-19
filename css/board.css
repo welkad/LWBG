@@ -426,7 +426,46 @@ body {
   to { transform: translateX(-50%) scale(1.15); opacity: 1; }
 }
 
+/* Persistent source selection after clicking a hovered checker */
+.point.selected {
+  background-color: rgba(255, 235, 59, 0.28) !important;
+  box-shadow: inset 0 0 0 2px #ffeb3b;
+}
 
+.point.selected .checker:last-child {
+  box-shadow: 0 0 8px 3px #ffeb3b;
+  transform: scale(1.05);
+}
+
+/* Persistent valid move targets after source is locked */
+.point.valid-target {
+  background-color: rgba(76, 175, 80, 0.22) !important;
+  box-shadow: inset 0 0 0 2px #4caf50;
+  cursor: pointer;
+}
+
+.point.valid-target::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #4caf50;
+  pointer-events: none;
+  z-index: 10;
+  animation: pulse-target 1.5s infinite alternate;
+}
+
+.top .point.valid-target::after {
+  bottom: 12px;
+}
+
+.bottom .point.valid-target::after {
+  top: 12px;
+}
 
 /* ==================================================
    HOME POCKET HIGHLIGHTS - ACTIVATE VIA DWELL HOVER
