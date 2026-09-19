@@ -323,10 +323,6 @@ export function handlePointClick(pointIndex) {
  * @param {number|string} fromIndex - 0-23 or 'bar'
  */
 function attemptAutoMove(fromIndex) {
-  // console.log("--- attemptAutoMove triggered ---");
-  // console.log("fromIndex:", fromIndex);
-  // console.log("currentPlayer:", state.currentPlayer);
-  // console.log("currentRoll:", state.currentRoll);
   const player = state.currentPlayer;
   if (!player || !state.currentRoll || state.currentRoll.length === 0) return;
 
@@ -447,13 +443,6 @@ export function undoLastMove() {
   state.borneOff = previousState.borneOff;
   state.currentRoll = previousState.currentRoll;
 
-  // Restore auto-selection if any checkers on bar point
-  // const player = state.currentPlayer;
-  // if (player && state.bar[player] > 0) {
-  //   state.selectedPoint = 'bar';
-  //   const rawBarMoves = getValidMovesForPoint('bar');
-  //   state.validMoves = Array.isArray(rawBarMoves) ? rawBarMoves : [rawBarMoves];
-  // } else {
   state.selectedPoint = null; // Keep selection state empty to suppress rectangles
   state.validMoves = [];  
 
