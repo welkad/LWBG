@@ -166,6 +166,8 @@ export function executeMove(fromIndex, toIndex) {
     return;
   }
 
+  resetSelectionState();  // Clear any lingering selection state
+
   // --- POST-MOVE SELECTION LOGIC ---  
   const remainingBarCount = state.bar[player] || 0;
   if (remainingBarCount > 0 && state.currentRoll.length > 0) {
@@ -210,8 +212,6 @@ export function executeMove(fromIndex, toIndex) {
 //  PUBLIC ACTION EXPORTS
 // ==================================
 
-
-
 /**
  * Handle point click interactions with hybrid hover awareness:
  * - Direct fast clicks invoke instant auto-move (first available die).
@@ -253,16 +253,24 @@ export function handlePointClick(pointIndex) {
   }
 
   // Scoped hover state verification
-  const targetSelector = normalizedIndex === 'bar'
-    ? '#bar-black, #bar-white'
-    : `[data-point="${normalizedIndex}"], [data-index="${normalizedIndex}"]`;
-  const clickedEl = document.querySelector(targetSelector);
+  let isHoverActive = false;
 
-  // Check if hover preview is active
-  const isHoverActive = clickedEl
-    ? clickedEl.classList.contains('hover-selected') ||
-      clickedEl.querySelector('.hover-selected') !== null
-    : false;
+  if (normalizedIndex === 'bar') {
+    // Check if element inside either bar container has the hover class
+    const hoveredBarEl = document.querySelector(`
+        #bar-black .hover-selected, #bar-black.hover-selected,
+        #bar-white .hover-selected, #bar-white.hover-selected
+    `);
+    isHoverActive = hoveredBarEl !== null;
+  } else {  // Check if preview is active
+    const targetSelector = `[data-point="${normalizedIndex}"], 
+      [data-index="${normalizedIndex}"]`;
+    const clickedEl = document.querySelector(targetSelector);
+    isHoverActive = clickedEl  
+      ? clickedEl.classList.contains('hover-selected') ||
+        clickedEl.querySelector('.hover-selected') !== null
+      : false;
+  }
 
   // Clear transient hover preview styles
   clearHoverHighlights();
@@ -306,8 +314,7 @@ export function handlePointClick(pointIndex) {
     return;
   }
 
-  // Hybrid decision:
-  // If hover preview was active and multiple-targets -> lock choices for player  
+  // Hybrid, either: hover preview was active and multiple-targets -> lock choices
   if (isHoverActive && targets.length > 1) {
     state.selectedPoint = normalizedIndex;
     state.validMoves = targets;
