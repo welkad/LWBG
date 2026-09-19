@@ -90,6 +90,15 @@ function logHitSummary(player, hits) {
   logStatus(`${player} hit ${opponent}'s ${plural} on the ${pointsString}!`);
 }
 
+/**
+ * Helper function to reset selections and purge hover previews from DOM 
+ */
+function resetSelectionState() {
+  state.selectedPoint = null;
+  state.validMoves = [];
+  clearHoverHighlights();
+}
+
 /** 
  * Executes a checker move, handles hits, bear-offs, consumed dice,
  * updates board state and turn flow, including win checking. Refactored to ensure
@@ -157,15 +166,14 @@ export function executeMove(fromIndex, toIndex) {
     return;
   }
 
-  // --- POST-MOVE SELECTION LOGIC ---
+  // --- POST-MOVE SELECTION LOGIC ---  
   const remainingBarCount = state.bar[player] || 0;
   if (remainingBarCount > 0 && state.currentRoll.length > 0) {
     // If player still has checkers on the bar, maintain auto-selection logic
     autoSelectBarIfRequired();
   } else {
     // Bar is clear: reset selections so regular board clicks resume
-    state.selectedPoint = null;
-    state.validMoves = [];
+    resetSelectionState();
     renderBoard();
   }
 
@@ -177,8 +185,7 @@ export function executeMove(fromIndex, toIndex) {
   // Check if player ran out of dice or has zero valid moves remaining
   if (state.currentRoll.length === 0) {
     // Normal turn completion: all dice used        
-    state.selectedPoint = null;
-    state.validMoves = [];
+    resetSelectionState();
     renderBoard();
   } else if (!hasAnyLegalMoves()) {
     // Turn stuck: remaining dice have no valid moves
@@ -192,8 +199,7 @@ export function executeMove(fromIndex, toIndex) {
     // Brief timeout so player can see the message before turn switches
     setTimeout(() => {
       // Keep state intact while message displays, then clear and switch
-      state.selectedPoint = null;
-      state.validMoves = [];
+      resetSelectionState();
       state.currentRoll = [];
       switchTurn();
     }, 3000);
@@ -203,6 +209,8 @@ export function executeMove(fromIndex, toIndex) {
 // ==================================
 //  PUBLIC ACTION EXPORTS
 // ==================================
+
+
 
 /**
  * Handle point click interactions with hybrid hover awareness:
@@ -221,9 +229,7 @@ export function handlePointClick(pointIndex) {
 
   // Deslection on clicking the already selected origin
   if (state.selectedPoint !== null && state.selectedPoint === normalizedIndex) {
-    state.selectedPoint = null;
-    state.validMoves = [];
-    clearHoverHighlights();
+    resetSelectionState();
     renderBoard();
     return;
   }
@@ -240,9 +246,7 @@ export function handlePointClick(pointIndex) {
 
     if (isTargetMatch) {      
       const originToMove = activeOrigin;
-      state.selectedPoint = null;
-      state.validMoves = [];
-      clearHoverHighlights();
+      resetSelectionState();
       executeMove(originToMove, normalizedIndex); // Execute move directly
       return;
     }
@@ -278,8 +282,7 @@ export function handlePointClick(pointIndex) {
 
   // Ignore clicks on empty points or opponent checkers
   if (pointOwner !== player || pointCount <= 0) {
-    state.selectedPoint = null;
-    state.validMoves = [];
+    resetSelectionState();
     renderBoard();
     return;
   }
@@ -298,8 +301,7 @@ export function handlePointClick(pointIndex) {
   if (targets.length === 0) {
     // Notify player if clicked checker has no legal moves
     logStatus("No valid moves can be made from this point.", 1500);
-    state.selectedPoint = null;
-    state.validMoves = []
+    resetSelectionState();
     renderBoard();
     return;
   }
@@ -313,8 +315,7 @@ export function handlePointClick(pointIndex) {
     return;
   }
   // Otherwise -> Fast auto-move
-  state.selectedPoint = null;
-  state.validMoves = []
+  resetSelectionState();
   attemptAutoMove(normalizedIndex);     
 }
 
@@ -379,8 +380,7 @@ function attemptAutoMove(fromIndex) {
 
   // Execute movement directly
   if (targetDestination !== null) {
-    state.selectedPoint = null;
-    state.validMoves = [];
+    resetSelectionState();
     executeMove(fromIndex, targetDestination);
   }
 }
@@ -443,8 +443,8 @@ export function undoLastMove() {
   state.borneOff = previousState.borneOff;
   state.currentRoll = previousState.currentRoll;
 
-  state.selectedPoint = null; // Keep selection state empty to suppress rectangles
-  state.validMoves = [];  
+  // Keep selection state empty to suppress rectangles
+  resetSelectionState();
 
   console.log("Last move undone.");
   renderBoard();
