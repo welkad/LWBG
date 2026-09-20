@@ -221,3 +221,23 @@ export function clearStatusQueue() {
     temporaryMessageTimer = null;
   }
 }
+
+/**
+ * Directly set and display a persistent status message (useful for undo/restore).
+ * @param {string} message 
+ */
+export function setStatus(message) {
+  if (temporaryMessageTimer) {
+    clearTimeout(temporaryMessageTimer);
+    temporaryMessageTimer = null;
+  }
+  messageQueue = []; // Clear queue
+  isDisplaying = false;
+  
+  currentMessage = formatPlayerNames(message);
+  
+  const statusBar = document.getElementById('game-status-bar');
+  if (statusBar) {
+    statusBar.textContent = currentMessage;
+  }
+}

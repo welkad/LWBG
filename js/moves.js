@@ -2,7 +2,7 @@
 import { DIRECTIONS, getValidMovesForPoint, findDiceSequenceForMove, hasAnyLegalMoves, canPlayerBearOff, isCheckerOnHighestPoint} from './rules.js';
 import { state, handleGameEnd, switchTurn } from './state.js';
 import { clearHoverHighlights, renderBoard, updateScoreBoardUI } from './board.js';
-import { clearStatusQueue, logStatus } from './ui.js';
+import { clearStatusQueue, logStatus, setStatus } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
 
 /**
@@ -10,12 +10,17 @@ import { renderDiceUI } from './dice-renderer.js';
  * @param {number[]} consumedDice - Array of dice values consumed during the move
  */
 function recordMoveSnapshot(consumedDice) {
+  // Capture current status element text or state message
+  const currentStatusEl = document.getElementById('game-status-bar');
+  const activeMessage = currentStatusEl ? currentStatusEl.textContent : '';
+
   state.moveHistory.push({    
     consumedDice: consumedDice,
     boardState: structuredClone(state.boardState),
     bar: { ...state.bar },
     borneOff: {...state.borneOff},
-    currentRoll: [...state.currentRoll]
+    currentRoll: [...state.currentRoll],
+    statusMessage: activeMessage
   });
 }
 
@@ -445,6 +450,7 @@ export function autoSelectBarIfRequired() {
 
     // Check if trapped on BAR point with no legal moves available
     if (validBarMoves.length === 0) {
+      clearStatusQueue(); // Remove any other pending messages 
       logStatus(`${player} is trapped on the bar! All entry points are blocked.`, 2000);
 
       // Clear remaining dice and automatically switch turn after a brief delay
@@ -488,8 +494,13 @@ export function undoLastMove() {
   // Keep selection state empty to suppress rectangles
   resetSelectionState();
 
-  // Restore logStatus message
-  logStatus(`${state.currentPlayer} rolled: [${state.currentRoll.join(', ')}]`);
+  // Restore logStatus message saved in snapshot
+  if (previousState.statusMessage) {
+    setStatus(previousState.statusMessage);
+  } else {
+    // Fall back if snapshot had no stored message
+    setStatus(`${state.currentPlayer} rolled: [${state.currentRoll.join(', ')}]`);
+  }
 
   console.log("Last move undone.");
   renderBoard();
