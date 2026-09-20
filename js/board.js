@@ -125,6 +125,13 @@ function createPointDOM(index) {
   }
   // Direct event listener invoking move handling logic
   pointEl.addEventListener('click', () => handlePointClick(index));
+
+  // Right-click event listener (right-click = use Die #2)
+  pointEl.addEventListener('contextmenu', (event) => {
+    event.preventDefault(); // Suppress browswer context-menu
+    handlePointClick(index, true);
+  });
+
   attachPointHoverListeners(pointEl, index);
   return pointEl;
 }
@@ -199,6 +206,10 @@ export function renderBar() {
     blackBarEl.classList.toggle('selected', isSelected);
     blackBarEl.classList.toggle('clickable', isBlackActive);
     blackBarEl.onclick = isBlackActive ? () => handlePointClick('bar') : null;
+    blackBarEl.oncontextmenu = isBlackActive ? (e) => {
+      e.preventDefault();
+      handlePointClick('bar', true);      
+    } : null;
   }
   if (whiteBarEl) {
     const isWhiteActive = state.currentPlayer === 'white' && whiteCount > 0;
@@ -207,6 +218,10 @@ export function renderBar() {
     whiteBarEl.classList.toggle('selected', isSelected);
     whiteBarEl.classList.toggle('clickable', isWhiteActive);
     whiteBarEl.onclick = isWhiteActive ? () => handlePointClick('bar') : null;
+    whiteBarEl.oncontextmenu = isWhiteActive ? (e) => {
+      e.preventDefault();
+      handlePointClick('bar', true);      
+    } : null;
   }
 }
 

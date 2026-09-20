@@ -77,12 +77,17 @@ export function isCheckerOnHighestPoint(fromIndex, player) {
 
 /**
  * Calculates valid destinations for a selected point or bar piece.
- * @param {number|string} fromIndex - Index (0-23) or 'bar' * 
+ * @param {number|string} fromIndex - Index (0-23) or 'bar'
+ * @param {boolean} [useSecondDie=false] - To target state.currentRoll[1] or not
  * @returns {Array<number>|'off'} Array of valid target indices
  */
-export function getValidMovesForPoint(fromIndex) {
+export function getValidMovesForPoint(fromIndex, useSecondDie = false) {
   const player = state.currentPlayer;
   if (!player || !state.hasRolled || state.currentRoll.length === 0) return [];  
+
+  // If second die value requested, make sure it exists
+  if (useSecondDie && state.currentRoll.length < 2) return [];
+
   const dir = DIRECTIONS[player];
 
   // Rule: Must enter from bar first if checkers are hit
@@ -91,7 +96,11 @@ export function getValidMovesForPoint(fromIndex) {
   }
 
   const validTargets = new Set();
-  const availableDice = [...state.currentRoll]; // Unique die values available
+  // Determine avialable dice based on useSecondDie preference
+  const availableDice = useSecondDie
+    ? [state.currentRoll[1]]
+    : [...state.currentRoll]; 
+
   const isBearOffEligible = canPlayerBearOff(player);  // Check if bear-off possible
 
   /**

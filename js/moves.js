@@ -217,14 +217,18 @@ export function executeMove(fromIndex, toIndex) {
  * - Direct fast clicks invoke instant auto-move (first available die).
  * - Clicking while hover highlights are active locks choices for target selection.
  * @param {number|string} pointIndex - 0-23 or 'bar'
+ * @param {boolean} [useSecondDie=false] - Use second die when right-click on mouse
  */
-export function handlePointClick(pointIndex) {
+export function handlePointClick(pointIndex, useSecondDie = false) {
   if (pointIndex === null || pointIndex === undefined || state.isInputLocked) {
     return;  // Check for null and undefined so index 0 isn't treated as falsy!
   }
 
   const player = state.currentPlayer; // Guard: ensure active player exists 
   if (!player || !state.hasRolled || state.currentRoll.length === 0) return;
+
+  // If requesting second die value, first ensure a second value exists
+  if (useSecondDie && state.currentRoll.length < 2) return;
 
   const normalizedIndex = (pointIndex === 'bar' || pointIndex === 'off')
     ? pointIndex : Number(pointIndex);
@@ -311,8 +315,8 @@ export function handlePointClick(pointIndex) {
     return;
   }
 
-  // Calculate valid moves
-  const rawTargets = getValidMovesForPoint(normalizedIndex);
+  // Calculate valid moves (also passing useSecondDie paramater)
+  const rawTargets = getValidMovesForPoint(normalizedIndex, useSecondDie);
   /** @type {Array<number|'off'>} */
   const targets = Array.isArray(rawTargets) ? rawTargets : [rawTargets];
 
@@ -331,21 +335,25 @@ export function handlePointClick(pointIndex) {
     renderBoard();
     return;
   }
-  // Otherwise -> Fast auto-move
+  // Otherwise -> Fast auto-move (also passing useSecondDie paramater)
   resetSelectionState();
-  attemptAutoMove(normalizedIndex);     
+  attemptAutoMove(normalizedIndex, useSecondDie);     
 }
 
 /**
  * Attempt to automatically move a checker from source point based on dice order.
  * @param {number|string} fromIndex - 0-23 or 'bar'
+ * @param {boolean} [useSecondDie=false] - Whether to play the second die value or not
  */
-function attemptAutoMove(fromIndex) {
+function attemptAutoMove(fromIndex, useSecondDie = false) {
   const player = state.currentPlayer;
   if (!player || !state.currentRoll || state.currentRoll.length === 0) return;
 
+  // If second die value is requested make sure it exists
+  if (useSecondDie && state.currentRoll.length < 2) return;
+
   const dir = DIRECTIONS[player];
-  const rawMoves = getValidMovesForPoint(fromIndex);
+  const rawMoves = getValidMovesForPoint(fromIndex, useSecondDie);
 
   /** @type {Array<number|'off'>} */
   const validMoves = Array.isArray(rawMoves) ? rawMoves : [rawMoves];
@@ -374,19 +382,27 @@ function attemptAutoMove(fromIndex) {
   /** @type {number|string|null} */
   let targetDestination = null;
 
-  // Priority 1: Left die (state.currentRoll[0])
-  if (state.currentRoll.length > 0) {
-    const leftTarget = calculateTarget(state.currentRoll[0]);
-    if (validMoves.includes(leftTarget)) {
-      targetDestination = leftTarget;
+  if (useSecondDie) {
+    // Mode A: Specifically evaluate second die (state.currentRoll[1])
+    const secondDieTarget = calculateTarget(state.currentRoll[1]);
+    if (validMoves.includes(secondDieTarget)) {
+      targetDestination = secondDieTarget;
+    } else {
+      // Mode B: Standard auto-move prioritizing first die
+      // Priority 1: Left die (state.currentRoll[0])
+      if (state.currentRoll.length > 0) {
+        const leftTarget = calculateTarget(state.currentRoll[0]);
+        if (validMoves.includes(leftTarget)) {
+          targetDestination = leftTarget;
+        }
+      }
     }
-  }
-
-  // Priority 2: Right die (state.currentRoll[1]) if left die is blocked
-  if (targetDestination === null && state.currentRoll.length > 1) {   
-    const rightTarget = calculateTarget(state.currentRoll[1]);
-    if (validMoves.includes(rightTarget)) {
-      targetDestination = rightTarget;
+    // Priority 2: Right die (state.currentRoll[1]) if left die is blocked
+    if (targetDestination === null && state.currentRoll.length > 1) {   
+      const rightTarget = calculateTarget(state.currentRoll[1]);
+      if (validMoves.includes(rightTarget)) {
+        targetDestination = rightTarget;
+      }
     }
   }
 
