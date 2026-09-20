@@ -1,7 +1,8 @@
 // js/debug.js - Developer utilities and trace logging toggleable via keypress ('T')
-import { state } from './state.js';
-import { renderBoard, renderBar } from './board.js';
+import { renderBoard, renderBar, updatePointLabels } from './board.js';
 import { runMoveTests } from './test-moves.js';
+import { renderDiceUI } from './dice-renderer.js';
+import { state } from './state.js';
 
 /**
  * Global debug flag. Toggle on or off by pressing 'T'.
@@ -86,6 +87,9 @@ function detachClickTracker() {
  * Attach state-manipulation debug functions to the window object.
  */
 function attachWindowDebugHelpers() {
+  // Expose state globally for browser console debugging
+  /** @type {any} */(window).state = state;
+
   // Expose the unit test harness on window
   /** @type {any} */ (window).runMoveTests = runMoveTests;
 
@@ -123,5 +127,56 @@ function attachWindowDebugHelpers() {
     renderBar();
     console.log(`%c[DEBUG] Bar set -> Black: ${blackCount}, White: ${whiteCount}`,
       'color: #00bcd4;');
+  };
+
+  /**
+   * Prepare an endgame state where all 15 checkers for both players 
+   * are positioned within their respective home boards ready to bear off.
+   */
+  /** @type {any} */ (window).debugSetupEndgame = function() {
+    // Clear all 24 points on the board
+    for (let i = 0; i < 24; i++) {
+      state.boardState[i] = { player: null, count: 0 };
+    }
+
+    // Clear bar and borne-off counts
+    state.bar.white = 0;
+    state.bar.black = 0;
+    state.borneOff.white = 0;
+    state.borneOff.black = 0;
+
+    // Set White in Home Board (Points 0-5) -> 15 checkers total
+    // E.g., distributed evenly: 3 checkers on points 0 through 4
+    state.boardState[0] = { player: 'black', count: 3 };
+    state.boardState[1] = { player: 'black', count: 3 };
+    state.boardState[2] = { player: 'black', count: 3 };
+    state.boardState[3] = { player: 'black', count: 3 };
+    state.boardState[4] = { player: 'black', count: 3 };
+
+    // Set Black in Home Board (Points 18-23) -> 15 checkers total
+    // E.g., distributed evenly: 3 checkers on points 19 through 23
+    state.boardState[19] = { player: 'white', count: 3 };
+    state.boardState[20] = { player: 'white', count: 3 };
+    state.boardState[21] = { player: 'white', count: 3 };
+    state.boardState[22] = { player: 'white', count: 3 };
+    state.boardState[23] = { player: 'white', count: 3 };
+
+    // Configure active turn state
+    state.gamePhase = 'turns';
+    state.currentPlayer = 'black';
+    state.hasRolled = true;
+    state.currentRoll = [6, 4];    
+    state.selectedPoint = null;
+    state.validMoves = [];
+
+    // Refresh the board display & UI
+    if (typeof updatePointLabels === 'function') updatePointLabels(state.currentPlayer);
+    if (typeof renderBoard === 'function') renderBoard();
+    if (typeof renderDiceUI === 'function') renderDiceUI();
+
+    console.log(
+      '%c[DEBUG] Endgame set: Both players in home board ready to bear off!',
+      'color: #4caf50; font-weight: bold;'
+    );
   };
 }
