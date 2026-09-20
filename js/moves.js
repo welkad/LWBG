@@ -1,5 +1,5 @@
 // js/moves.js - Move validation, legal destination calculation, move execution, and undo history.
-import { DIRECTIONS, getValidMovesForPoint, findDiceSequenceForMove, hasAnyLegalMoves} from './rules.js';
+import { DIRECTIONS, getValidMovesForPoint, findDiceSequenceForMove, hasAnyLegalMoves, canPlayerBearOff, isCheckerOnHighestPoint} from './rules.js';
 import { state, handleGameEnd, switchTurn } from './state.js';
 import { clearHoverHighlights, renderBoard, updateScoreBoardUI } from './board.js';
 import { clearStatusQueue, logStatus } from './ui.js';
@@ -320,9 +320,17 @@ export function handlePointClick(pointIndex, useSecondDie = false) {
   /** @type {Array<number|'off'>} */
   const targets = Array.isArray(rawTargets) ? rawTargets : [rawTargets];
 
+  // Notify player if clicked checker has no legal moves
   if (targets.length === 0) {
-    // Notify player if clicked checker has no legal moves
-    logStatus("No valid moves can be made from this point.", 1500);
+    const isBearOffMode = canPlayerBearOff(player);    
+    // Customized message during bear off phase of the game
+    if (isBearOffMode && typeof normalizedIndex === 'number'
+      && !isCheckerOnHighestPoint(normalizedIndex, player)) {
+        logStatus("Must bear off from highest point first!", 2000);
+      } else {
+        logStatus("No valid moves can be made from this point.", 1500);
+      }
+    
     resetSelectionState();
     renderBoard();
     return;
