@@ -219,7 +219,9 @@ export function executeMove(fromIndex, toIndex) {
  * @param {number|string} pointIndex - 0-23 or 'bar'
  */
 export function handlePointClick(pointIndex) {
-  if (!pointIndex || state.isInputLocked) return;  // Prevent unwanted input
+  if (pointIndex === null || pointIndex === undefined || state.isInputLocked) {
+    return;  // Check for null and undefined so index 0 isn't treated as falsy!
+  }
 
   const player = state.currentPlayer; // Guard: ensure active player exists 
   if (!player || !state.hasRolled || state.currentRoll.length === 0) return;

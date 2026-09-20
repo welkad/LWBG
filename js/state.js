@@ -234,3 +234,6 @@ export function handleGameEnd(winner, resigningPlayer = null) {
     renderDiceUI(); // Display Y/N dice and update legend
   }, GAME_OVER_BANNER_DURATION_MS);  // Wait until Victory message is finished
 }
+
+// DEBUG STEP
+/** @type {any} */(window).state = state;

@@ -381,7 +381,10 @@ export function attachPointHoverListeners(pointEl, pointIndex) {
       clearTimeout(hoverTimer);
       hoverTimer = null;
     }
-    clearHoverHighlights();
+    // Only clear hover highlights if no point is currently selected
+    if (state.selectedPoint === null) {
+      clearHoverHighlights();
+    }
   });
 }
 
