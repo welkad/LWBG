@@ -386,6 +386,11 @@ export function attachPointHoverListeners(pointEl, pointIndex) {
 }
 
 export function clearHoverHighlights() {
+  // Cancel any pending hover timer
+  if (hoverTimer) {
+    clearTimeout(hoverTimer);
+    hoverTimer = null;
+  }
   document.querySelectorAll('.hover-selected, .hover-target').forEach((el) => {
     el.classList.remove('hover-selected', 'hover-target');
   });
