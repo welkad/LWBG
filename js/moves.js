@@ -459,7 +459,7 @@ export function autoSelectBarIfRequired() {
 
       setTimeout(() => {
         switchTurn(); // Automatically resets isInputLocked = false
-      }, 3000);
+      }, 2000);
       return false; // Signal that no valid moves exist
     }
     // Legal moves exist
