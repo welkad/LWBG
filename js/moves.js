@@ -421,7 +421,7 @@ export function autoSelectBarIfRequired() {
 
     // Check if trapped on BAR point with no legal moves available
     if (validBarMoves.length === 0) {
-      logStatus(`${player} is trapped on the bar! All entry points are blocked.`, 3000);
+      logStatus(`${player} is trapped on the bar! All entry points are blocked.`, 2000);
 
       // Clear remaining dice and automatically switch turn after a brief delay
       state.currentRoll = [];
