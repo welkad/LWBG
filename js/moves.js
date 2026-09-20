@@ -482,10 +482,14 @@ export function undoLastMove() {
   state.boardState = previousState.boardState;
   state.bar = previousState.bar;
   state.borneOff = previousState.borneOff;
-  state.currentRoll = previousState.currentRoll;
+  state.currentRoll = [...previousState.currentRoll]
+    .sort((a, b) => b - a); // Keep highest roll first
 
   // Keep selection state empty to suppress rectangles
   resetSelectionState();
+
+  // Restore logStatus message
+  logStatus(`${state.currentPlayer} rolled: [${state.currentRoll.join(', ')}]`);
 
   console.log("Last move undone.");
   renderBoard();

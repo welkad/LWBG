@@ -2,6 +2,7 @@
 import { renderBoard, renderBar, updatePointLabels } from './board.js';
 import { runMoveTests } from './test-moves.js';
 import { renderDiceUI } from './dice-renderer.js';
+import { logStatus } from './ui.js';
 import { state } from './state.js';
 
 /**
@@ -168,6 +169,9 @@ function attachWindowDebugHelpers() {
     state.currentRoll = [6, 4];    
     state.selectedPoint = null;
     state.validMoves = [];
+
+    // Update logStatus call
+    logStatus(`${state.currentPlayer} rolled: [${state.currentRoll.join(', ')}]`);
 
     // Refresh the board display & UI
     if (typeof updatePointLabels === 'function') updatePointLabels(state.currentPlayer);
