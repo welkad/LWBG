@@ -307,7 +307,7 @@ export function updatePointLabels(currentPlayer) {
 
 /** @type {ReturnType<typeof setTimeout> | null} */
 let hoverTimer = null;
-const DWELL_DELAY_MS = 750; // millisecond threshold for hover highlights
+const DWELL_DELAY_MS = 1000; // millisecond threshold for hover highlights
 
 /**
  * Attach dwell-hover preview logic to point elements.
