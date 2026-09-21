@@ -330,6 +330,8 @@ const DWELL_DELAY_MS = 1000; // millisecond threshold for hover highlights
  *  @param {number | 'bar'} pointIndex
  */
 export function attachPointHoverListeners(pointEl, pointIndex) {
+  if (!state.showHoverHighlights) return; // Disable if set to false (default)
+
   pointEl.addEventListener('mouseenter', () => {
     if (state.selectedPoint !==null) return;  // Suppress hover preview if point selected
     // Ensure player has rolled and still has remaining dice to play

@@ -11,7 +11,7 @@ import { updateCubePositionUI } from './doubling-cube.js';
 import { calculateGameOutcome } from './rules.js';
 import { renderDiceUI } from './dice-renderer.js';
 
-const GAME_OVER_BANNER_DURATION_MS = 5000;  // Display victory message for 5s
+const GAME_OVER_BANNER_DURATION_MS = 3000;  // Display victory message duration
 
 /** @type {GameState} */
 export const state = {
@@ -22,6 +22,7 @@ export const state = {
     selectedPoint: null,              // Point index (0-23) or 'bar'    
     validMoves: [],                   // Target indices (0-23 or 'off') for checkers
     moveHistory:[],                   // Holds snapshots of boardState, bar, currentRoll
+    showHoverHighlights: false,       // Turn on/off selection/targets - press 'H' key
 
     cubeValue: 1,                     // Default starting multiplier
     cubeOwner: 'center',              // 'center', 'white', of 'black'

@@ -6,6 +6,7 @@ import { handleResignation, state, switchTurn } from './state.js';
 import { handleCubeClick, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, toggleDiceOrder } from './dice-rolling.js';
 import { undoLastMove } from './moves.js';
+import { clearHoverHighlights } from './board.js';
 
 /** 
  * - Space / R : Roll dice
@@ -134,6 +135,18 @@ export function setupKeyboardListeners() {
           clearStatusQueue();
           logStatus("Are you sure you want to resign?");
           renderDiceUI();
+        }
+        break;
+
+      // HIGHLIGHT TOGGLE
+      case 'KeyH':
+        event.preventDefault();
+        state.showHoverHighlights = !state.showHoverHighlights;
+        const highlightStatus = state.showHoverHighlights ? "enabled" : "disabled";
+        logStatus(`Hover highlights ${highlightStatus}.`, 1500);
+        // Clear active hover effects immediately if disabled mid-hover
+        if(!state.showHoverHighlights && typeof clearHoverHighlights === 'function') {
+          clearHoverHighlights();
         }
         break;
 

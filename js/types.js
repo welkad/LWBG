@@ -69,6 +69,7 @@
  * @property {boolean} isRolling - True while dice rolling animation is active.
  * @property {boolean} hasRolled - True if player rolled dice during current turn.
  * @property {boolean} isInputLocked - Block user interaction during transition delays.
+ * @property {boolean} showHoverHighlights - Toggle selection/target point highlights.
  */
 
 /**
