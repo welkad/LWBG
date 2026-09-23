@@ -27,6 +27,8 @@ A lightweight, vanilla JavaScript implementation of Backgammon designed to run e
     │        
     ├── ui.js                # Status messages, game notifications, legend updates, and general UI feedback
     ├── keyboard.js          # Global keyboard shortcuts for game actions
+    ├── mouse.js             # Mouse & drag-and-drop handlers
+    │  
     ├── types.js             # Central JSDoc type definitions for state, point data, and custom window objects
     ├── debug.js             # Developer utilities and trace logging toggleable via keypress ('T')
     └── test-moves.js        # Automated move-validation test harness

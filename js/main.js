@@ -2,6 +2,7 @@
 import { initBoardState } from './state.js';
 import { renderBoard } from './board.js';
 import { updateTurnUI, initDiceListeners } from './dice.js';
+import { setupMouseAndDragListeners } from './mouse.js';
 import { setupKeyboardListeners } from './keyboard.js';
 import { renderDiceUI } from './dice-renderer.js';
 import { initDebugModule } from './debug.js';
@@ -25,6 +26,7 @@ function initApp() {
 
     // Attach click handlers and keyboard listeners
      initDiceListeners();
+     setupMouseAndDragListeners();
      setupKeyboardListeners();
 }
 

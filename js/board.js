@@ -1,4 +1,4 @@
-// js/board.js - Handles DOM creation for points and rendering checkers onto the board layout.
+// js/board.js - Handle DOM creation for points and rendering checkers onto the board.
 import { state, calculatePipCount } from './state.js';
 import { handlePointClick} from './moves.js';
 import { getValidMovesForPoint } from './rules.js';
@@ -59,19 +59,20 @@ function createPointDOM(index) {
   pointEl.className = `point ${pointColorClass}`; // Board triangle color class
   pointEl.dataset.point = String(index);
   pointEl.dataset.index = String(index);
+  pointEl.dataset.pointIndex = String(index);
 
   // Adjust Z-Index so point stacks overflow on top of adjacent triangles
   // Top row (12-23) & bottom row (11-0) layering order
   pointEl.style.zIndex = String(index >= 12 ? (30 - index) : (index + 10));
 
   const pointData = state.boardState[index];
-  const isOwner = pointData && pointData.player === state.currentPlayer && pointData.count > 0;
+  const isOwner = pointData && pointData.player === state.currentPlayer
+    && pointData.count > 0;
   const isValidTarget = state.validMoves && state.validMoves.includes(index);
 
-  // Only allow clickable cursor during turns, after rolling, and on valid pieces/targets
-  const isCickable = state.gamePhase === 'turns' && 
-                      state.hasRolled &&
-                      (isOwner || isValidTarget);
+  // Clickable cursor only during turns, after rolling, for valid pieces/targets
+  const isCickable = state.gamePhase === 'turns'
+    && state.hasRolled && (isOwner || isValidTarget);
 
   if (isCickable) {
     pointEl.classList.add('clickable');
@@ -93,6 +94,13 @@ function createPointDOM(index) {
     for (let i = 0; i < pointData.count; i++) {
       const checkerEl = document.createElement('div');
       checkerEl.className = `checker ${pieceColorClass}`;
+
+      // Enable drag on active player's checkers after rolling
+      if (state.hasRolled && pointData.player === state.currentPlayer) {
+        checkerEl.setAttribute('draggable', 'true');
+      } else {
+        checkerEl.removeAttribute('draggable');
+      }
 
       // Mini-column overflow logic (up to 5 checkers per column)
       if (i >= 5) {
@@ -149,9 +157,20 @@ function renderTrayCheckers(containerEl, count, colorClass, isTop) {
   if (!containerEl) return;
   containerEl.innerHTML = '';
 
+  const isCurrentPlayerColor =
+    (state.currentPlayer === 'black' && colorClass.includes('black')) ||
+    (state.currentPlayer === 'white' && colorClass.includes('white'));
+
   for (let i = 0; i < count; i++) {
     const checker = document.createElement('div');
     checker.className = `checker ${colorClass}`;
+
+    // Enable drag if checkers belong to active player and dice are rolled
+    if (state.hasRolled && isCurrentPlayerColor) {
+      checker.setAttribute('draggable', 'true');
+    } else {
+      checker.removeAttribute('draggable');
+    }
 
     // Apply stacking/staggering logic once for both Bar & Home Pockets
     if (i >= 5) {

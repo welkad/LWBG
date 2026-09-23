@@ -1,7 +1,7 @@
 // ============================================
 // js/mouse.js - Mouse & Drag-and-Drop Handlers
 // ============================================
-import { clearHoverHighlights, renderBoard } from "./board.js";
+import { clearHoverHighlights } from "./board.js";
 import { executeMove } from "./moves.js";
 import { state } from "./state.js";
 
@@ -12,7 +12,7 @@ let draggedFromIndex = null;
  * Initialize all mouse drag-and-drop event listeners on the board.
  */
 export function setupMouseAndDragListeners() {
-  const boardEl = document.getElementById('master-board');
+  const boardEl = document.querySelector('.master-board');
   if (!boardEl) return;
 
   // ---------------------------------------
@@ -25,14 +25,19 @@ export function setupMouseAndDragListeners() {
     const checkerEl = target.closest('.checker');
     if (!checkerEl) return;
 
-    const pointAttr = checkerEl.parentElement?.dataset.pointIndes;
+    const pointContainer = /** @type {HTMLElement | null} */ (
+      checkerEl.closest('[data-point-index]')
+    );
+
+    const pointAttr = pointContainer?.dataset.pointIndex;
     if (pointAttr === undefined) return;
 
     draggedFromIndex = pointAttr === 'bar' ? 'bar' : parseInt(pointAttr, 10);
 
-    if (e.dataTransfer) {
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', String(draggedFromIndex));
+    const dragEvt = /** @type {DragEvent} */ (e);
+    if (dragEvt.dataTransfer) {
+      dragEvt.dataTransfer.effectAllowed = 'move';
+      dragEvt.dataTransfer.setData('text/plain', String(draggedFromIndex));
     }
 
     checkerEl.classList.add('dragging');
@@ -52,8 +57,9 @@ export function setupMouseAndDragListeners() {
   // Drag Over
   boardEl.addEventListener('dragover', (e) => {
     e.preventDefault(); // Required to allow drop
-    if (e.dataTransfer) {
-      e.dataTransfer.dropEffect = 'move';
+    const dragEvt = /** @type {DragEvent} */ (e);
+    if (dragEvt.dataTransfer) {
+      dragEvt.dataTransfer.dropEffect = 'move';
     }
   });
 
@@ -86,6 +92,9 @@ export function setupMouseAndDragListeners() {
     const targetPointEl = /** @type {HTMLElement | null} */ (
       /** @type {HTMLElement} */ (e.target).closest('[data-point-index]')
     );
+
+    console.log('Drop target:', targetPointEl, 'From:', draggedFromIndex);  // DEBUG
+
     if (!targetPointEl) return;
 
     const toAttr = targetPointEl.dataset.pointIndex;

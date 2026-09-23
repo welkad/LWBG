@@ -7,7 +7,25 @@
     border-radius: 50%; 
     box-sizing: border-box;
     margin: 0; 
-    z-index: 2; 
+    z-index: 2;
+
+    user-select: none;
+    -webkit-user-drag: element;
+    cursor: grab;
+}
+
+.checker:active {
+  cursor: grabbing;
+}
+
+.checker.dragging {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+[data-point-index].drag-over {
+  outline: 2px solid #e2b04c;
+  background-color: rgba(226, 176, 76, 0.2);
 }
 
 .white-piece { 

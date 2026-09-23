@@ -120,6 +120,16 @@ export function executeMove(fromIndex, toIndex) {
   // Resolve exact sequence of individual dice needed for this move
   const dieSequence =
     findDiceSequenceForMove(fromIndex, toIndex, state.currentRoll, player);
+
+  // DEBUG
+  console.log('DRAG MOVE CHECK:', {
+    fromIndex,
+    toIndex,
+    player,
+    currentRoll: state.currentRoll,
+    dieSequence
+  });
+
   if (!dieSequence) return;
   
   // Record single snapshot for undo history before executing step sequence
