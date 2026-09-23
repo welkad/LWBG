@@ -93,7 +93,7 @@ export function setupMouseAndDragListeners() {
       /** @type {HTMLElement} */ (e.target).closest('[data-point-index]')
     );
 
-    console.log('Drop target:', targetPointEl, 'From:', draggedFromIndex);  // DEBUG
+    // console.log('Drop target:', targetPointEl, 'From:', draggedFromIndex);  // DEBUG
 
     if (!targetPointEl) return;
 

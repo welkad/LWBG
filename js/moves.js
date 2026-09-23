@@ -122,13 +122,13 @@ export function executeMove(fromIndex, toIndex) {
     findDiceSequenceForMove(fromIndex, toIndex, state.currentRoll, player);
 
   // DEBUG
-  console.log('DRAG MOVE CHECK:', {
-    fromIndex,
-    toIndex,
-    player,
-    currentRoll: state.currentRoll,
-    dieSequence
-  });
+  // console.log('DRAG MOVE CHECK:', {
+  //   fromIndex,
+  //   toIndex,
+  //   player,
+  //   currentRoll: state.currentRoll,
+  //   dieSequence
+  // });
 
   if (!dieSequence) return;
   

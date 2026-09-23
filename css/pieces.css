@@ -9,9 +9,9 @@
     margin: 0; 
     z-index: 2;
 
-    user-select: none;
+    /* user-select: none;
     -webkit-user-drag: element;
-    cursor: grab;
+    cursor: grab; */
 }
 
 .checker:active {
@@ -19,7 +19,7 @@
 }
 
 .checker.dragging {
-  opacity: 0.4;
+  opacity: 0.8;
   pointer-events: none;
 }
 
