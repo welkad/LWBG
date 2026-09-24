@@ -47,6 +47,34 @@ export function updateScoreBoardUI() {
   if (whiteScoreEl) whiteScoreEl.textContent = `${state.scores.white}`;
 }
 
+/**
+ * Helper function to calculate checker positioning if a point has more than 5.
+ * @param {number} index - Zero based index of the checker (0-14) on the point.
+ * @returns {{
+ *  colIndex: number, rowIndex: number, offsetX: number, totalOffsetY: number
+ * }} - Calculated offsets and column metadata.
+ */
+function getCheckerPosition(index) {
+  // Mini-column overflow logic (up to 5 checkers per column)  
+  const colIndex = Math.floor(index / 5); // 0 for 0-4, 1 for 5-9, 2 for 10-14
+  const rowIndex = index % 5;             // 0-4 inside each column
+
+  // Horizontal shift: 12px right per extra column (tune as needed)
+  const offsetX = colIndex * 6;
+
+  // Staggered vertical base offset + standard spacing
+  const colStaggerY = colIndex * 10;  // up/down PX per column
+  const rowSpacingY = rowIndex * 36;   // overlap per checker
+  const totalOffsetY = colStaggerY + rowSpacingY;
+
+  return {
+    colIndex,
+    rowIndex,
+    offsetX,
+    totalOffsetY
+  };
+}
+
 // Update point and checker listeners
 /**
  * @param {number} index
@@ -102,18 +130,10 @@ function createPointDOM(index) {
         checkerEl.removeAttribute('draggable');
       }
 
-      // Mini-column overflow logic (up to 5 checkers per column)
+      // Overflow logic (if more than 5 checkers per column)
       if (i >= 5) {
-        const colIndex = Math.floor(i / 5); // Col 1 for pieces 5-9, Col 2 for pieces 10-14
-        const rowIndex = i % 5;             // Row height position (0 to 4) inside new column
-
-        // Horizontal shift: 12px right per extra column (tune as needed)
-        const offsetX = colIndex * 6;
-
-        // Staggered vertical base offset + standard spacing
-        const colStaggerY = colIndex * 10;  // up/down PX per column
-        const rowSpacingY = rowIndex * 36;   // overlap per checker
-        const totalOffsetY = colStaggerY + rowSpacingY;
+        // Pass the exact zero-based loop index 'i'
+        const { colIndex, rowIndex, offsetX, totalOffsetY } = getCheckerPosition(i);
 
         checkerEl.classList.add('stacked');
         checkerEl.style.transform = `translateX(calc(-50% + ${offsetX}px))`;
@@ -126,7 +146,7 @@ function createPointDOM(index) {
           checkerEl.style.bottom = `${totalOffsetY}px`;
         }
         // Keep layered  checkers above the base stack
-        checkerEl.style.zIndex = String(10 + i);
+        checkerEl.style.zIndex = String(10 + (colIndex * 10) + rowIndex);
       }
       pointEl.appendChild(checkerEl);
     }

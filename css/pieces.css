@@ -8,15 +8,11 @@
     box-sizing: border-box;
     margin: 0; 
     z-index: 2;
-
-    /* user-select: none;
-    -webkit-user-drag: element;
-    cursor: grab; */
 }
 
-.checker:active {
+/* .checker:active {
   cursor: grabbing;
-}
+} */
 
 .checker.dragging {
   opacity: 0.8;

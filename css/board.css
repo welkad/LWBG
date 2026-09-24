@@ -65,6 +65,7 @@ body {
 /* Structural rules for the triangle shapes */
 .point { 
     position: relative;
+    overflow: visible;
     height: 100%;     
     display: flex; 
     align-items: center; 
