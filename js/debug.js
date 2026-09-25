@@ -153,13 +153,13 @@ function attachWindowDebugHelpers() {
     // state.boardState[2] = { player: 'black', count: 3 };
     // state.boardState[3] = { player: 'black', count: 3 };
     // state.boardState[4] = { player: 'black', count: 3 };
-    state.boardState[5] = { player: 'black', count: 10 };
+    state.boardState[5] = { player: 'black', count: 15 };
     // state.boardState[7] = { player: 'black', count: 6 };
 
     // Set Black in Home Board (Points 18-23) -> 15 checkers total
     // E.g., distributed evenly: 3 checkers on points 19 through 23
     // state.boardState[16] = { player: 'white', count: 6 };
-    state.boardState[18] = { player: 'white', count: 10 };
+    state.boardState[18] = { player: 'white', count: 15 };
     // state.boardState[19] = { player: 'white', count: 3 };
     // state.boardState[20] = { player: 'white', count: 3 };
     // state.boardState[21] = { player: 'white', count: 3 };

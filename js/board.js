@@ -59,12 +59,12 @@ function getCheckerPosition(index) {
   const colIndex = Math.floor(index / 5); // 0 for 0-4, 1 for 5-9, 2 for 10-14
   const rowIndex = index % 5;             // 0-4 inside each column
 
-  // Horizontal shift: 12px right per extra column (tune as needed)
+  // Horizontal shift pixels right per extra column (tune as needed)
   const offsetX = colIndex * 6;
 
   // Staggered vertical base offset + standard spacing
   const colStaggerY = colIndex * 10;  // up/down PX per column
-  const rowSpacingY = rowIndex * 36;   // overlap per checker
+  const rowSpacingY = rowIndex * 38;   // overlap per checker
   const totalOffsetY = colStaggerY + rowSpacingY;
 
   return {
