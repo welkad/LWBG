@@ -242,9 +242,6 @@ export function handlePointClick(pointIndex, useSecondDie = false) {
   const player = state.currentPlayer; // Guard: ensure active player exists 
   if (!player || !state.hasRolled || state.currentRoll.length === 0) return;
 
-  // If requesting second die value, first ensure a second value exists
-  if (useSecondDie && state.currentRoll.length < 2) return;
-
   const normalizedIndex = (pointIndex === 'bar' || pointIndex === 'off')
     ? pointIndex : Number(pointIndex);
 
@@ -387,19 +384,32 @@ function attemptAutoMove(fromIndex, useSecondDie = false) {
   const player = state.currentPlayer;
   if (!player || !state.currentRoll || state.currentRoll.length === 0) return;
 
-  // If second die value is requested make sure it exists
-  if (useSecondDie && state.currentRoll.length < 2) return;
+  // If only 1 die value remains, force useSecondDie to false
+  let activeDie = (useSecondDie && state.currentRoll.length >= 2);
 
-  const dir = DIRECTIONS[player];
-  const rawMoves = getValidMovesForPoint(fromIndex, useSecondDie);
-
+  let rawMoves = getValidMovesForPoint(fromIndex, activeDie);
   /** @type {Array<number|'off'>} */
-  const validMoves = Array.isArray(rawMoves) ? rawMoves : [rawMoves];
+  let validMoves = Array.isArray(rawMoves)
+    ? rawMoves : (rawMoves != null ? [rawMoves] : []);
 
-  if (!validMoves || validMoves.length === 0) {
+  // Fallback: If Die #2 requested (right-click) has no valid moves use Die #1 instead
+  if (useSecondDie && validMoves.length=== 0) {
+    const fallbackMoves = getValidMovesForPoint(fromIndex, false);
+    const parsedFallback = Array.isArray(fallbackMoves)
+      ? fallbackMoves : (fallbackMoves != null ? [fallbackMoves]: []);
+    
+      if (parsedFallback.length > 0) {
+        activeDie = false;  // Fallback to Die #1
+        validMoves = parsedFallback;
+      }
+  }
+
+  if (validMoves.length === 0) {
     logStatus("You cannot make a valid move from this point.", 1500);
     return;
   }
+
+  const dir = DIRECTIONS[player];
 
   /**
    * Helper to calculate target index for a specific die value
@@ -420,21 +430,23 @@ function attemptAutoMove(fromIndex, useSecondDie = false) {
   /** @type {number|string|null} */
   let targetDestination = null;
 
-  if (useSecondDie) {
-    // Mode A: Specifically evaluate second die (state.currentRoll[1])
+  // Mode A: Specifically evaluate second die (state.currentRoll[1])
+  if (activeDie && state.currentRoll.length >= 2) {    
     const secondDieTarget = calculateTarget(state.currentRoll[1]);
     if (validMoves.includes(secondDieTarget)) {
       targetDestination = secondDieTarget;
-    } else {
-      // Mode B: Standard auto-move prioritizing first die
-      // Priority 1: Left die (state.currentRoll[0])
-      if (state.currentRoll.length > 0) {
-        const leftTarget = calculateTarget(state.currentRoll[0]);
-        if (validMoves.includes(leftTarget)) {
-          targetDestination = leftTarget;
-        }
-      }
     }
+  }
+
+  // Mode B: Standard auto-move prioritizing first die (or fallback execution)
+  if (targetDestination === null) {
+    // Priority 1: Left die (state.currentRoll[0])
+    if (state.currentRoll.length > 0) {
+      const leftTarget = calculateTarget(state.currentRoll[0]);
+      if (validMoves.includes(leftTarget)) {
+        targetDestination = leftTarget;
+      }
+    }    
     // Priority 2: Right die (state.currentRoll[1]) if left die is blocked
     if (targetDestination === null && state.currentRoll.length > 1) {   
       const rightTarget = calculateTarget(state.currentRoll[1]);
