@@ -75,8 +75,8 @@ function getCheckerPosition(index) {
   };
 }
 
-// Update point and checker listeners
 /**
+ * Update point and checker listeners
  * @param {number} index
  */
 function createPointDOM(index) {
@@ -85,8 +85,8 @@ function createPointDOM(index) {
   // Global index 0, 2, 4... -> even | 1, 3, 5... -> odd
   const pointColorClass = (index % 2 === 0) ? 'point-even' : 'point-odd';
   pointEl.className = `point ${pointColorClass}`; // Board triangle color class
-  pointEl.dataset.point = String(index);
-  pointEl.dataset.index = String(index);
+  // pointEl.dataset.point = String(index);
+  // pointEl.dataset.index = String(index);
   pointEl.dataset.pointIndex = String(index);
 
   // Adjust Z-Index so point stacks overflow on top of adjacent triangles
@@ -225,11 +225,11 @@ export function renderBar() {
 
   // Ensure data-point="bar" is set for event delegation
   if (blackBarEl) {
-    blackBarEl.dataset.point = 'bar';
+    blackBarEl.dataset.pointIndex = 'bar';
     attachPointHoverListeners(blackBarEl, 'bar');
   }
   if (whiteBarEl) {
-    whiteBarEl.dataset.point = 'bar';
+    whiteBarEl.dataset.pointIndex = 'bar';
     attachPointHoverListeners(whiteBarEl, 'bar');
   }
 
@@ -423,8 +423,9 @@ export function attachPointHoverListeners(pointEl, pointIndex) {
           }
         } else {
           // Query data-point attribute to match board HTML template
-          const targetEl = document.querySelector(`[data-point="${targetIndex}"],
-            [data-index="${targetIndex}"]`);
+          // const targetEl = document.querySelector(`[data-point="${targetIndex}"],
+          //   [data-index="${targetIndex}"]`);
+          const targetEl = document.querySelector(`[data-point-index="${targetIndex}"]`);
           targetEl?.classList.add('hover-target');
         }
       });
