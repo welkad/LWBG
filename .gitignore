@@ -8,5 +8,5 @@ ehthumbs.db
 Thumbs.db
 
 # Debug files
-debug.js
-test-moves.js
+js/debug.js
+js/test-moves.js
