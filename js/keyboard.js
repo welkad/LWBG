@@ -143,7 +143,7 @@ export function setupKeyboardListeners() {
         event.preventDefault();
         state.showHoverHighlights = !state.showHoverHighlights;
         const highlightStatus = state.showHoverHighlights ? "enabled" : "disabled";
-        logStatus(`Hover highlights ${highlightStatus}.`, 1500);
+        logStatus(`Hover highlights ${highlightStatus}. Press 'H' to toggle.`, 2000);
         // Clear active hover effects immediately if disabled mid-hover
         if(!state.showHoverHighlights && typeof clearHoverHighlights === 'function') {
           clearHoverHighlights();
