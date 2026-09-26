@@ -11,7 +11,7 @@ import { updateCubePositionUI } from './doubling-cube.js';
 import { calculateGameOutcome } from './rules.js';
 import { renderDiceUI } from './dice-renderer.js';
 
-const GAME_OVER_BANNER_DURATION_MS = 3000;  // Display victory message duration
+let GAME_OVER_BANNER_DURATION_MS = 3000;  // Display victory message duration
 
 /** @type {GameState} */
 export const state = {
@@ -209,6 +209,10 @@ export function handleGameEnd(winner, resigningPlayer = null) {
     winMessage = `${resigningPlayer} resigned. ${winner} wins ${message}!`;
   } else {
     winMessage = `${winner} bore off all checkers and wins ${message}!`;
+  }
+
+  if (!resigningPlayer) {
+    GAME_OVER_BANNER_DURATION_MS += 2000; // Increase banner time for a 'normal' win!
   }
 
   logStatus(winMessage, GAME_OVER_BANNER_DURATION_MS); // log initial victory message
