@@ -103,7 +103,7 @@ function attachWindowDebugHelpers() {
     state.currentPlayer = state.currentPlayer || 'black';
     state.hasRolled = true;
     state.currentRoll = [6, 4];
-    state.selectedPoint = 5; // Mock selected point
+    // state.selectedPoint = 5; // Mock selected point
     state.validMoves = ['off'];
 
     // Force re-render
@@ -112,10 +112,10 @@ function attachWindowDebugHelpers() {
     }
 
     // Force class fallback if re-render clears it
-    const playerPocket = document.getElementById(`bear-off-${state.currentPlayer}`);
-    if (playerPocket) {
-      playerPocket.classList.add('valid-target');
-    }
+    // const playerPocket = document.getElementById(`bear-off-${state.currentPlayer}`);
+    // if (playerPocket) {
+    //   playerPocket.classList.add('valid-target');
+    // }
 
     console.log(`%c[DEBUG] Bear-off set -> Black: ${blackCount}, White: ${whiteCount}`,
       'color: #00bcd4;');
@@ -153,13 +153,17 @@ function attachWindowDebugHelpers() {
     // state.boardState[2] = { player: 'black', count: 3 };
     // state.boardState[3] = { player: 'black', count: 3 };
     // state.boardState[4] = { player: 'black', count: 3 };
-    state.boardState[5] = { player: 'black', count: 15 };
+
+    // state.boardState[5] = { player: 'black', count: 15 };
+
     // state.boardState[7] = { player: 'black', count: 6 };
 
     // Set Black in Home Board (Points 18-23) -> 15 checkers total
     // E.g., distributed evenly: 3 checkers on points 19 through 23
     // state.boardState[16] = { player: 'white', count: 6 };
-    state.boardState[18] = { player: 'white', count: 15 };
+
+    // state.boardState[18] = { player: 'white', count: 15 };
+
     // state.boardState[19] = { player: 'white', count: 3 };
     // state.boardState[20] = { player: 'white', count: 3 };
     // state.boardState[21] = { player: 'white', count: 3 };
