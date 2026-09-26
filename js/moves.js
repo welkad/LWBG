@@ -292,8 +292,9 @@ export function handlePointClick(pointIndex, useSecondDie = false) {
     `);
     isHoverActive = hoveredBarEl !== null;
   } else {  // Check if preview is active
-    const targetSelector = `[data-point="${normalizedIndex}"], 
-      [data-index="${normalizedIndex}"]`;
+    // const targetSelector = `[data-point="${normalizedIndex}"], 
+    //   [data-index="${normalizedIndex}"]`;
+    const targetSelector = `[data-point-index="${normalizedIndex}"]`;
     const clickedEl = document.querySelector(targetSelector);
     isHoverActive = clickedEl  
       ? clickedEl.classList.contains('hover-selected') ||
@@ -330,10 +331,24 @@ export function handlePointClick(pointIndex, useSecondDie = false) {
     return;
   }
 
-  // Calculate valid moves (also passing useSecondDie paramater)
-  const rawTargets = getValidMovesForPoint(normalizedIndex, useSecondDie);
-  /** @type {Array<number|'off'>} */
-  const targets = Array.isArray(rawTargets) ? rawTargets : [rawTargets];
+  // Calculate valid moves
+  let activeDiceChoice = useSecondDie;
+  let rawTargets = getValidMovesForPoint(normalizedIndex, activeDiceChoice);
+  let targets = Array.isArray(rawTargets) 
+    ? rawTargets : (rawTargets ? [rawTargets] : []);
+
+  // Fallback to Die #1 if right-click (Die #2) yields no move, but Die #1 does
+  if (activeDiceChoice && targets.length === 0) {
+    const fallbackTargets = getValidMovesForPoint(normalizedIndex, false);
+    const parsedFallback = Array.isArray(fallbackTargets)
+      ? fallbackTargets
+      : (fallbackTargets ? [fallbackTargets] : []);
+
+    if (parsedFallback.length > 0) {
+      activeDiceChoice = false; // Fallback to Die #1
+      targets = parsedFallback;
+    }
+  }
 
   // Notify player if clicked checker has no legal moves
   if (targets.length === 0) {
