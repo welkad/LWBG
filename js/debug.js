@@ -95,7 +95,8 @@ function attachWindowDebugHelpers() {
   /** @type {any} */ (window).runMoveTests = runMoveTests;
 
   // debugSetBearOff(); // Instantly loads black and white checkers in pockets
-  /** @type {any} */ (window).debugSetBearOff = function(blackCount = 5, whiteCount = 5) {
+  /** @type {any} */ (window).debugSetBearOff = function(
+      blackCount = 5, whiteCount = 5, forceWhiteStyle = true) {
     state.borneOff.black = blackCount;
     state.borneOff.white = whiteCount;
 
@@ -104,18 +105,18 @@ function attachWindowDebugHelpers() {
     state.hasRolled = true;
     state.currentRoll = [6, 4];
     // state.selectedPoint = 5; // Mock selected point
-    state.validMoves = ['off'];
+    // state.validMoves = ['off'];
 
     // Force re-render
     if (typeof renderBoard === 'function') {
       renderBoard();
     }
 
-    // Force class fallback if re-render clears it
-    // const playerPocket = document.getElementById(`bear-off-${state.currentPlayer}`);
-    // if (playerPocket) {
-    //   playerPocket.classList.add('valid-target');
-    // }
+    // Swap all black-piece classes in bear-off pockets to white pieces
+    document.querySelectorAll('.bear-off-pocket .black-piece').forEach((el) => {
+      el.classList.remove('black-piece');
+      el.classList.add('white-piece');
+    });
 
     console.log(`%c[DEBUG] Bear-off set -> Black: ${blackCount}, White: ${whiteCount}`,
       'color: #00bcd4;');
@@ -148,11 +149,11 @@ function attachWindowDebugHelpers() {
 
     // Set White in Home Board (Points 0-5) -> 15 checkers total
     // E.g., distributed evenly: 3 checkers on points 0 through 4
-    // state.boardState[0] = { player: 'black', count: 3 };
-    // state.boardState[1] = { player: 'black', count: 3 };
-    // state.boardState[2] = { player: 'black', count: 3 };
-    // state.boardState[3] = { player: 'black', count: 3 };
-    // state.boardState[4] = { player: 'black', count: 3 };
+    state.boardState[0] = { player: 'black', count: 3 };
+    state.boardState[1] = { player: 'black', count: 3 };
+    state.boardState[2] = { player: 'black', count: 3 };
+    state.boardState[3] = { player: 'black', count: 3 };
+    state.boardState[4] = { player: 'black', count: 3 };
 
     // state.boardState[5] = { player: 'black', count: 15 };
 
@@ -164,11 +165,11 @@ function attachWindowDebugHelpers() {
 
     // state.boardState[18] = { player: 'white', count: 15 };
 
-    // state.boardState[19] = { player: 'white', count: 3 };
-    // state.boardState[20] = { player: 'white', count: 3 };
-    // state.boardState[21] = { player: 'white', count: 3 };
-    // state.boardState[22] = { player: 'white', count: 3 };
-    // state.boardState[23] = { player: 'white', count: 3 };
+    state.boardState[19] = { player: 'white', count: 3 };
+    state.boardState[20] = { player: 'white', count: 3 };
+    state.boardState[21] = { player: 'white', count: 3 };
+    state.boardState[22] = { player: 'white', count: 3 };
+    state.boardState[23] = { player: 'white', count: 3 };
 
     // Configure active turn state
     state.gamePhase = 'turns';
