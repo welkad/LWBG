@@ -103,18 +103,10 @@
     align-items: center;
 }
 
-/* 32px Tray Checker Sizing */
+/* Unified 32px Tray Checker Sizing */
+.bear-off-pocket .checker,
 #bar-black .checker,
 #bar-white .checker {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    z-index: 10;
-    cursor: pointer;
-}
-
-.bear-off-pocket .checker {
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -146,10 +138,11 @@
 }
 
 /* Absolute positioning base for 6+ staggered overflow checkers */
-.bear-off-pocket .checker.stacked {
+.bear-off-pocket .checker.stacked,
+#bar-black .checker.stacked,
+#bar-white .checker.stacked {
     position: absolute;
     left: 50%;
-    margin: 0 !important;
 }
 
 /* ==========================================
@@ -157,54 +150,19 @@
    ========================================== */
 
 /* Stacked checkers on points OR top bar (Black) */
-/* .top .point .checker.stacked,
+.top .point .checker.stacked,
 #bar-black .checker.stacked {
     position: absolute;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-} */
+}
 
 /* Stacked checkers on points OR bottom bar (White) */
-/* .bottom .point .checker.stacked,
+.bottom .point .checker.stacked,
 #bar-white .checker.stacked {
     position: absolute;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-} */
-
-/* Clear flex margins on absolute stacked tray checkers */
-/* .bear-off-pocket .checker.stacked,
-#bar-black .checker.stacked,
-#bar-white .checker.stacked {
-    position: absolute;
-    margin: 0 !important;
-} */
-
-/* Top Trays: Align horizontally to center before translateX offset */
-/* #bar-black .checker.stacked,
-.top-pocket .checker.stacked {
-    left: 50%;
-} */
-
-/* Bottom Trays: Align horizontally to center before translateX offset */
-/* #bar-white .checker.stacked,
-.bottom-pocket .checker.stacked {
-    left: 50%;
-} */
-
-/* Vertical Tray Stacked Checkers */
-.bear-off-pocket .checker.stacked,
-#bar-black .checker.stacked,
-#bar-white .checker.stacked {
-    position: absolute;
-    left: 50%;
-    margin: 0 !important;
-}
-
-.bear-off-pocket .checker {
-    position: absolute;
-    left: 50%;
-    margin: 0 !important;
 }

@@ -6,3 +6,7 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Debug files
+js/debug.js
+js/test-moves.js
