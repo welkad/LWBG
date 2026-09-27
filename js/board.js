@@ -165,9 +165,7 @@ function createPointDOM(index) {
 }
 
 /**
- *  Shared renderer for vertical trays (bar & bear-off pockets) 
- */
-/**
+ * Shared renderer for vertical trays (bar & bear-off pockets) 
  * @param {HTMLElement | null} containerEl
  * @param {number} count
  * @param {string} colorClass
@@ -192,25 +190,40 @@ function renderTrayCheckers(containerEl, count, colorClass, isTop) {
       checker.removeAttribute('draggable');
     }
 
-    // Apply stacking/staggering logic once for both Bar & Home Pockets
+    // Apply stacking/staggering logic for all bear-off checkers
+    const colIndex = Math.floor(i / 5);
+    const rowIndex = i % 5;
+
+    const offsetX = colIndex * 5;
+    const colStaggerY = colIndex * 8;
+    const rowSpacingY = rowIndex * 32;
+    const totalOffsetY = colStaggerY + rowSpacingY;
+
+    // All tray checkers use the same absolute positioning system
+    checker.style.position = 'absolute';
+    checker.style.left = '50%';
+    checker.style.margin = '0';
+    checker.style.transform =
+      `translateX(calc(-50% + ${offsetX}px))`;
+
+    if (isTop) {
+      checker.style.top = `${totalOffsetY}px`;
+      checker.style.bottom = 'auto';
+
+      checker.style.zIndex =
+        String(10 + (colIndex * 10) + rowIndex);
+
+    } else {
+      checker.style.bottom = `${totalOffsetY}px`;
+      checker.style.top = 'auto';
+
+      checker.style.zIndex =
+        String(10 + (colIndex * 10) + (4 - rowIndex));
+    }
+
+    // Mark only checkers 6–15 as overflow/staggered
     if (i >= 5) {
-      const colIndex = Math.floor(i / 5);
-      const rowIndex = i % 5;
-
-      const offsetX = colIndex * 4;       // Slight horizontal offset
-      const colStaggerY = colIndex * 8;   // Vertical shift per column
-      const rowSpacingY = rowIndex * 32;  // Overlap spacing
-      const totalOffsetY = colStaggerY + rowSpacingY;
-
       checker.classList.add('stacked');
-      checker.style.transform = `translateX(calc(-50% + ${offsetX}px))`;
-
-      if (isTop) {
-        checker.style.top = `${totalOffsetY}px`;
-      } else {
-        checker.style.bottom = `${totalOffsetY}px`;
-      }
-      checker.style.zIndex = String(10 + i);
     }
     containerEl.appendChild(checker);
   }

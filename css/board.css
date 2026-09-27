@@ -472,10 +472,26 @@ body {
    HOME POCKET HIGHLIGHTS - ACTIVATE VIA DWELL HOVER
    ================================================== */
 
-#home-top-pocket,
-#home-bottom-pocket,
 .bear-off-pocket {
   position: relative;
+}
+
+/* Top Pocket: Anchors top, grows down */
+#home-top-pocket {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Bottom Pocket: Anchors bottom, grows up */
+#home-bottom-pocket {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse; /* Reverses base stack so index 0 sits at the very bottom */
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .bear-off-pocket.valid-target .bear-off-target-overlay,
