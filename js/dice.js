@@ -84,7 +84,8 @@ export function handleDieClick(player, dieNumber, event) {
     state.isResignOffered = true;
     state.resignOfferedBy = player;
     clearStatusQueue(); // Clear older messages
-    logStatus("Are you sure you want to resign?");
+    const message = state.cubeValue === 1 ? 'the game' : `${state.cubeValue} points`;
+    logStatus(`Are you sure you want to resign and concede ${message}?`);
     updateCubePositionUI(); // Deactivate cube while pending
     renderDiceUI();
   } else if (content === 'U') {
@@ -321,8 +322,10 @@ export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlaye
     });
     clearStatusQueue();    
     // Dynamic message based on input source content
-    const declineMsg = decliner ? `${decliner}` : 'Another game was';     
-    logStatus(`${declineMsg} declined. Thank you for playing!`);
+    const declineMsg = decliner 
+      ? `${decliner} declined another game.`
+      : 'Another game was declined.';
+    logStatus(`${declineMsg} Thank you for playing!`);
 
     // Delay clearing dice elements immediately
     setTimeout(() => {
