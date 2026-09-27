@@ -353,7 +353,7 @@ export function handlePointClick(pointIndex, useSecondDie = false) {
     // Customized message during bear off phase of the game
     if (isBearOffMode && typeof normalizedIndex === 'number'
       && !isCheckerOnHighestPoint(normalizedIndex, player)) {
-        logStatus("You must move from the highest point first!", 2000);
+        logStatus("You must move from a higher point first!", 2000);
       } else {
         logStatus("No valid moves can be made from this point.", 1500);
       }
