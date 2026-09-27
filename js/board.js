@@ -197,8 +197,8 @@ function renderTrayCheckers(containerEl, count, colorClass, isTop) {
       const colIndex = Math.floor(i / 5);
       const rowIndex = i % 5;
 
-      const offsetX = colIndex * 4;       // Slight horizontal offset
-      const colStaggerY = colIndex * 8;   // Vertical shift per column
+      const offsetX = colIndex * 5;       // Slight horizontal offset
+      const colStaggerY = colIndex * 10;  // Vertical shift per column
       const rowSpacingY = rowIndex * 32;  // Overlap spacing
       const totalOffsetY = colStaggerY + rowSpacingY;
 

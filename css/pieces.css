@@ -85,7 +85,9 @@
 .bear-off-pocket {
     background: #2d2016;
     border-radius: 4px;
-    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.6), 1px 1px 1px rgba(255,255,255,0.05);
+    box-shadow: 
+      inset 2px 2px 5px rgba(0,0,0,0.6),
+      1px 1px 1px rgba(255,255,255,0.05);
 }
 
 /* Center Separation Padding for Top and Bottom Trays */
@@ -118,23 +120,23 @@
 /* Overlap spacing for base 1-5 checkers */
 .top-pocket .checker + .checker,
 #bar-black .checker + .checker {
-    margin-top: -2px;
+    margin-top: 0;
 }
 
 .bottom-pocket .checker + .checker,
 #bar-white .checker + .checker {
-    margin-bottom: -2px;
+    margin-bottom: 0;
 }
 
 /* Edge spacing from pocket inner border */
 .top-pocket .checker:first-child,
 #bar-black .checker:first-child {
-    margin-top: 2px;
+    margin-top: 0;
 }
 
 .bottom-pocket .checker:first-child,
 #bar-white .checker:first-child {
-    margin-bottom: 2px;
+    margin-bottom: 0;
 }
 
 /* Absolute positioning base for 6+ staggered overflow checkers */
@@ -154,8 +156,7 @@
 #bar-black .checker.stacked {
     position: absolute;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 50%;    
 }
 
 /* Stacked checkers on points OR bottom bar (White) */
@@ -163,6 +164,5 @@
 #bar-white .checker.stacked {
     position: absolute;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 50%;    
 }
