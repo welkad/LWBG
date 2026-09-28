@@ -80,7 +80,7 @@ export function setupKeyboardListeners() {
     }
 
     switch (key) {
-      // ROLL
+      // ROLL or SWAP dice
       case 'Space':
       case 'KeyR':
         event.preventDefault();
@@ -94,6 +94,9 @@ export function setupKeyboardListeners() {
         } else if (state.gamePhase === 'turns' && !state.hasRolled) {
           // Regular turn roll
           handleDiceRoll(state.currentPlayer);
+        } else if (state.gamePhase === 'turns' && state.hasRolled) {
+          // Swap dice order if already rolled (non-doubles, 2 dice remaining)
+          toggleDiceOrder(state.currentPlayer); 
         }
         break;
 
