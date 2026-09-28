@@ -6,11 +6,35 @@ import { state } from './state.js';
 /** @type {string[]} */
 let messageQueue = [];
 let isDisplaying = false;
-let currentMessage = '';    // Track active message in status bar
+let previousMessage = ''; // Store prior message before interrupts (i.e. Resign/Cube)
+let currentMessage = '';  // Track active message in status bar
 
 /** @type {ReturnType<typeof setTimeout> | null} */
 let temporaryMessageTimer = null;
 const DISPLAY_DELAY_MS = 1500;  // Delay in milliseconds
+
+/**
+ * Save current active message so it can be restored if prompt cancelled.
+ */
+export function saveCurrentStatus() {
+  if (state.isRolling) return;  // Prevent saving mid roll status text
+
+  const statusBar = document.getElementById('game-status-bar');
+  if (statusBar && statusBar.textContent) {
+    previousMessage = statusBar.textContent;
+  } else {
+    previousMessage = currentMessage;
+  }
+}
+
+/**
+ * Restore message that was active prior to a cancelled prompt.
+ */
+export function restorePreviousStatus() {
+  if (previousMessage) {
+    setStatus(previousMessage);
+  }
+}
 
 /**
  * Helper function to capitalize 'white' or 'black'

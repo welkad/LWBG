@@ -1,7 +1,7 @@
 // js/keyboard.js - Global keyboard shortcuts for game actions.
 import { renderDiceUI } from './dice-renderer.js';
 import { handlePostGameDieClick } from './dice.js';
-import { clearStatusQueue, logStatus } from './ui.js';
+import { clearStatusQueue, logStatus, restorePreviousStatus, saveCurrentStatus } from './ui.js';
 import { handleResignation, state, switchTurn } from './state.js';
 import { handleCubeClick, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, toggleDiceOrder } from './dice-rolling.js';
@@ -15,6 +15,7 @@ import { clearHoverHighlights } from './board.js';
  * - U         : Undo last move
  * - D         : Complete turn
  * - Q         : Prompt resignation
+ * - H         : Toggle move highlighting on or off
  * - Y / N     : Confirm / cancel active prompt (Resign or Doubling Cube)
  */
 
@@ -60,14 +61,8 @@ export function setupKeyboardListeners() {
             state.resignOfferedBy = null;
             clearStatusQueue();
 
-            // Dynamic prompt restoration based on active roll state
-            if (state.hasRolled) {
-              const remaining = state.currentRoll ? state.currentRoll.length : 0;
-              const howMany = state.currentRoll.length > 1 ? 'moves' : 'move';
-              logStatus(`${player}: ${howMany} remaining.`);
-            } else {
-              logStatus(`${player}'s turn. Cube, roll or resign.`);
-            }
+            // Restore prompt based on previous message
+            restorePreviousStatus();
 
             updateCubePositionUI();
             renderDiceUI();
@@ -137,9 +132,14 @@ export function setupKeyboardListeners() {
       // RESIGN or QUIT
       case 'KeyQ':
         event.preventDefault();
-        // Allow resignation during game play, even if dice already rolled
-        if (state.gamePhase === 'turns'
-          && !state.isResignOffered && !state.isCubeOffered) {
+        // Prevent resignation during active roll animations or pending prompts
+        if (
+          state.gamePhase === 'turns' &&
+          !state.isRolling &&
+          !state.isResignOffered &&
+          !state.isCubeOffered
+        ) {
+          saveCurrentStatus();  // Store current prompt if needed again later
           state.isResignOffered = true;
           state.resignOfferedBy = state.currentPlayer;
           clearStatusQueue();
