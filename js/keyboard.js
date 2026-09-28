@@ -59,7 +59,16 @@ export function setupKeyboardListeners() {
             state.isResignOffered = false;
             state.resignOfferedBy = null;
             clearStatusQueue();
-            logStatus(`${player}'s turn. Cube, roll or resign.`);
+
+            // Dynamic prompt restoration based on active roll state
+            if (state.hasRolled) {
+              const remaining = state.currentRoll ? state.currentRoll.length : 0;
+              const howMany = state.currentRoll.length > 1 ? 'moves' : 'move';
+              logStatus(`${player}: ${howMany} remaining.`);
+            } else {
+              logStatus(`${player}'s turn. Cube, roll or resign.`);
+            }
+
             updateCubePositionUI();
             renderDiceUI();
           }
@@ -128,8 +137,9 @@ export function setupKeyboardListeners() {
       // RESIGN or QUIT
       case 'KeyQ':
         event.preventDefault();
-        if (!state.hasRolled && !state.isResignOffered && !state.isCubeOffered &&
-          state.gamePhase !== 'game_over' && state.gamePhase === 'turns') {
+        // Allow resignation during game play, even if dice already rolled
+        if (state.gamePhase === 'turns'
+          && !state.isResignOffered && !state.isCubeOffered) {
           state.isResignOffered = true;
           state.resignOfferedBy = state.currentPlayer;
           clearStatusQueue();
