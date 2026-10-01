@@ -6,7 +6,7 @@ import { handleResignation, state, switchTurn } from './state.js';
 import { handleCubeClick, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, toggleDiceOrder } from './dice-rolling.js';
 import { undoLastMove } from './moves.js';
-import { clearHoverHighlights } from './board.js';
+import { clearHoverHighlights, renderBoard } from './board.js';
 
 /** 
  * - Space / R : Roll dice
@@ -155,11 +155,24 @@ export function setupKeyboardListeners() {
       case 'KeyH':
         event.preventDefault();
         state.showHoverHighlights = !state.showHoverHighlights;
+
+        // Toggle the CSS class on the board container
+        const boardEl = document.querySelector('.master-board');
+        if (boardEl) {
+          boardEl.classList.toggle('show-highlighs', state.showHoverHighlights);
+        }
+
         const highlightStatus = state.showHoverHighlights ? "enabled" : "disabled";
         logStatus(`Hover highlights ${highlightStatus}. Press 'H' to toggle.`, 2000);
-        // Clear active hover effects immediately if disabled mid-hover
+        
+        // Clear or refresh active hover effects immediately
         if(!state.showHoverHighlights && typeof clearHoverHighlights === 'function') {
           clearHoverHighlights();
+        }
+
+        // Re-render board to update active target points
+        if (typeof renderBoard === 'function') {
+          renderBoard();
         }
         break;
 

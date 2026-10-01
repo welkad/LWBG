@@ -99,10 +99,10 @@ function createPointDOM(index) {
   const isValidTarget = state.validMoves && state.validMoves.includes(index);
 
   // Clickable cursor only during turns, after rolling, for valid pieces/targets
-  const isCickable = state.gamePhase === 'turns'
+  const isClickable = state.gamePhase === 'turns'
     && state.hasRolled && (isOwner || isValidTarget);
 
-  if (isCickable) {
+  if (isClickable) {
     pointEl.classList.add('clickable');
   }
 
@@ -110,7 +110,8 @@ function createPointDOM(index) {
   if (state.selectedPoint === index) {
     pointEl.classList.add('selected');
   }
-  if (state.validMoves && state.validMoves.includes(index)) {
+  if (state.showHoverHighlights
+      && state.validMoves && state.validMoves.includes(index)) {
     pointEl.classList.add('valid-target');
   }
   
@@ -292,7 +293,12 @@ export function renderBearOff(player) {
     state.validMoves && state.validMoves.includes('off');
   
   if (isValidTarget) {
-    bearOffEl.classList.add('valid-target', 'clickable');
+    if (state.showHoverHighlights) {
+      bearOffEl.classList.add('valid-target');
+    } else {
+      bearOffEl.classList.remove('valid-target');
+    }
+    bearOffEl.classList.add('clickable');
 
     // Inject dedicated target overlay element
     const overlay = document.createElement('div');
@@ -369,9 +375,8 @@ const DWELL_DELAY_MS = 1000; // millisecond threshold for hover highlights
  *  @param {number | 'bar'} pointIndex
  */
 export function attachPointHoverListeners(pointEl, pointIndex) {
-  if (!state.showHoverHighlights) return; // Disable if set to false (default)
-
   pointEl.addEventListener('mouseenter', () => {
+    if (!state.showHoverHighlights) return;   // Disable if set to false (default)
     if (state.selectedPoint !==null) return;  // Suppress hover preview if point selected
     // Ensure player has rolled and still has remaining dice to play
     const hasRemainingRolls = state.hasRolled
@@ -394,7 +399,8 @@ export function attachPointHoverListeners(pointEl, pointIndex) {
 
     // Start threshold countdown
     hoverTimer = setTimeout(() => {
-      if (state.selectedPoint !== null) return; // Guard double selections during delay
+      // Guard double selections during delay
+      if (state.selectedPoint !== null || !state.showHoverHighlights) return; 
       // Calculate potential valid target points for this piece
       const rawTargets = getValidMovesForPoint(pointIndex);
       /** @type {Array<number|'off'>} */

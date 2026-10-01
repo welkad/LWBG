@@ -371,39 +371,46 @@ body {
 }
 
 /* =============================================
-   POINT INTERACTION - ACTIVATE VIA DWELL HOVER
+   POINT INTERACTION - DWELL HOVER & SELECTION
    ============================================= */
 
-/* Ensure valid targets remain clickable without visual highlights */
+/* Ensure valid move targets always show clickable pointer */
 .point.valid-target,
 .bear-off-pocket.valid-target {
   cursor: pointer;
 }
 
-/* Point selection rules */
 .point {
   z-index: 2;
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.point.hover-selected {
+/* SOURCE SELECTION (Selected & Hover-Selected) */
+.point.selected,
+.point.hover-selected,
+#bar-black.selected,
+#bar-white.selected {
   background-color: rgba(255, 235, 59, 0.28) !important;
   box-shadow: inset 0 0 0 2px #ffeb3b;
 }
 
+.point.selected .checker:last-child,
 .point.hover-selected .checker:last-child {
   box-shadow: 0 0 8px 3px #ffeb3b;
   transform: scale(1.05);
 }
 
-/* Target indicators */
-.point.hover-target {
+/* TARGET HIGHLIGHTS (Gated behind .show-highlights class) */
+.show-highlights .point.valid-target,
+.show-highlights .point.hover-target {
   background-color: rgba(76, 175, 80, 0.22) !important;
   box-shadow: inset 0 0 0 2px #4caf50;
   cursor: pointer;
 }
 
-.point.hover-target::after {
+/* Target dot indicator */
+.show-highlights .point.valid-target::after,
+.show-highlights .point.hover-target::after {
   content: '';
   position: absolute;
   left: 50%;
@@ -418,54 +425,21 @@ body {
   animation: pulse-target 1.5s infinite alternate;
 }
 
-.top .point.hover-target::after { bottom: 12px; }
-.bottom .point.hover-target::after { top: 12px; }
-
-/* Pulsing animation for target indicators */
-@keyframes pulse-target {
-  from { transform: translateX(-50%) scale(0.85); opacity: 0.7; }
-  to { transform: translateX(-50%) scale(1.15); opacity: 1; }
-}
-
-/* Persistent source selection for points and bar containers */
-.point.selected, #bar-black.selected, #bar-white.selected {
-  background-color: rgba(255, 235, 59, 0.28) !important;
-  box-shadow: inset 0 0 0 2px #ffeb3b;
-}
-
-.point.selected .checker:last-child {
-  box-shadow: 0 0 8px 3px #ffeb3b;
-  transform: scale(1.05);
-}
-
-/* Persistent valid move targets after source is locked */
-.point.valid-target {
-  background-color: rgba(76, 175, 80, 0.22) !important;
-  box-shadow: inset 0 0 0 2px #4caf50;
-  cursor: pointer;
-}
-
-.point.valid-target::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: 12px;
-  background-color: #4caf50;
-  border-radius: 50%;
-  box-shadow: 0 0 8px #4caf50;
-  pointer-events: none;
-  z-index: 10;
-  animation: pulse-target 1.5s infinite alternate;
-}
-
-.top .point.valid-target::after {
+/* Dot positioning for top vs bottom board quadrants */
+.show-highlights .top .point.valid-target::after,
+.show-highlights .top .point.hover-target::after {
   bottom: 12px;
 }
 
-.bottom .point.valid-target::after {
+.show-highlights .bottom .point.valid-target::after,
+.show-highlights .bottom .point.hover-target::after {
   top: 12px;
+}
+
+/* Pulsing animation */
+@keyframes pulse-target {
+  from { transform: translateX(-50%) scale(0.85); opacity: 0.7; }
+  to { transform: translateX(-50%) scale(1.15); opacity: 1; }
 }
 
 /* ==================================================
