@@ -159,7 +159,7 @@ export function setupKeyboardListeners() {
         // Toggle the CSS class on the board container
         const boardEl = document.querySelector('.master-board');
         if (boardEl) {
-          boardEl.classList.toggle('show-highlighs', state.showHoverHighlights);
+          boardEl.classList.toggle('show-highlights', state.showHoverHighlights);
         }
 
         const highlightStatus = state.showHoverHighlights ? "enabled" : "disabled";
