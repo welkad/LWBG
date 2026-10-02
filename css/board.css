@@ -74,6 +74,14 @@ body {
     box-sizing: border-box;   
 }
 
+/* Disable any possible invalid point, bar, or checker selections */
+.point.blocked,
+.point.blocked .checker,
+.bar-half.blocked,
+.bar-half.blocked .checker {
+  cursor: not-allowed !important; 
+}
+
 .point.clickable {
   cursor: pointer;  /* Finger cursor only on active points */
 }
@@ -311,14 +319,25 @@ body {
     align-items: center;
     box-sizing: border-box;
     position: relative;
-    overflow: visible;
+    overflow: visible;    
+    cursor: default;  /* Default to arrow cursor */
+}
+
+/* Base state for bar checkers */
+.bar-half .checker {    
+    cursor: default;
+}
+
+/* Only display pointer cursor when the bar container is explicitly clickable */
+.bar-half.clickable,
+.bar-half.clickable .checker {
     cursor: pointer;
 }
 
-/* Ensure bar checkers pass pointer clicks through to handlePointClick('bar') */
-.bar-half .checker {
-    cursor: pointer;
-    pointer-events: auto;
+/* Explicitly disable mouse interactions on inactive bar checkers */
+.bar-half:not(.clickable) .checker {
+    cursor: default !important;
+    pointer-events: none;
 }
 
 /* ===================================================

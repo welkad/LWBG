@@ -98,12 +98,31 @@ function createPointDOM(index) {
     && pointData.count > 0;
   const isValidTarget = state.validMoves && state.validMoves.includes(index);
 
-  // Clickable cursor only during turns, after rolling, for valid pieces/targets
+  // Check if player still has unplayed dice left in their roll
+  const hasRemainingRolls = state.hasRolled
+    && Array.isArray(state.currentRoll) && state.currentRoll.length > 0;
+
+  // Check for valid moves only if there are remaining dice to play
+  let ownerHasMoves = false;
+  if (isOwner && hasRemainingRolls) {
+    const rawTargets = getValidMovesForPoint(index);
+    const targets = Array.isArray(rawTargets)
+      ? rawTargets : (rawTargets ? [rawTargets] : []);
+    ownerHasMoves = targets.length > 0;
+  }
+
+  // Clickable: owned piece that can move with remaining dice or valid target
   const isClickable = state.gamePhase === 'turns'
-    && state.hasRolled && (isOwner || isValidTarget);
+    && hasRemainingRolls && ((isOwner && ownerHasMoves) || isValidTarget);
+
+  // Blocked: owned piece that has no legal moves but still has dice left to play
+  const isBlocked = state.gamePhase === 'turns'
+    && hasRemainingRolls && isOwner && !ownerHasMoves;
 
   if (isClickable) {
     pointEl.classList.add('clickable');
+  } else if (isBlocked){
+    pointEl.classList.add('blocked');
   }
 
   // Apply selection and valid move target highlights
@@ -182,12 +201,17 @@ function renderTrayCheckers(containerEl, count, colorClass, isTop) {
     (state.currentPlayer === 'black' && colorClass.includes('black')) ||
     (state.currentPlayer === 'white' && colorClass.includes('white'));
 
+  // Check if player has active dice remaining in their roll
+  const canDrag = state.hasRolled && state.gamePhase == 'turns'
+    && Array.isArray(state.currentRoll) && state.currentRoll.length > 0
+    && isCurrentPlayerColor;
+
   for (let i = 0; i < count; i++) {
     const checker = document.createElement('div');
     checker.className = `checker ${colorClass}`;
 
-    // Enable drag if checkers belong to active player and dice are rolled
-    if (state.hasRolled && isCurrentPlayerColor) {
+    // Enable drag if checkers belong to active player and unused dice remain
+    if (canDrag) {
       checker.setAttribute('draggable', 'true');
     } else {
       checker.removeAttribute('draggable');
@@ -224,6 +248,11 @@ export function renderBar() {
   const blackCount = state.bar.black || 0;
   const whiteCount = state.bar.white || 0;
 
+  // Clear stale interaction classes from both containers first
+  [blackBarEl, whiteBarEl].forEach(el =>{
+    if (el) el.classList.remove('clickable', 'blocked', 'selected');
+  });
+
   // Ensure data-point="bar" is set for event delegation
   if (blackBarEl) {
     blackBarEl.dataset.pointIndex = 'bar';
@@ -238,28 +267,62 @@ export function renderBar() {
   renderTrayCheckers(blackBarEl, blackCount|| 0, 'black-piece', true);
   renderTrayCheckers(whiteBarEl, whiteCount || 0, 'white-piece', false);
 
-  // Attach interactivity states & click handlers for Bar pieces
+  // Check if player has rolled and has active remaining dice
+  const hasRemainingRolls = state.hasRolled 
+    && Array.isArray(state.currentRoll) && state.currentRoll.length > 0;
+
+  // Player Black interactivity states & click handlers for bar pieces
   if (blackBarEl) {
-    const isBlackActive = state.currentPlayer === 'black' && blackCount > 0;
+    const isBlackActive = state.currentPlayer === 'black'
+      && state.gamePhase === 'turns' && hasRemainingRolls && blackCount > 0;
     const isSelected = state.selectedPoint === 'bar' && state.currentPlayer === 'black';
 
+    let barHasMoves = false;
+    if (isBlackActive) {
+      const rawBarMoves = getValidMovesForPoint('bar');
+      const barMoves = Array.isArray(rawBarMoves) 
+        ? rawBarMoves : (rawBarMoves ? [rawBarMoves] : []);
+      barHasMoves = barMoves.length > 0;
+    }
+
+    const isBarBlocked = isBlackActive && !barHasMoves;
+
     blackBarEl.classList.toggle('selected', isSelected);
-    blackBarEl.classList.toggle('clickable', isBlackActive);
-    blackBarEl.onclick = isBlackActive ? () => handlePointClick('bar') : null;
-    blackBarEl.oncontextmenu = isBlackActive ? (e) => {
+    blackBarEl.classList.toggle('clickable', isBlackActive && barHasMoves);
+    blackBarEl.classList.toggle('blocked', isBarBlocked);
+
+    blackBarEl.onclick = (isBlackActive && barHasMoves) 
+      ? () => handlePointClick('bar') : null;
+    blackBarEl.oncontextmenu = (isBlackActive && barHasMoves) ? (e) => {
       e.preventDefault();
       handlePointClick('bar', true);      
     } : null;
   }
+  // Player White interactivity states & click handlers for bar pieces
   if (whiteBarEl) {
-    const isWhiteActive = state.currentPlayer === 'white' && whiteCount > 0;
+    const isWhiteActive = state.currentPlayer === 'white'
+      && state.gamePhase === 'turns' && hasRemainingRolls && whiteCount > 0;
     const isSelected = state.selectedPoint === 'bar' && state.currentPlayer === 'white';
 
+    let barHasMoves = false;
+    if (isWhiteActive) {
+      const rawBarMoves = getValidMovesForPoint('bar');
+      const barMoves = Array.isArray(rawBarMoves)
+        ? rawBarMoves : (rawBarMoves ? [rawBarMoves] : []);
+      barHasMoves = barMoves.length > 0;
+    }
+
+    const isBarBlocked = isWhiteActive && !barHasMoves;
+
     whiteBarEl.classList.toggle('selected', isSelected);
-    whiteBarEl.classList.toggle('clickable', isWhiteActive);
-    whiteBarEl.onclick = isWhiteActive ? () => handlePointClick('bar') : null;
-    whiteBarEl.oncontextmenu = isWhiteActive ? (e) => {
+    whiteBarEl.classList.toggle('clickable', isWhiteActive && barHasMoves);
+    whiteBarEl.classList.toggle('blocked', isBarBlocked);
+
+    whiteBarEl.onclick = (isWhiteActive && barHasMoves)
+      ? () => handlePointClick('bar') : null;
+    whiteBarEl.oncontextmenu = (isWhiteActive && barHasMoves) ? (e) => {
       e.preventDefault();
+
       handlePointClick('bar', true);      
     } : null;
   }
