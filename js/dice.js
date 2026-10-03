@@ -107,7 +107,13 @@ export function initDiceListeners() {
   [blackZone, whiteZone].forEach(zone => {
     if (!zone) return;
 
-    zone.addEventListener('click', event => {        
+    /** @param {MouseEvent} event */
+    const handleInteraction = (event) => {
+      // Prevent native browser right-click menu
+      if (event.type === 'contextmenu') {
+        event.preventDefault();
+      }    
+
       const target = /** @type {HTMLElement | null} */ (event.target);
       if (!target) return;
 
@@ -121,8 +127,11 @@ export function initDiceListeners() {
       const dieNumber = Number(match[2]);
 
       handleDieClick(player, dieNumber, event);
-    });
-  });    
+    };
+
+    zone.addEventListener('click', handleInteraction);
+    zone.addEventListener('contextmenu', handleInteraction);
+  });
 
   // Doubling Cube handler
   const cubeEl = document.getElementById('doubling-cube');
