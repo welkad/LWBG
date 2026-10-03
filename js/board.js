@@ -449,9 +449,16 @@ export function attachPointHoverListeners(pointEl, pointIndex) {
     // Check if point contains pieces owned by current player
     let isOwner = false;
     if (pointIndex === 'bar') {
-      const barCount = state.currentPlayer === 'black'
-        ? state.bar.black : state.bar.white;
-      isOwner = barCount > 0;
+      // Ensure the specific bar element hovered belongs to the current player
+      const isCorrectBarForPlayer = 
+        (state.currentPlayer === 'black' && pointEl.id === 'bar-black') ||
+        (state.currentPlayer === 'white' && pointEl.id === 'bar-white');
+      
+      if (isCorrectBarForPlayer) {
+        const barCount = state.currentPlayer === 'black'
+          ? state.bar.black : state.bar.white;
+        isOwner = barCount > 0;
+      }
     } else if (typeof pointIndex === 'number') {
       const pointData = state.boardState[pointIndex];
       isOwner = pointData && pointData.player === state.currentPlayer
