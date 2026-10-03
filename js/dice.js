@@ -170,7 +170,7 @@ export function resetDiceUI() {
             die1.style.display = '';
         }
         if (die2) {
-            setDieValue(die2, 'Q');
+            setDieValue(die2, 'R');
             die2.classList.remove('used');
             die2.style.display = '';
         }

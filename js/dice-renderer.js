@@ -179,7 +179,7 @@ export function renderDiceUI() {
   if (!state.hasRolled) {
     removeExtraDice(player, 2);
     setDieValue(die1, "R");
-    setDieValue(die2, "Q");
+    setDieValue(die2, "R");
     die1.classList.remove("used");
     die2.classList.remove("used");
     die1.style.display = "";
