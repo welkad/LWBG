@@ -10,10 +10,10 @@ import { clearHoverHighlights, renderBoard } from './board.js';
 
 /** 
  * - Space / R : Roll dice
- * - S         : Swap dice order
+ * - Space / S : Swap dice order
  * - C         : Offer doubling cube
  * - U         : Undo last move
- * - D         : Complete turn
+ * - Space / D : Complete turn
  * - Q         : Prompt resignation
  * - H         : Toggle move highlighting on or off
  * - Y / N     : Confirm / cancel active prompt (Resign or Doubling Cube)
@@ -80,8 +80,30 @@ export function setupKeyboardListeners() {
     }
 
     switch (key) {
-      // ROLL or SWAP dice
-      case 'Space':
+      // SPACEBAR: Roll, Swap Dice or Complete turn
+      case 'Space':      
+        event.preventDefault();
+        if (state.gamePhase === 'opening_roll') {
+          // Identify who needs to roll
+          if (!state.openingRolls?.black) {
+            handleDiceRoll('black');
+          } else if (!state.openingRolls?.white) {
+            handleDiceRoll('white');
+          }
+        } else if (state.gamePhase === 'turns' && !state.hasRolled) {
+          // Roll dice
+          handleDiceRoll(state.currentPlayer);
+        } else if (state.gamePhase === 'turns' && state.hasRolled) {
+          if (state.currentRoll.length === 0) {
+            // All dice played: switch turn (same as 'D')
+            switchTurn();
+          } else {
+            // Unplayed dice remain: swap dice order (same as 'S')
+            toggleDiceOrder(state.currentPlayer); 
+          }
+        }
+        break;
+      // KEY R: Roll or Swap Dice
       case 'KeyR':
         event.preventDefault();
         if (state.gamePhase === 'opening_roll') {
@@ -92,11 +114,11 @@ export function setupKeyboardListeners() {
             handleDiceRoll('white');
           }
         } else if (state.gamePhase === 'turns' && !state.hasRolled) {
-          // Regular turn roll
+          // Roll dice
           handleDiceRoll(state.currentPlayer);
-        } else if (state.gamePhase === 'turns' && state.hasRolled) {
-          // Swap dice order if already rolled (non-doubles, 2 dice remaining)
-          toggleDiceOrder(state.currentPlayer); 
+        } else if (state.gamePhase === 'turns' && state.hasRolled) {  
+          // Unplayed dice remain: swap dice order (same as 'S')
+          toggleDiceOrder(state.currentPlayer);           
         }
         break;
 
