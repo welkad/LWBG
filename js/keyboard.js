@@ -1,7 +1,7 @@
 // js/keyboard.js - Global keyboard shortcuts for game actions.
 import { renderDiceUI } from './dice-renderer.js';
 import { handlePostGameDieClick } from './dice.js';
-import { clearStatusQueue, logStatus, restorePreviousStatus, saveCurrentStatus } from './ui.js';
+import { clearStatusQueue, logStatus, restorePreviousStatus, saveCurrentStatus, updateLegendUI } from './ui.js';
 import { handleResignation, state, switchTurn } from './state.js';
 import { handleCubeClick, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, toggleDiceOrder } from './dice-rolling.js';
@@ -12,11 +12,11 @@ import { clearHoverHighlights, renderBoard } from './board.js';
  * - Space / R : Roll dice
  * - Space / S : Swap dice order
  * - C         : Offer doubling cube
- * - U         : Undo last move
+ * - U         : Undo last move (or Ctrl+Z)
  * - Space / D : Complete turn
  * - Q         : Prompt resignation
  * - H         : Toggle move highlighting on or off
- * - Y / N     : Confirm / cancel active prompt (Resign or Doubling Cube)
+ * - Y / N     : Confirm / cancel active prompt (Resign or Doubling Cube) * 
  */
 
 export function setupKeyboardListeners() {
@@ -63,6 +63,7 @@ export function setupKeyboardListeners() {
 
             // Restore prompt based on previous message
             restorePreviousStatus();
+            updateLegendUI();
 
             updateCubePositionUI();
             renderDiceUI();
@@ -197,6 +198,21 @@ export function setupKeyboardListeners() {
           renderBoard();
         }
         break;
+
+      // UNDO (Ctrl+Y / Cmd+Y or Ctrl+Shift+Y / Cmd+Shift+Y)
+      case 'KeyY':
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          if (state.gamePhase !== 'game_over') {
+            // Handle both Cmd+Y and Cmd+Shift+Y regardless of Shift state
+            if (typeof undoLastMove === 'function') {
+              undoLastMove();
+              renderDiceUI();
+            }
+          }
+        }
+
+      // UNDO (Ctrl+Z / Cmd+Z)
 
       default:
         break;
