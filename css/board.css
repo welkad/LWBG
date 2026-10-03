@@ -405,16 +405,16 @@ body {
 }
 
 /* SOURCE SELECTION (Selected & Hover-Selected) */
-.point.selected,
-.point.hover-selected,
-#bar-black.selected,
-#bar-white.selected {
+.show-highlights .point.selected,
+.show-highlights .point.hover-selected,
+.show-highlights #bar-black.selected,
+.show-highlights #bar-white.selected {
   background-color: rgba(255, 235, 59, 0.28) !important;
   box-shadow: inset 0 0 0 2px #ffeb3b;
 }
 
-.point.selected .checker:last-child,
-.point.hover-selected .checker:last-child {
+.show-highlights .point.selected .checker:last-child,
+.show-highlights .point.hover-selected .checker:last-child {
   box-shadow: 0 0 8px 3px #ffeb3b;
   transform: scale(1.05);
 }

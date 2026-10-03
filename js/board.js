@@ -85,8 +85,6 @@ function createPointDOM(index) {
   // Global index 0, 2, 4... -> even | 1, 3, 5... -> odd
   const pointColorClass = (index % 2 === 0) ? 'point-even' : 'point-odd';
   pointEl.className = `point ${pointColorClass}`; // Board triangle color class
-  // pointEl.dataset.point = String(index);
-  // pointEl.dataset.index = String(index);
   pointEl.dataset.pointIndex = String(index);
 
   // Adjust Z-Index so point stacks overflow on top of adjacent triangles
