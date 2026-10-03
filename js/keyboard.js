@@ -199,20 +199,18 @@ export function setupKeyboardListeners() {
         }
         break;
 
-      // UNDO (Ctrl+Y / Cmd+Y or Ctrl+Shift+Y / Cmd+Shift+Y)
-      case 'KeyY':
+      // UNDO (Ctrl+Z / Cmd+Z or Ctrl+Shift+Z / Cmd+Shift+Z)
+      case 'KeyZ':
         if (event.ctrlKey || event.metaKey) {
           event.preventDefault();
           if (state.gamePhase !== 'game_over') {
-            // Handle both Cmd+Y and Cmd+Shift+Y regardless of Shift state
+            // Handle both Cmd+Z and Cmd+Shift+Z regardless of Shift state
             if (typeof undoLastMove === 'function') {
               undoLastMove();
               renderDiceUI();
             }
           }
         }
-
-      // UNDO (Ctrl+Z / Cmd+Z)
 
       default:
         break;
