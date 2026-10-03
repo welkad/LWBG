@@ -3,7 +3,7 @@ import { handleResignation, resetGame, state, switchTurn } from './state.js';
 import { handleCubeClick, handleCubeMouseLeave, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, handleOpeningRoll, toggleDiceOrder } from './dice-rolling.js';
 import { renderDiceUI, setDieValue } from './dice-renderer.js';
-import { clearStatusQueue, logStatus, updateLegendUI } from './ui.js';
+import { clearStatusQueue, logStatus, restorePreviousStatus, updateLegendUI } from './ui.js';
 import { undoLastMove } from './moves.js';
 
 /**
@@ -39,7 +39,11 @@ export function handleDieClick(player, dieNumber, event) {
       state.isResignOffered = false;
       state.resignOfferedBy = null;
       clearStatusQueue();
-      logStatus(`${player}'s turn. Roll or Resign.`);
+
+      // Restore prompt based on previous message
+      restorePreviousStatus();
+      updateLegendUI();
+
       updateCubePositionUI();
       renderDiceUI();
     }
