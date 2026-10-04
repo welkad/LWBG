@@ -6,19 +6,26 @@
 
 .resign-btn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #aaa;
-  font-size: 0.75rem;
+  /* border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px; */
+  color: #aaa; 
   padding: 2px 8px;
-  border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .resign-btn:hover {
-  background: rgba(220, 53, 69, 0.2);
-  border-color: #dc3545;
-  color: #fff;
+  /* background: rgba(220, 53, 69, 0.2); */  
+  color: #dc3545;
+  /* color: #fff; */
+}
+
+.resign-btn:active {
+  transform: scale(0.95);
+}
+
+.resign-btn.hidden {
+  display: none !important;
 }
 
 /* ==========================================

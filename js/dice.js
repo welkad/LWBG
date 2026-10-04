@@ -3,7 +3,7 @@ import { handleResignation, resetGame, state, switchTurn } from './state.js';
 import { handleCubeClick, handleCubeMouseLeave, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, handleOpeningRoll, toggleDiceOrder } from './dice-rolling.js';
 import { renderDiceUI, setDieValue } from './dice-renderer.js';
-import { clearStatusQueue, logStatus, restorePreviousStatus, updateLegendUI } from './ui.js';
+import { clearStatusQueue, logStatus, restorePreviousStatus, saveCurrentStatus, updateLegendUI } from './ui.js';
 import { undoLastMove } from './moves.js';
 
 /**
@@ -83,15 +83,6 @@ export function handleDieClick(player, dieNumber, event) {
   const content = targetEl.textContent.trim();
   if (content === 'R' && !state.hasRolled) {
       handleDiceRoll(player);
-  } else if (content === 'Q' && !state.hasRolled) {
-    // Trigger resign confirmation
-    state.isResignOffered = true;
-    state.resignOfferedBy = player;
-    clearStatusQueue(); // Clear older messages
-    const message = state.cubeValue === 1 ? 'the game' : `${state.cubeValue} points`;
-    logStatus(`Are you sure you want to resign and concede ${message}?`);
-    updateCubePositionUI(); // Deactivate cube while pending
-    renderDiceUI();
   } else if (content === 'U') {
       undoLastMove();
       renderDiceUI();
@@ -103,7 +94,9 @@ export function handleDieClick(player, dieNumber, event) {
   }
 }
 
-// Attach event listeners to dice elements once DOM is ready
+/** 
+ * Attach event listeners to dice elements once DOM is ready
+ */ 
 export function initDiceListeners() {
   const blackZone = document.getElementById('black-dice-zone');
   const whiteZone = document.getElementById('white-dice-zone');
@@ -120,10 +113,8 @@ export function initDiceListeners() {
 
       const target = /** @type {HTMLElement | null} */ (event.target);
       if (!target) return;
-
       const dieEl = target.closest('.die');
       if (!dieEl) return;
-
       const match = dieEl.id.match(/^(black|white)-die-(\d+)$/);
       if (!match) return;
 
@@ -145,6 +136,35 @@ export function initDiceListeners() {
       });
       cubeEl.addEventListener('mouseleave', handleCubeMouseLeave);
   }
+
+  // Listen for Resign button(s)
+  ['resign-black-btn', 'resign-white-btn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      // Determine resigning player from button ID
+      const resigningPlayer = id.includes('black') ? 'black' : 'white';
+
+      // Only allow current active player to resign during their turn
+      if (resigningPlayer !== state.currentPlayer) return;
+
+      // Only allow resignation during game play without active prompt
+      if (state.gamePhase === 'turns' && !state.isResignOffered
+        && !state.isCubeOffered) {
+        // Trigger resign confirmation
+        saveCurrentStatus();
+        state.isResignOffered = true;
+        state.resignOfferedBy = resigningPlayer;
+        clearStatusQueue(); // Clear older messages
+
+        const message = state.cubeValue === 1 ? 'the game' : `${state.cubeValue} points`;
+        logStatus(`Are you sure you want to resign and concede ${message}?`);
+        updateCubePositionUI(); // Deactivate cube while pending
+        renderDiceUI();
+      }
+    });
+  });
 }
 
 // ==========================================

@@ -98,7 +98,9 @@ function clearInactiveDice() {
 //  DYNAMIC DICE UI
 // ================================
 
-export function renderDiceUI() { 
+export function renderDiceUI() {
+  // Sync resign button visibility with current turn phase
+  updateResignButtonsUI();
 
   // --- CUBE OFFER PENDING STATE ---
   if (state.isCubeOffered) {
@@ -384,4 +386,33 @@ function renderChoiceDice(targetPlayers, yesAction = 'yes', noAction = 'no') {
   });
 
   updateLegendUI();
+}
+
+// ==============================================
+//  RESIGN BUTTON VISIBILITY
+// ==============================================
+function updateResignButtonsUI() {
+  const blackBtn = document.getElementById('resign-black-btn');
+  const whiteBtn = document.getElementById('resign-white-btn');
+
+  if (!blackBtn || !whiteBtn) return;
+
+  // Only allow resignation during actve play and without pending prompts
+  const canResign = state.gamePhase === 'turns' && !state.isResignOffered
+    && !state.isCubeOffered;
+  
+  if (!canResign) {
+    blackBtn.classList.add('hidden');
+    whiteBtn.classList.add('hidden');
+    return; // Exit early if no resignation possible
+  }
+
+  // Display flag exclusively for the active player
+  if (state.currentPlayer === 'black') {
+    blackBtn.classList.remove('hidden');
+    whiteBtn.classList.add('hidden');
+  } else {
+    blackBtn.classList.add('hidden');
+    whiteBtn.classList.remove('hidden');
+  }
 }

@@ -219,11 +219,19 @@ body {
 
 .scoreboard {
     display: flex;
-    flex-direction: column;
+    /* Align score text and flag horizontally */
+    flex-direction: row;  
+    align-items: center;
+    gap: 10px;
     font-size: 1.1rem;
     font-weight: bold;
     color: #d4d4d4;
     min-width: 110px;
+}
+
+.score-info {
+  display: flex;
+  flex-direction: column; /* Stack the two score lines vertically */
 }
 
 #scoreboard-black {
