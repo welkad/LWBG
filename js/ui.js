@@ -193,12 +193,12 @@ export function updateLegendUI() {
   // Disable legend buttons during prompts (Cube, Resign, Game Over, etc.)
   if (
     state.isCubeOffered || state.isResignOffered ||
-    state.gamePhase === 'game_over' || state.isInputLocked
+    state.gamePhase === 'game_over'
   ) {
-    rollBtn.disabled;
-    resignBtn.disabled;
-    undoBtn.disabled;
-    doneBtn.disabled;
+    rollBtn.disabled = true;
+    resignBtn.disabled = true;
+    undoBtn.disabled = true;
+    doneBtn.disabled = true;
     return;
   }
 
@@ -219,17 +219,6 @@ export function updateLegendUI() {
 
     return;
   }
-
-  // Opening roll phase
-  // if (state.gamePhase === 'opening_roll') {
-  //   const isOpeningRollPending =
-  //     state.openingRolls.white === null || state.openingRolls.black === null;
-
-  //   rollBtn.classList.toggle('hidden', !isOpeningRollPending);
-  //   resignBtn.classList.add('hidden');
-  //   undoBtn.classList.add('hidden');
-  //   doneBtn.classList.add('hidden');
-  // }
 }
 
 /**
