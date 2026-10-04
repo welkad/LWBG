@@ -1,30 +1,66 @@
 /* css/controls.css - Contains interactive UI components: player dice zones, dice styling, and the doubling cube. */
 
 /* ==========================================
-   RESIGNATION BUTTON
+   INTERACTIVE LEGEND BUTTONS
    ========================================== */
 
-.resign-btn {
+.dice-legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.legend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: transparent;
-  /* border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px; */
-  color: #aaa; 
-  padding: 2px 8px;
+  border: none;
+  color: #d4d4d4;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease-in-out;
+  user-select: none;
 }
 
-.resign-btn:hover {
-  /* background: rgba(220, 53, 69, 0.2); */  
-  color: #dc3545;
-  /* color: #fff; */
+.legend-btn .key-badge {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fbfbfb;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 22px;
+  height: 22px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-.resign-btn:active {
-  transform: scale(0.95);
+.legend-btn:hover {
+  background: #3a3a3a;
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
 }
 
-.resign-btn.hidden {
+.legend-btn:active {
+  transform: translateY(1px);
+}
+
+.legend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: auto;
+  box-shadow: none;
+}
+
+.legend-btn.hidden {
   display: none !important;
 }
 

@@ -95,7 +95,7 @@ export function handleDieClick(player, dieNumber, event) {
 }
 
 /** 
- * Attach event listeners to dice elements once DOM is ready
+ * Attach event listeners to dice and legend elements once DOM is ready
  */ 
 export function initDiceListeners() {
   const blackZone = document.getElementById('black-dice-zone');
@@ -137,25 +137,30 @@ export function initDiceListeners() {
       cubeEl.addEventListener('mouseleave', handleCubeMouseLeave);
   }
 
-  // Listen for Resign button(s)
-  ['resign-black-btn', 'resign-white-btn'].forEach(id => {
+  // Listen for legend button mouse interactions
+  const legendActions = [
+    { id: 'action-roll-btn', handler: () => handleDiceRoll(state.currentPlayer) },
+    { id: 'action-undo-btn', handler: () => { undoLastMove(), renderDiceUI() } },
+    { id: 'action-done-btn', handler: () => switchTurn() }
+  ];
+
+  legendActions.forEach(({ id, handler }) => {
     const btn = document.getElementById(id);
-    if (!btn) return;
+    if (btn) {
+      btn.addEventListener('click', handler);
+    }
+  });
 
-    btn.addEventListener('click', () => {
-      // Determine resigning player from button ID
-      const resigningPlayer = id.includes('black') ? 'black' : 'white';
-
-      // Only allow current active player to resign during their turn
-      if (resigningPlayer !== state.currentPlayer) return;
-
-      // Only allow resignation during game play without active prompt
-      if (state.gamePhase === 'turns' && !state.isResignOffered
-        && !state.isCubeOffered) {
+  const resignBtn = document.getElementById('action-resign-btn');
+  if (resignBtn) {
+    resignBtn.addEventListener('click', () => {
+      // Allow current active player to resign during their own turn
+      if (state.gamePhase === 'turns' && state.currentPlayer !== null
+        && !state.isResignOffered && !state.isCubeOffered) {
         // Trigger resign confirmation
         saveCurrentStatus();
         state.isResignOffered = true;
-        state.resignOfferedBy = resigningPlayer;
+        state.resignOfferedBy = state.currentPlayer;
         clearStatusQueue(); // Clear older messages
 
         const message = state.cubeValue === 1 ? 'the game' : `${state.cubeValue} points`;
@@ -164,7 +169,7 @@ export function initDiceListeners() {
         renderDiceUI();
       }
     });
-  });
+  }
 }
 
 // ==========================================

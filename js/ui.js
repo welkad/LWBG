@@ -176,60 +176,60 @@ function processQueue() {
 }
 
 /**
- *  Update the dice control legend dynamically between regular play and cube decisions
+ *  Update interactive legend button visibility based on game state
  */
 export function updateLegendUI() {
-  const legendEl = document.querySelector('.dice-legend');
-  if (!legendEl) return;
+  const rollBtn = /** @type {HTMLButtonElement | null} */
+    (document.getElementById('action-roll-btn'));
+  const resignBtn =  /** @type {HTMLButtonElement | null} */
+    (document.getElementById('action-resign-btn'));
+  const undoBtn = /** @type {HTMLButtonElement | null} */
+    (document.getElementById('action-undo-btn'));
+  const doneBtn = /** @type {HTMLButtonElement | null} */
+    (document.getElementById('action-done-btn'));
 
-  if (state.gamePhase === 'opening_roll') {
-    legendEl.innerHTML = `
-        <span><strong>R</strong> : Roll</span>
-    `;
+  if (!rollBtn || !resignBtn || !undoBtn || !doneBtn) return;
+
+  // Disable legend buttons during prompts (Cube, Resign, Game Over, etc.)
+  if (
+    state.isCubeOffered || state.isResignOffered ||
+    state.gamePhase === 'game_over' || state.isInputLocked
+  ) {
+    rollBtn.disabled;
+    resignBtn.disabled;
+    undoBtn.disabled;
+    doneBtn.disabled;
     return;
   }
 
-  if (state.gamePhase === 'game_over') {     
-    const hasChoice = document.querySelector('.die[data-action^="play-again"]');
+// During active gameplay keep all four buttons visible
+  if (state.gamePhase === 'turns' || state.gamePhase === 'opening_roll') {
+    rollBtn.classList.remove('hidden');
+    resignBtn.classList.remove('hidden');
+    undoBtn.classList.remove('hidden');
+    doneBtn.classList.remove('hidden');
 
-    if (hasChoice) {   // If choice still exists, show Y/N prompt
-      legendEl.innerHTML = `
-        <span><strong>Y</strong> : Play Again</span>
-        <span><strong>N</strong> : Decline</span>
-      `;
-    } else {
-      legendEl.innerHTML = ''; // Otherwise clear dice legend if no longer playing
-    }
-  } else if (state.isResignOffered) {
-      legendEl.innerHTML = `
-        <span><strong>Y</strong> : Resign</span>
-        <span><strong>N</strong> : Cancel</span>
-      `;
-  } else if (state.isCubeOffered) {
-      legendEl.innerHTML = `
-        <span><strong>Y</strong> : Accept</span>
-        <span><strong>N</strong> : Resign</span>
-    `;
-  } else if (!state.hasRolled && state.gamePhase === 'turns') {
-      legendEl.innerHTML = `        
-        <span><strong>R</strong> : Roll</span>        
-        <span><strong>Q</strong> : Resign</span>
-      `;
-  } else if (state.gamePhase === 'turns' ){
-    if (state.hasRolled) {
-      // Post-roll active turn menu
-      legendEl.innerHTML = `          
-          <span><strong>U</strong> : Undo</span>
-          <span><strong>D</strong> : Done</span>
-      `;
-    } else {
-      // Pre-roll menu
-      legendEl.innerHTML = `
-          <span><strong>R</strong> : Roll</span>
-          <span><strong>Q</strong> : Resign</span>
-      `;
-    }
+    // Disable buttons if a resignation confirmation prompt is active
+    const isPendingPrompt = state.isResignOffered;
+
+    rollBtn.disabled = isPendingPrompt || state.hasRolled;    
+    undoBtn.disabled = isPendingPrompt || !state.hasRolled || state.moveHistory.length === 0;
+    doneBtn.disabled = isPendingPrompt || !state.hasRolled || state.currentRoll.length > 0;
+    resignBtn.disabled = isPendingPrompt || state.gamePhase === 'opening_roll';
+
+    return;
   }
+
+  // Opening roll phase
+  // if (state.gamePhase === 'opening_roll') {
+  //   const isOpeningRollPending =
+  //     state.openingRolls.white === null || state.openingRolls.black === null;
+
+  //   rollBtn.classList.toggle('hidden', !isOpeningRollPending);
+  //   resignBtn.classList.add('hidden');
+  //   undoBtn.classList.add('hidden');
+  //   doneBtn.classList.add('hidden');
+  // }
 }
 
 /**

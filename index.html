@@ -18,19 +18,9 @@
         <div class="score-line">Black: <span id="pip-black">167</span></div>
         <div class="score-line">Score: <span id="score-black">0</span></div>
       </div>
-      <!-- <div class="resign-btn" id="resign-black-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6h-5.6z" />
-        </svg>
-      </div> -->
     </div>
     <h1>Backgammon</h1>
     <div class="scoreboard" id="scoreboard-white">
-      <!-- <div class="resign-btn" id="resign-white-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6h-5.6z" />
-        </svg>
-      </div> -->
       <div class="score-info">
         <div class="score-line">White: <span id="pip-white">167</span></div>
         <div class="score-line">Score: <span id="score-white">0</span></div>
@@ -112,10 +102,27 @@
   </div>
 
   <!-- Dice Action Legend -->
-  <div class="dice-legend">
-    <span><strong>R</strong> : Roll</span>
-    <span><strong>U</strong> : Undo</span>
-    <span><strong>D</strong> : Done</span>
+  <div id="legend" class="dice-legend">
+    <!-- ROLL -->
+    <button id="action-roll-btn" class="legend-btn hidden" title="Roll Dice (R)">
+      <span class="key-badge">R</span>
+      <span class="btn-label">: Roll</span>
+    </button>
+    <!-- UNDO -->
+    <button id="action-undo-btn" class="legend-btn hidden" title="Undo Move (U)">
+      <span class="key-badge">U</span>
+      <span class="btn-label">: Undo</span>
+    </button>
+    <!-- DONE -->
+    <button id="action-done-btn" class="legend-btn hidden" title="Finish Turn (D)">
+      <span class="key-badge">D</span>
+      <span class="btn-label">: Done</span>
+    </button>
+    <!-- RESIGN -->
+    <button id="action-resign-btn" class="legend-btn hidden" title="Resign Game (Q)"> 
+      <span class="key-badge">Q</span>
+      <span class="btn-label">: Resign</span>
+    </button>
   </div>
   
 </body>
