@@ -231,10 +231,10 @@ export function handleDiceRoll(player) {
         const isTrappedOnbar = player ? (state.bar[player] || 0) > 0 : false;
         const message = isTrappedOnbar        
           ? `${player} is trapped on the bar and has no legal moves. `
-          : `No legal moves available for ${player}. `;
+          : `No legal moves available for ${player}. Passing turn...`;
 
         clearStatusQueue(); // Clear any pending messages
-        logStatus(message + 'Passing turn...');
+        logStatus(message);
 
         setTimeout(() => {
           switchTurn();
