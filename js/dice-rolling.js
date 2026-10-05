@@ -1,10 +1,11 @@
 // js/dice-rolling.js
-import { state } from './state.js';
+import { state, switchTurn } from './state.js';
 import { logStatus, clearStatusQueue } from './ui.js';
 import { renderBoard, updatePointLabels } from './board.js';
 import { renderDiceUI, setDieValue, renderWinnerOpeningDice } from './dice-renderer.js';
 import { updateCubePositionUI } from './doubling-cube.js';
 import { autoSelectBarIfRequired } from './moves.js';
+import { hasAnyLegalMoves } from './rules.js';
 
 /**
  * @typedef {Object} DieConfig
@@ -224,6 +225,14 @@ export function handleDiceRoll(player) {
       state.selectedPoint = null;
       state.validMoves = [];
       renderBoard();
+
+      // Automatically pass turn if no legal moves exist anywhere on board
+      if (!hasAnyLegalMoves()) {
+        logStatus(`No legal moves available for ${player}. Passing turn...`);
+        setTimeout(() => {
+          switchTurn();
+        }, 3000);
+      }      
     }
   );
 }
