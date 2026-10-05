@@ -26,26 +26,16 @@ export function handleDieClick(player, dieNumber, event) {
     if (player !== state.resignOfferedBy) return;
 
     const targetEl = document.getElementById(`${player}-die-${dieNumber}`);
-    if (!targetEl) return;
+    if (!targetEl) {
+      console.error(`${targetEl} not found!`);
+      return;
+    }
 
     const content = targetEl.textContent.trim();
-
-    if (content === 'Y') {
-      // Player confirmed resignation
-      handleResignation(player);
-      renderDiceUI();
+    if (content === 'Y') {      
+      handleYesAction();  // Player confirmed resignation
     } else if (content === 'N') {
-      // Player canceled resignation
-      state.isResignOffered = false;
-      state.resignOfferedBy = null;
-      clearStatusQueue();
-
-      // Restore prompt based on previous message
-      restorePreviousStatus();
-      updateLegendUI();
-
-      updateCubePositionUI();
-      renderDiceUI();
+      handleNoAction();
     }
     return;
   }
@@ -62,13 +52,16 @@ export function handleDieClick(player, dieNumber, event) {
     if (player !== respondingPlayer) return;
 
     const targetEl = document.getElementById(`${player}-die-${dieNumber}`);
-    if (!targetEl) return;
-    const content = targetEl.textContent.trim();
-    const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
+    if (!targetEl) {
+      console.error(`${targetEl} not found!`);
+      return;
+    }
+
+    const content = targetEl.textContent.trim();    
     if (content === 'Y') {
-        resolveCubeOffer(true, targetValue);
+      handleYesAction();
     } else if (content === 'N') {
-        resolveCubeOffer(false, targetValue);
+      handleNoAction();
     }
     return;
   }
@@ -140,14 +133,18 @@ export function initDiceListeners() {
   // Listen for legend button mouse interactions
   const legendActions = [
     { id: 'action-roll-btn', handler: () => handleDiceRoll(state.currentPlayer) },
-    { id: 'action-undo-btn', handler: () => { undoLastMove(), renderDiceUI() } },
-    { id: 'action-done-btn', handler: () => switchTurn() }
+    { id: 'action-undo-btn', handler: () => { undoLastMove(); renderDiceUI(); } },
+    { id: 'action-done-btn', handler: () => switchTurn() },
+    { id: 'action-yes-btn', handler: handleYesAction },
+    { id: 'action-no-btn', handler: handleNoAction }
   ];
 
   legendActions.forEach(({ id, handler }) => {
     const btn = document.getElementById(id);
     if (btn) {
       btn.addEventListener('click', handler);
+    } else {
+      console.warn(`[initDiceListeners] Button with id '${id}' was not found`);
     }
   });
 
@@ -166,6 +163,7 @@ export function initDiceListeners() {
         const message = state.cubeValue === 1 ? 'the game' : `${state.cubeValue} points`;
         logStatus(`Are you sure you want to resign and concede ${message}?`);
         updateCubePositionUI(); // Deactivate cube while pending
+        updateLegendUI();
         renderDiceUI();
       }
     });
@@ -281,9 +279,14 @@ export function refreshDiceForNewTurn() {
  */
 export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlayer = null) {
   if (state.gamePhase !== 'game_over') return;
-  
-  let player = selectPlayer || typeof eventOrPlayer === 'string' ? eventOrPlayer : null;
-  let selectedChoice = choice;
+
+  let selectedChoice = choice;  
+  let player = null;  
+  if (selectPlayer) {
+    player = selectPlayer;
+  } else if (typeof eventOrPlayer === 'string') {
+    player = eventOrPlayer;
+  }  
 
   // Extract attributes from data
   if (eventOrPlayer && typeof eventOrPlayer === 'object' && 'target' in eventOrPlayer) {
@@ -372,5 +375,54 @@ export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlaye
        // Clear the dice legend
       updateLegendUI();
     }, 1500);
+  }
+}
+
+/**
+ * Execute 'Yes' / Confirm action for active game prompts.
+ */
+export function handleYesAction() {
+  if (state.gamePhase === 'game_over') {
+    handlePostGameDieClick(null, 'yes', null);
+    return;
+  }
+
+  if (state.isResignOffered) {
+    const resigningPlayer = state.resignOfferedBy || state.currentPlayer;
+    handleResignation(resigningPlayer);
+    renderDiceUI();
+    return;
+  }
+
+  if (state.isCubeOffered) {
+    const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
+    resolveCubeOffer(true, targetValue);
+  }
+}
+
+/**
+ * Execute 'No' / Cancel action for active game prompts.
+ */
+export function handleNoAction() {
+  if (state.gamePhase === 'game_over') {
+    handlePostGameDieClick(null, 'no', null);
+    return;
+  }
+
+  if (state.isResignOffered) {
+    state.isResignOffered = false;
+    state.resignOfferedBy = null;
+
+    clearStatusQueue();
+    restorePreviousStatus();
+    updateLegendUI();
+    updateCubePositionUI();
+    renderDiceUI();
+    return;
+  }
+
+  if (state.isCubeOffered) {
+    const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
+    resolveCubeOffer(false, targetValue);
   }
 }

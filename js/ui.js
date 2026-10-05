@@ -187,36 +187,78 @@ export function updateLegendUI() {
     (document.getElementById('action-undo-btn'));
   const doneBtn = /** @type {HTMLButtonElement | null} */
     (document.getElementById('action-done-btn'));
+  // Confirm or Cancel buttons
+  const yesBtn = /** @type {HTMLButtonElement | null} */
+    (document.getElementById('action-yes-btn'));
+  const noBtn = /** @type {HTMLButtonElement | null} */
+    (document.getElementById('action-no-btn'));
+  const labelYes = document.getElementById('label-yes');
+  const labelNo = document.getElementById('label-no');
 
-  if (!rollBtn || !resignBtn || !undoBtn || !doneBtn) return;
-
-  // Disable legend buttons during prompts (Cube, Resign, Game Over, etc.)
   if (
-    state.isCubeOffered || state.isResignOffered ||
-    state.gamePhase === 'game_over'
-  ) {
-    rollBtn.disabled = true;
-    resignBtn.disabled = true;
-    undoBtn.disabled = true;
-    doneBtn.disabled = true;
+    !rollBtn || !resignBtn || !undoBtn || !doneBtn ||
+    !yesBtn || !noBtn || !labelYes || !labelNo
+  ) return;
+
+  // Helper to hide main action buttons
+  const hideActionButtons = () => {
+    rollBtn.classList.add('hidden');
+    doneBtn.classList.add('hidden');  
+    undoBtn.classList.add('hidden');
+    resignBtn.classList.add('hidden');
+  }
+
+  // Resignation prompt (Y/N)
+  if (state.isResignOffered) {
+    hideActionButtons();
+    labelYes.textContent = ': Resign';
+    labelNo.textContent = ': Cancel';
+    yesBtn.classList.remove('hidden');
+    noBtn.classList.remove('hidden');
     return;
   }
 
-// During active gameplay keep all four buttons visible
+  // Doubling cube prompt (Y/N)
+  if (state.isCubeOffered) {
+    hideActionButtons();
+    labelYes.textContent = ': Accept';
+    labelNo.textContent = ': Refuse';
+    yesBtn.classList.remove('hidden');
+    noBtn.classList.remove('hidden');
+    return;
+  }
+
+  // Game over / play again prompt
+  if (state.gamePhase === 'game_over') {
+    hideActionButtons();
+    const hasChoice = document.querySelector('.die[data-action^="play-again"]');
+    if (hasChoice) {
+      labelYes.textContent = ': Play Again';
+      labelNo.textContent = ': Decline';
+      yesBtn.classList.remove('hidden');
+      noBtn.classList.remove('hidden');
+    } else {
+      yesBtn.classList.add('hidden');
+      noBtn.classList.add('hidden');
+    }
+    return;
+  }
+
+  // Hide Y/N prompt buttons outside of prompt states
+  yesBtn.classList.add('hidden');
+  noBtn.classList.add('hidden');
+
+  // During active gameplay keep all four buttons visible
   if (state.gamePhase === 'turns' || state.gamePhase === 'opening_roll') {
     rollBtn.classList.remove('hidden');
     resignBtn.classList.remove('hidden');
     undoBtn.classList.remove('hidden');
     doneBtn.classList.remove('hidden');
 
-    // Disable buttons if a resignation confirmation prompt is active
-    const isPendingPrompt = state.isResignOffered;
-
-    rollBtn.disabled = isPendingPrompt || state.hasRolled;    
-    undoBtn.disabled = isPendingPrompt || !state.hasRolled || state.moveHistory.length === 0;
-    doneBtn.disabled = isPendingPrompt || !state.hasRolled || state.currentRoll.length > 0;
-    resignBtn.disabled = isPendingPrompt || state.gamePhase === 'opening_roll';
-
+    rollBtn.disabled = state.hasRolled;
+    doneBtn.disabled = !state.hasRolled || state.currentRoll.length > 0;
+    undoBtn.disabled = !state.hasRolled || state.moveHistory.length === 0;    
+    resignBtn.disabled = state.gamePhase === 'opening_roll';
     return;
   }
 }

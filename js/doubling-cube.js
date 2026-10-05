@@ -1,6 +1,6 @@
 // js/doubling-cube.js - Contains all doubling cube logic.
 import { handleResignation, state } from "./state.js";
-import { logStatus, resetStatusToDefault, clearStatusQueue } from "./ui.js";
+import { logStatus, resetStatusToDefault, clearStatusQueue, updateLegendUI } from "./ui.js";
 import { renderDiceUI } from "./dice-renderer.js";
 
 const DISPLAY_TIME = 2000; // Temporary message duration
@@ -62,6 +62,7 @@ export function handleCubeClick(player) {
 
   // Refresh cube UI so classes update immediately
   updateCubePositionUI();
+  updateLegendUI(); // Swap legend buttons to display Y / N
 
   // Clear stale queued messages (e.g. "Turn switched") so Doubles prompt can render
   clearStatusQueue();
@@ -101,6 +102,7 @@ export function resolveCubeOffer(accepted, targetValue) {
     );
     // Move cube to new owner's tray
     updateCubePositionUI();
+    updateLegendUI(); // Restore legend UI to standard action buttons
 
     // Show offering player's dice zone again
     const currentZone = document.getElementById(`${offeringPlayer}-dice-zone`);

@@ -1,9 +1,9 @@
 // js/keyboard.js - Global keyboard shortcuts for game actions.
 import { renderDiceUI } from './dice-renderer.js';
-import { handlePostGameDieClick } from './dice.js';
-import { clearStatusQueue, logStatus, restorePreviousStatus, saveCurrentStatus, updateLegendUI } from './ui.js';
-import { handleResignation, state, switchTurn } from './state.js';
-import { handleCubeClick, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
+import { handleYesAction, handleNoAction } from './dice.js';
+import { clearStatusQueue, logStatus, saveCurrentStatus, updateLegendUI } from './ui.js';
+import { state, switchTurn } from './state.js';
+import { handleCubeClick } from './doubling-cube.js';
 import { handleDiceRoll, toggleDiceOrder } from './dice-rolling.js';
 import { undoLastMove } from './moves.js';
 import { clearHoverHighlights, renderBoard } from './board.js';
@@ -36,47 +36,15 @@ export function setupKeyboardListeners() {
     const isChoiceActive = isPlayAgainActive || isResignActive || isCubeActive;
 
     if (isChoiceActive) {
-      if (key === 'KeyY' || key === 'KeyN') {
+      if (key === 'KeyY') {
         event.preventDefault();
-        const choice = key === 'KeyY' ? 'yes' : 'no';
-
-        // Play again prompt (end of game)
-        if (isPlayAgainActive) {
-          // Ignore any key press during intial post-game delay
-          if (state.awaitingPlayAgainPrompt) return;
-
-          // Delegate directly to dice.js post-game handler
-          handlePostGameDieClick(null, choice, null);         
-          return;
-        }
-
-        // Resignation prompt
-        if (isResignActive) {
-          if (choice == 'yes') {
-            handleResignation(state.resignOfferedBy);
-            renderDiceUI();
-          } else {
-            const player = state.resignOfferedBy;
-            state.isResignOffered = false;
-            state.resignOfferedBy = null;
-            clearStatusQueue();
-
-            // Restore prompt based on previous message
-            restorePreviousStatus();
-            updateLegendUI();
-
-            updateCubePositionUI();
-            renderDiceUI();
-          }
-          return;
-        }
-
-        // Doubling cube prompt
-        if (isCubeActive) {
-          const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
-          resolveCubeOffer(choice === 'yes', targetValue);
-          return;
-        }
+        handleYesAction();
+        return;
+      }
+      if (key === 'KeyN') {
+        event.preventDefault();
+        handleNoAction();
+        return;
       }
     }
 
@@ -170,6 +138,7 @@ export function setupKeyboardListeners() {
           state.resignOfferedBy = state.currentPlayer;
           clearStatusQueue();
           logStatus("Are you sure you want to resign?");
+          updateLegendUI();
           renderDiceUI();
         }
         break;
