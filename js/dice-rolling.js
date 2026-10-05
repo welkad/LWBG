@@ -228,7 +228,14 @@ export function handleDiceRoll(player) {
 
       // Automatically pass turn if no legal moves exist anywhere on board
       if (!hasAnyLegalMoves()) {
-        logStatus(`No legal moves available for ${player}. Passing turn...`);
+        const isTrappedOnbar = player ? (state.bar[player] || 0) > 0 : false;
+        const message = isTrappedOnbar        
+          ? `${player} is trapped on the bar and has no legal moves. `
+          : `No legal moves available for ${player}. `;
+
+        clearStatusQueue(); // Clear any pending messages
+        logStatus(message + 'Passing turn...');
+
         setTimeout(() => {
           switchTurn();
         }, 3000);

@@ -486,19 +486,8 @@ export function autoSelectBarIfRequired() {
     const validBarMoves = Array.isArray(rawBarMoves) ? rawBarMoves : [rawBarMoves];
 
     // Check if trapped on BAR point with no legal moves available
-    if (validBarMoves.length === 0) {
-      clearStatusQueue(); // Remove any other pending messages 
-      logStatus(`${player} is trapped on the bar! All entry points are blocked.`, 2000);
-
-      // Clear remaining dice and automatically switch turn after a brief delay
-      state.currentRoll = [];
-      state.isInputLocked = true; // Lock input during 3s message window
-
-      setTimeout(() => {
-        switchTurn(); // Automatically resets isInputLocked = false
-      }, 2000);
-      return false; // Signal that no valid moves exist
-    }
+    if (validBarMoves.length === 0) return false;
+    
     // Legal moves exist
     state.selectedPoint = null; // Keep selection state empty to suppress rectangles
     state.validMoves = validBarMoves; // Calculate destination points from bar
