@@ -123,7 +123,9 @@ export function handleCubeMouseLeave() {
   resetStatusToDefault(DISPLAY_TIME);
 }
 
-// Helper function to update positioning in CSS
+/**
+ *  Update CUBE position in CSS
+ */
 export function updateCubePositionUI() {
   const cubeEl = document.getElementById("doubling-cube");
   if (!cubeEl) return; 
@@ -146,11 +148,16 @@ export function updateCubePositionUI() {
     targetContainer.appendChild(cubeEl);
   }
 
-  // Display 64 when value is 1 (standard physical set display)
-  cubeEl.textContent = state.cubeValue === 1 ? '64' : `${state.cubeValue}`;
+  // Calculate display value (double current value if an offer is pending)
+  let displayValue = state.cubeValue;  
+  if (state.isCubeOffered) {
+     displayValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
+  }
 
-  // Set data attribute for CSS targeting
-  cubeEl.setAttribute("data-owner", state.cubeOwner);
+  // Display standard value of 64 unless a cube double has been offered
+  cubeEl.textContent = (!state.isCubeOffered && state.cubeValue === 1)
+    ? '64' : `${displayValue}`;  
+  cubeEl.setAttribute("data-owner", state.cubeOwner); // Set CSS data attribute
 
   // Determine if the cube should be visually active/clickable
   const isOpening = state.gamePhase === "opening_roll";
