@@ -126,15 +126,21 @@ export function handleCubeMouseLeave() {
 // Helper function to update positioning in CSS
 export function updateCubePositionUI() {
   const cubeEl = document.getElementById("doubling-cube");
-  if (!cubeEl) return;
+  if (!cubeEl) return; 
 
-  // Move cube to appropriate container based on owner
-  let targetContainerId = "bar"; // default center position
-  if (state.cubeOwner === "black") {
-    targetContainerId = "doubling-cube-tray";
-  } else if (state.cubeOwner === "white") {
-    targetContainerId = "home-bar";
+  let targetContainerId;
+  if (state.isCubeOffered) {
+    targetContainerId = 'bar';  // Center cube during any pending offer
+  } else {
+    if (state.cubeOwner === "black") {
+      targetContainerId = "doubling-cube-tray";
+    } else if (state.cubeOwner === "white") {
+      targetContainerId = "home-bar";
+    } else {
+      targetContainerId = "bar";  // Center starting position
+    }
   }
+  
   const targetContainer = document.getElementById(targetContainerId);
   if (targetContainer && cubeEl.parentElement !== targetContainer) {
     targetContainer.appendChild(cubeEl);

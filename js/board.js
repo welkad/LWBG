@@ -2,6 +2,7 @@
 import { state, calculatePipCount } from './state.js';
 import { handlePointClick} from './moves.js';
 import { getValidMovesForPoint } from './rules.js';
+import { updateCubePositionUI } from './doubling-cube.js';
 
 export function renderBoard() {
   const topLeft = document.getElementById('top-left');
@@ -294,7 +295,7 @@ export function renderBar() {
     blackBarEl.oncontextmenu = (isBlackActive && barHasMoves) ? (e) => {
       e.preventDefault();
       handlePointClick('bar', true);      
-    } : null;
+    } : null;    
   }
   // Player White interactivity states & click handlers for bar pieces
   if (whiteBarEl) {
@@ -324,6 +325,7 @@ export function renderBar() {
       handlePointClick('bar', true);      
     } : null;
   }
+  updateCubePositionUI(); // Ensure doubling cube position is accurate
 }
 
 // Show borne-off checkers and enable bear-off targets

@@ -30,5 +30,9 @@ function initApp() {
      setupKeyboardListeners();
 }
 
-// Run setup after DOM is fully loaded
-document.addEventListener('DOMContentLoaded', initApp);
+// Run setup after all CSS stylesheets and assets are completely loaded
+if (document.readyState === "complete") {
+    initApp();
+} else {
+    window.addEventListener('load', initApp);
+}
