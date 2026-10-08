@@ -206,10 +206,12 @@ export function handleGameEnd(winner, resigningPlayer = null) {
   }
   let winMessage = '';
   if (resigningPlayer) {
-    winMessage = `${resigningPlayer} resigned. ${winner} wins ${message}!`;
+    winMessage = `${resigningPlayer} resigned.`;
   } else {
-    winMessage = `${winner} bore off all checkers and wins ${message}!`;
+    winMessage = `${winner} bore off all checkers.`;
   }
+  // Concat winMessage (who won) with message (how many points)
+  winMessage = `${winMessage}` + ' ' + `${winner} wins ${message}!`;
 
   if (!resigningPlayer) {
     GAME_OVER_BANNER_DURATION_MS += 2000; // Increase banner time for a 'normal' win!
