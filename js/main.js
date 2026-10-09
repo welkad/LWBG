@@ -9,10 +9,12 @@ import { initDebugModule } from './debug.js';
 import { logStatus } from './ui.js';
 
 function initApp() {
-    // Initialize data
-    initBoardState();
-    initDebugModule();  // Initialize debugging mode
+  // Initialize non-DOM state first
+  initBoardState();
+  initDebugModule();  // Initialize debugging mode
 
+  // Defer DOM reads and renders until browser completes style recalculation
+  requestAnimationFrame(() => {
     // Log game instructions at start
     const statusBar = document.getElementById('game-status-bar');
     if (statusBar && statusBar.textContent.trim()) {
@@ -25,14 +27,15 @@ function initApp() {
     updateTurnUI();
 
     // Attach click handlers and keyboard listeners
-     initDiceListeners();
-     setupMouseAndDragListeners();
-     setupKeyboardListeners();
+    initDiceListeners();
+    setupMouseAndDragListeners();
+    setupKeyboardListeners();
+  });
 }
 
-// Run setup after all CSS stylesheets and assets are completely loaded
-if (document.readyState === "complete") {
-    initApp();
+// Run setup after DOM is interactive and stylesheets are parsed
+if (document.readyState === "loading") {
+    document.addEventListener('DOMContentLoaded', initApp);
 } else {
-    window.addEventListener('load', initApp);
+    initApp();
 }

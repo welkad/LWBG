@@ -171,6 +171,8 @@ export function handleDiceRoll(player) {
     return;
 
   state.isRolling = true;
+  updateCubePositionUI(); // Disable doubling cube immediately after rolling
+
   const die1El = document.getElementById(`${player}-die-1`);
   const die2El = document.getElementById(`${player}-die-2`);
   const raw1 = Math.floor(Math.random() * 6) + 1;

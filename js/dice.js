@@ -369,7 +369,7 @@ export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlaye
     logStatus(`${declineMsg} Thank you for playing!`, 3000);
     const blackPlural = state.scores.black === 1 ? 'point' : 'points';
     const whitePlural = state.scores.white === 1 ? 'point' : 'points';
-    logStatus(`Final Score: Black ${state.scores.black} ${blackPlural}` + ' ' 
+    logStatus(`Final Score: Black ${state.scores.black} ${blackPlural}` + ' - ' 
       + `White ${state.scores.white} ${whitePlural}.`);
 
     // Delay clearing dice elements immediately

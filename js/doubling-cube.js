@@ -31,13 +31,13 @@ export function handleCubeClick(player) {
     logStatus("A cube decision is currently pending.", DISPLAY_TIME);
     return;
   }
-  // Disable if not player's turn or after rolling
-  if (player !== state.currentPlayer || state.isRolling) {
+  // Disable if not player's turn
+  if (player !== state.currentPlayer) {
     logStatus("You can only double on your turn.", DISPLAY_TIME);
     return;
   }
   // Cannot double after rolling the dice
-  if (state.hasRolled) {
+  if (state.isRolling || state.hasRolled) {
     logStatus("You cannot double after rolling the dice!", DISPLAY_TIME);
     return;
   }
@@ -173,6 +173,7 @@ export function updateCubePositionUI() {
   } else if (
     isGameOver ||
     isOpening ||
+    state.isRolling ||
     state.hasRolled ||
     isOwnedByOpponent ||
     state.isResignOffered ||

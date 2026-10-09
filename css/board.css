@@ -272,15 +272,22 @@ body {
 #bar-black {
     height: 190px;
     margin-bottom: 0;
-    justify-content: flex-start;
-    gap: -6px;
+    justify-content: flex-start;    
 }
 
 #bar-white {
     height: 190px;
     margin-top: 0;
-    justify-content: flex-end;
-    gap: -6px;
+    justify-content: flex-end;    
+}
+
+/* Overlap stacked checkers on the bar */
+#bar-black .checker + .checker {
+  margin-top: -6px;
+}
+
+#bar-white .checker + .checker {
+  margin-bottom: -6px;
 }
 
 .bar-half {
