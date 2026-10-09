@@ -15,6 +15,11 @@ export function setupMouseAndDragListeners() {
   const boardEl = document.querySelector('.master-board');
   if (!boardEl) return;
 
+  // Prevent default context menu on game board
+  boardEl.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+  });
+
   // ---------------------------------------
   // Drag & Drop Listeners
   // ---------------------------------------
