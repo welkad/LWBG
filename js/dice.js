@@ -81,9 +81,15 @@ export function handleDieClick(player, dieNumber, event) {
       renderDiceUI();
   } else if (content === 'D') {
       switchTurn();
-  } else if (state.hasRolled && state.currentRoll.length === 2 && state.moveHistory.length === 0) {
+  } else if (
+      state.hasRolled && 
+      state.currentRoll.length === 2 &&
+      state.moveHistory.length === 0
+    ) {
       // Swap dice order if initial roll values are clicked
-      toggleDiceOrder(player);
+      if (!event || event.type === 'click' || event.type === 'contextmenu') {
+        toggleDiceOrder(player);
+      }
   }
 }
 

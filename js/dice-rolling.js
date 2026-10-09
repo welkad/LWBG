@@ -171,7 +171,7 @@ export function handleDiceRoll(player) {
     return;
 
   state.isRolling = true;
-  updateCubePositionUI(); // Disable doubling cube immediately after rolling
+  updateCubePositionUI(); // Disable doubling cube while rolling dice
 
   const die1El = document.getElementById(`${player}-die-1`);
   const die2El = document.getElementById(`${player}-die-2`);
@@ -199,7 +199,7 @@ export function handleDiceRoll(player) {
       state.isRolling = false;
       state.hasRolled = true;
 
-      // Update doubling cube UI state to disabled after rolling dice
+      // Disable doubling cube after dice have rolled
       updateCubePositionUI();
 
       // Indicate that non-doubles can now be swapped by clicking
@@ -211,7 +211,7 @@ export function handleDiceRoll(player) {
         diceZone.classList.remove("swappable");
       }
 
-      renderDiceUI();   // Render 2 or 4 dice based on currentRoll
+      renderDiceUI(); // Render 2 or 4 dice based on currentRoll
 
       // Format message: "Black rolled: Double 4s!" or "White rolled: 5, 3"
       const rollMessage = state.isDouble
