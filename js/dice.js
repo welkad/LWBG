@@ -112,7 +112,24 @@ export function initDiceListeners() {
 
       const target = /** @type {HTMLElement | null} */ (event.target);
       if (!target) return;
-      const dieEl = target.closest('.die');
+
+      let dieEl = target.closest('.die');
+      
+      // Check if dice selection accuracy is important (i.e. for split-decisions)
+      if (!dieEl) {
+        const diceInZone = Array.from(zone.querySelectorAll('.die'));
+        const contents = diceInZone.map(el => el.textContent.trim());
+
+        // Only allow gap-clicks if dice are displaying "R" or pips
+        const isUniformAction = contents.every(
+          val => val === 'R' || !isNaN(Number(val))
+        );
+
+        if (isUniformAction) {
+          dieEl = diceInZone[0] || null;
+        }
+      }
+      
       if (!dieEl) return;
       const match = dieEl.id.match(/^(black|white)-die-(\d+)$/);
       if (!match) return;
@@ -372,7 +389,7 @@ export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlaye
     const declineMsg = decliner 
       ? `${decliner} declined another game.`
       : 'Another game was declined.';
-    logStatus(`${declineMsg} Thank you for playing!`, 3000);
+    logStatus(`${declineMsg} Thank you for playing!`);
     // const blackPlural = state.scores.black === 1 ? 'point' : 'points';
     // const whitePlural = state.scores.white === 1 ? 'point' : 'points';
     // logStatus(`Final Score: Black ${state.scores.black} ${blackPlural}` + ' vs ' 
