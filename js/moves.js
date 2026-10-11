@@ -207,7 +207,7 @@ export function executeMove(fromIndex, toIndex) {
   } else if (!hasAnyLegalMoves()) {
     // Turn stuck: remaining dice have no valid moves
     clearStatusQueue(); // Cancel pending queue delays in ui.js
-    logStatus('No legal moves availabe for remaining roll ' +
+    logStatus('No legal moves available for remaining roll ' +
       [state.currentRoll.join(', ')], 3000
     );
 
