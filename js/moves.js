@@ -195,32 +195,36 @@ export function executeMove(fromIndex, toIndex) {
   }
 
   // Refresh remaining UI components
+  renderBoard();  // Update board
   renderDiceUI();
   updateScoreBoardUI(); // Refresh pip count immediately
 
   // --- POST MOVE TURN END CHECK ---
   // Check if player ran out of dice or has zero valid moves remaining
-  if (state.currentRoll.length === 0) {
-    // Normal turn completion: all dice used        
-    resetSelectionState();
-    renderBoard();
-  } else if (!hasAnyLegalMoves()) {
-    // Turn stuck: remaining dice have no valid moves
-    clearStatusQueue(); // Cancel pending queue delays in ui.js
-    logStatus('No legal moves available for remaining roll ' +
-      [state.currentRoll.join(', ')], 3000
-    );
-
-    state.isInputLocked = true; // Lock input during 3s window
-
-    // Brief timeout so player can see the message before turn switches
-    setTimeout(() => {
-      // Keep state intact while message displays, then clear and switch
+  setTimeout(() => {
+    // Delay check slightly so checker moves first
+    if (state.currentRoll.length === 0) {
+      // Normal turn completion: all dice used        
       resetSelectionState();
-      state.currentRoll = [];
-      switchTurn();
-    }, 3000);
-  }
+      renderBoard();
+    } else if (!hasAnyLegalMoves()) {
+      // Turn stuck: remaining dice have no valid moves
+      // clearStatusQueue(); // Cancel pending queue delays in ui.js
+      logStatus('No legal moves available for remaining roll ' +
+        [state.currentRoll.join(', ')], 3000
+      );
+
+      state.isInputLocked = true; // Lock input during 3s window
+
+      // Brief timeout so player can see the message before turn switches
+      setTimeout(() => {
+        // Keep state intact while message displays, then clear and switch
+        resetSelectionState();
+        state.currentRoll = [];
+        switchTurn();
+      }, 3000);
+    }
+  }, 500);  // Let the DOM paint the checker movement first
 }
 
 // ==================================

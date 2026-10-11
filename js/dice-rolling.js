@@ -238,9 +238,11 @@ export function handleDiceRoll(player) {
         clearStatusQueue(); // Clear any pending messages
         logStatus(message);
 
+        const delay = isTrappedOnbar ? 1500 : 3000; // Adjust delay time
+
         setTimeout(() => {
           switchTurn();
-        }, 3000);
+        }, delay);
       }      
     }
   );
