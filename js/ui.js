@@ -87,6 +87,14 @@ export function logStatus(message, timeout = 0) {
     showTemporaryStatus(formattedMessage, timeout);
     return;
   }
+
+  // --- FAST ACTION OVERRIDE ---
+  // Bypass queue for rapid action messages (i.e. bearing off or hitting)
+  if (formattedMessage.includes('bore off') || formattedMessage.includes('hit')) {
+    setStatus(formattedMessage);
+    return;
+  }
+
   // Override/clear out any previous temporary message with persistent message
   if (temporaryMessageTimer) {
     clearTimeout(temporaryMessageTimer);
