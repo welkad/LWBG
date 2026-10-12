@@ -1,6 +1,7 @@
 // ============================================
 // js/ui.js - Display messages in status banner
 // ============================================
+import { hasAnyLegalMoves } from './rules.js';
 import { state } from './state.js';
 
 /** @type {string[]} */
@@ -264,7 +265,8 @@ export function updateLegendUI() {
     doneBtn.classList.remove('hidden');
 
     rollBtn.disabled = state.hasRolled;
-    doneBtn.disabled = !state.hasRolled || state.currentRoll.length > 0;
+    const hasMovesLeft = state.currentRoll.length > 0 && hasAnyLegalMoves();
+    doneBtn.disabled = !state.hasRolled || state.isRolling || hasMovesLeft;
     undoBtn.disabled = !state.hasRolled || state.moveHistory.length === 0;    
     resignBtn.disabled = state.gamePhase === 'opening_roll';
     return;

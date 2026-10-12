@@ -2,7 +2,7 @@
 import { DIRECTIONS, getValidMovesForPoint, findDiceSequenceForMove, hasAnyLegalMoves, canPlayerBearOff, isCheckerOnHighestPoint} from './rules.js';
 import { state, handleGameEnd, switchTurn } from './state.js';
 import { clearHoverHighlights, renderBoard, updateScoreBoardUI } from './board.js';
-import { clearStatusQueue, logStatus, setStatus } from './ui.js';
+import { clearStatusQueue, logStatus, setStatus, updateLegendUI } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
 
 /**
@@ -183,7 +183,7 @@ export function executeMove(fromIndex, toIndex) {
 
   resetSelectionState();  // Clear any lingering selection state
 
-  // --- POST-MOVE SELECTION LOGIC ---  
+  // --- POST-MOVE: SELECTION LOGIC ---  
   const remainingBarCount = state.bar[player] || 0;
   if (remainingBarCount > 0 && state.currentRoll.length > 0) {
     // If player still has checkers on the bar, maintain auto-selection logic
@@ -199,7 +199,7 @@ export function executeMove(fromIndex, toIndex) {
   renderDiceUI();
   updateScoreBoardUI(); // Refresh pip count immediately
 
-  // --- POST MOVE TURN END CHECK ---
+  // --- POST-MOVE: END OF TURN CHECK ---
   // Check if player ran out of dice or has zero valid moves remaining
   setTimeout(() => {
     // Delay check slightly so checker moves first
@@ -211,18 +211,25 @@ export function executeMove(fromIndex, toIndex) {
       // Turn stuck: remaining dice have no valid moves
       // clearStatusQueue(); // Cancel pending queue delays in ui.js
       logStatus('No legal moves available for remaining roll ' +
-        [state.currentRoll.join(', ')], 3000
+        [state.currentRoll.join(', ')]
       );
 
-      state.isInputLocked = true; // Lock input during 3s window
-
-      // Brief timeout so player can see the message before turn switches
-      setTimeout(() => {
-        // Keep state intact while message displays, then clear and switch
+      // Check if any moves have been made
+      const hasMadeMoves = state.moveHistory.length > 0;
+      if (hasMadeMoves) {
+        // Player is stuck mid-turn: allow them to click Undo or Done manually
         resetSelectionState();
-        state.currentRoll = [];
-        switchTurn();
-      }, 3000);
+        renderBoard();
+        updateLegendUI(); // Enable 'Done' button
+      } else {  // Start of turn or trapped on bar point
+        // Brief timeout so player can see the message before turn switches
+        setTimeout(() => {
+          // Keep state intact while message displays, then clear and switch
+          resetSelectionState();
+          state.currentRoll = [];
+          switchTurn();
+        }, 3000);
+      }
     }
   }, 500);  // Let the DOM paint the checker movement first
 }
