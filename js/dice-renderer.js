@@ -1,6 +1,7 @@
 // js/dice-renderer.js - Handles the creation and rendering of dice UI.
 import { state } from './state.js';
 import { updateLegendUI } from './ui.js';
+import { hasAnyLegalMoves } from './rules.js';
 
 // ===============================
 //  RENDER PIPS & TEXT CODES
@@ -193,6 +194,7 @@ export function renderDiceUI() {
   // Store how many moves/dice remain
   const movesMade = state.moveHistory.length;
   const movesLeft = state.currentRoll.length;
+  const isStuck = movesLeft > 0 && !hasAnyLegalMoves(); // Check if player stuck
 
   // If doubles rolled
   if (state.isDouble) {
@@ -202,8 +204,8 @@ export function renderDiceUI() {
       return total + (consumed ? consumed.length : 1);
     }, 0);
 
-    // When all 4 moves are finished -> show U U U D
-    if (movesLeft === 0 && movesMade > 0) {
+    // When all 4 moves are finished or no legal moves remain -> show U U U D
+    if ((movesLeft === 0 || isStuck) && movesMade > 0) {
       for (let i = 0; i < 4; i++) {
         const dieEl = getOrCreateDie(player, i);
         if (!dieEl) continue;
@@ -246,8 +248,8 @@ export function renderDiceUI() {
   // Normal two-dice roll
   removeExtraDice(player, 2);
 
-  // When all moves are completed on a normal roll -> Show U D
-  if (movesLeft === 0 && movesMade > 0) {
+  // When all moves completed or no legal moves remain -> Show U D
+  if ((movesLeft === 0 || isStuck) && movesMade > 0) {
     setDieValue(die1, "U");
     setDieValue(die2, "D");
     die1.classList.remove("used");
