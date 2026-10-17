@@ -1,15 +1,15 @@
 // js/moves.js - Move validation, legal destination calculation, move execution, and undo history.
-import { DIRECTIONS, getValidMovesForPoint, findDiceSequenceForMove, hasAnyLegalMoves, canPlayerBearOff, isCheckerOnHighestPoint} from './rules.js';
+import { DIRECTIONS, getValidMovesForPoint, findDiceSequenceForMove, hasAnyLegalMoves, canPlayerBearOff, isCheckerOnHighestPoint, countTotalLegalMoves} from './rules.js';
 import { state, handleGameEnd, switchTurn } from './state.js';
 import { clearHoverHighlights, renderBoard, updateScoreBoardUI } from './board.js';
-import { clearStatusQueue, logStatus, setStatus, updateLegendUI } from './ui.js';
+import { logStatus, setStatus, updateLegendUI } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
 
 /**
  * Save a pre-move state snapshot so each individual step can be reverted independently
  * @param {number[]} consumedDice - Array of dice values consumed during the move
  */
-function recordMoveSnapshot(consumedDice) {
+function recordMoveSnapshot(consumedDice, isForced = false) {
   // Capture current status element text or state message
   const currentStatusEl = document.getElementById('game-status-bar');
   const activeMessage = currentStatusEl ? currentStatusEl.textContent : '';
@@ -20,7 +20,8 @@ function recordMoveSnapshot(consumedDice) {
     bar: { ...state.bar },
     borneOff: {...state.borneOff},
     currentRoll: [...state.currentRoll],
-    statusMessage: activeMessage
+    statusMessage: activeMessage,
+    isForced: isForced  // Track if move was mandatory
   });
 }
 
@@ -121,19 +122,14 @@ export function executeMove(fromIndex, toIndex) {
   const dieSequence =
     findDiceSequenceForMove(fromIndex, toIndex, state.currentRoll, player);
 
-  // DEBUG
-  // console.log('DRAG MOVE CHECK:', {
-  //   fromIndex,
-  //   toIndex,
-  //   player,
-  //   currentRoll: state.currentRoll,
-  //   dieSequence
-  // });
-
   if (!dieSequence) return;
+
+  // Check how many legal options existed before making this move
+  const totalOptionsBeforeMove = countTotalLegalMoves();
+  const isForcedMove = totalOptionsBeforeMove <= 1;
   
   // Record single snapshot for undo history before executing step sequence
-  recordMoveSnapshot(dieSequence);
+  recordMoveSnapshot(dieSequence, isForcedMove);
 
   let currentStepIndex = fromIndex;
   /** @type {Array<{opponent: Player, point: number}>} */
@@ -208,21 +204,24 @@ export function executeMove(fromIndex, toIndex) {
       resetSelectionState();
       renderBoard();
     } else if (!hasAnyLegalMoves()) {
-      // Turn stuck: remaining dice have no valid moves
-      // clearStatusQueue(); // Cancel pending queue delays in ui.js
+      // Turn stuck: remaining dice have no valid moves     
       logStatus('No legal moves available for remaining roll ' +
         [state.currentRoll.join(', ')]
       );
 
       // Check if any moves have been made
       const hasMadeMoves = state.moveHistory.length > 0;
-      if (hasMadeMoves) {
-        // Player is stuck mid-turn: allow them to click Undo or Done manually
+
+      // Check if every move made so far this turn was a forced move
+      const allMovesForced = state.moveHistory.every(m => m.isForced);
+
+      if (hasMadeMoves && !allMovesForced) {
+        // Player has made optional moves: allow them to manually Undo or click Done
         resetSelectionState();
         renderBoard();
         updateLegendUI(); // Enable 'Done' button
-      } else {  // Start of turn or trapped on bar point
-        // Brief timeout so player can see the message before turn switches
+      } else {  // Start of turn or trapped on bar point (or all moves mandatory)
+        // Brief timeout to display message before turn switches automatically
         setTimeout(() => {
           // Keep state intact while message displays, then clear and switch
           resetSelectionState();
@@ -514,6 +513,13 @@ export function autoSelectBarIfRequired() {
 export function undoLastMove() {
   if (!state.moveHistory || state.moveHistory.length === 0) {
     logStatus("No moves to undo.", -1);
+    return;
+  }
+
+  // Peek at the most recent snapshot
+  const latestMove = state.moveHistory[state.moveHistory.length - 1];
+  if (latestMove && latestMove.isForced) {
+    logStatus("Cannot undo forced move. No alternate choices exist.", 2000);
     return;
   }
 

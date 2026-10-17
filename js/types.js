@@ -39,6 +39,7 @@
  * @property {number[]} [consumedDice] - Array of die values used/consumed during this move.
  * @property {{ black: number, white: number }} borneOff - Count of checkers borne off.
  * @property {string} [statusMessage] - Persistent status bar message recorded prior to the move.
+ * @property {boolean} isForced - Track if move was mandatory
  */
 
 /**
