@@ -312,3 +312,30 @@ export function calculateGameOutcome(winner, resigningPlayer = null) {
   // Gammon (2x): 0 borne off by loser but all checkers outside winnner's home
   return { winType: 'Gammon', pointsWon: cube * 2 };
 }
+
+/**
+ * Count all possible legal moves a player can make accross the board.
+ * Useful for determining if move was forced (i.e. has no other options).
+ * @returns {number} Total count of valid moves available
+ */
+export function countTotalLegalMoves() {
+  const player = state.currentPlayer;
+  if (!player || !state.hasRolled || !state.currentRoll ||
+    state.currentRoll.length === 0) return 0;
+
+  let totalMoves = 0;
+
+  // If trapped on bar, only check  bar moves
+  if (state.bar[player] > 0) {
+    return getValidMovesForPoint('bar').length;
+  }
+
+  // Check every point on the board
+  for (let i = 0; i <= 23; i++) {
+    if (state.boardState[i].player === player && state.boardState[i].count > 0) {
+      const moves = getValidMovesForPoint(i);
+      totalMoves += moves.length;
+    }
+  }
+  return totalMoves;
+}
