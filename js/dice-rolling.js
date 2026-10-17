@@ -211,6 +211,12 @@ export function handleDiceRoll(player) {
         diceZone.classList.remove("swappable");
       }
 
+      // If doubles rolled but no legal moves, only show 2 dice instead of 4
+      if (state.isDouble && !hasAnyLegalMoves()) {
+        state.currentRoll = state.currentRoll.slice(0, 2);
+        state.isDouble = false; // Reset flag so renderer treats as two dice
+      }
+
       renderDiceUI(); // Render 2 or 4 dice based on currentRoll
 
       // Format message: "Black rolled: Double 4s!" or "White rolled: 5, 3"
@@ -218,7 +224,10 @@ export function handleDiceRoll(player) {
         ? `Double ${finalD1}s!`
         : `${finalD1}, ${finalD2}`;
 
-      logStatus(`${player} rolled: ${rollMessage}`);
+      // Only announce valid rolls
+      if (hasAnyLegalMoves()) {
+        logStatus(`${player} rolled: ${rollMessage}`);
+      }
 
       // Check if trapped on bar to handle turn-switch if no legal moves exist
       autoSelectBarIfRequired();

@@ -224,8 +224,11 @@ export function renderDiceUI() {
       return;
     }
 
-    // Active playing phase -> show 'U' for spent dice, number for remaining
-    for (let i = 0; i < 4; i++) {
+    // Active playing phase -> render pips based on current roll length
+    const totalDiceToShow = movesMade === 0 ? state.currentRoll.length : 4;
+     
+    // Show 'U' for spent dice, number for remaining
+    for (let i = 0; i < totalDiceToShow; i++) {
       const dieEl = getOrCreateDie(player, i);
       if (!dieEl) continue;
       dieEl.style.display = "";
