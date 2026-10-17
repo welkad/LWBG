@@ -227,6 +227,8 @@ export function handleDiceRoll(player) {
       // Only announce valid rolls
       if (hasAnyLegalMoves()) {
         logStatus(`${player} rolled: ${rollMessage}`);
+      } else {
+        console.warn(`${player} rolled: ${rollMessage} and has no legal moves.`);
       }
 
       // Check if trapped on bar to handle turn-switch if no legal moves exist
@@ -246,9 +248,8 @@ export function handleDiceRoll(player) {
 
         clearStatusQueue(); // Clear any pending messages
         logStatus(message);
-
+        
         const delay = isTrappedOnbar ? 1500 : 3000; // Adjust delay time
-
         setTimeout(() => {
           switchTurn();
         }, delay);

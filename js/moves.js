@@ -2,7 +2,7 @@
 import { DIRECTIONS, getValidMovesForPoint, findDiceSequenceForMove, hasAnyLegalMoves, canPlayerBearOff, isCheckerOnHighestPoint, countTotalLegalMoves} from './rules.js';
 import { state, handleGameEnd, switchTurn } from './state.js';
 import { clearHoverHighlights, renderBoard, updateScoreBoardUI } from './board.js';
-import { logStatus, setStatus, updateLegendUI } from './ui.js';
+import { clearStatusQueue, logStatus, setStatus, updateLegendUI } from './ui.js';
 import { renderDiceUI } from './dice-renderer.js';
 
 /**
@@ -195,7 +195,7 @@ export function executeMove(fromIndex, toIndex) {
   renderDiceUI();
   updateScoreBoardUI(); // Refresh pip count immediately
 
-  // --- POST-MOVE: END OF TURN CHECK ---
+  // --- POST-MOVE: END OF TURN CHECK ---  
   // Check if player ran out of dice or has zero valid moves remaining
   setTimeout(() => {
     // Delay check slightly so checker moves first
@@ -203,11 +203,12 @@ export function executeMove(fromIndex, toIndex) {
       // Normal turn completion: all dice used        
       resetSelectionState();
       renderBoard();
-    } else if (!hasAnyLegalMoves()) {
-      // Turn stuck: remaining dice have no valid moves     
+    } else if (!hasAnyLegalMoves()) {      
+      // Turn stuck: remaining dice have no valid moves
       logStatus('No legal moves available for remaining roll ' +
-        [state.currentRoll.join(', ')]
+        [state.currentRoll.join(', ')], 2000
       );
+      clearStatusQueue(); // Erase any other pending messages
 
       // Check if any moves have been made
       const hasMadeMoves = state.moveHistory.length > 0;
