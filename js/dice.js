@@ -5,6 +5,7 @@ import { handleDiceRoll, handleOpeningRoll, toggleDiceOrder } from './dice-rolli
 import { renderDiceUI, setDieValue } from './dice-renderer.js';
 import { clearStatusQueue, logStatus, restorePreviousStatus, saveCurrentStatus, updateLegendUI } from './ui.js';
 import { undoLastMove } from './moves.js';
+import { calculateGameOutcome } from './rules.js';
 
 /**
  * @typedef {'black' | 'white' } PlayerColor
@@ -108,7 +109,7 @@ export function initDiceListeners() {
       // Prevent native browser right-click menu
       if (event.type === 'contextmenu') {
         event.preventDefault();
-      }    
+      };
 
       const target = /** @type {HTMLElement | null} */ (event.target);
       if (!target) return;
@@ -128,7 +129,7 @@ export function initDiceListeners() {
         if (isUniformAction) {
           dieEl = diceInZone[0] || null;
         }
-      }
+      };
       
       if (!dieEl) return;
       const match = dieEl.id.match(/^(black|white)-die-(\d+)$/);
@@ -151,7 +152,7 @@ export function initDiceListeners() {
           handleCubeClick(state.currentPlayer);
       });
       cubeEl.addEventListener('mouseleave', handleCubeMouseLeave);
-  }
+  };
 
   // Listen for legend button mouse interactions
   const legendActions = [
@@ -183,14 +184,22 @@ export function initDiceListeners() {
         state.resignOfferedBy = state.currentPlayer;
         clearStatusQueue(); // Clear older messages
 
-        const message = state.cubeValue === 1 ? 'the game' : `${state.cubeValue} points`;
+        // Determine winner (opponent of resigning player)
+        const winningPlayer = state.currentPlayer === 'black' ? 'white' : 'black';
+
+        // Pass both winning and resigning player to evaluate position
+        const outcome = calculateGameOutcome(winningPlayer, state.currentPlayer);        
+        const totalPoints = outcome.pointsWon;
+
+        // Build dynamic message and display to resigning player
+        const message = totalPoints === 1 ? 'the game' : `${totalPoints} points`;        
         logStatus(`Are you sure you want to resign and concede ${message}?`);
         updateCubePositionUI(); // Deactivate cube while pending
         updateLegendUI();
         renderDiceUI();
       }
     });
-  }
+  };
 }
 
 // ==========================================
