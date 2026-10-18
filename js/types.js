@@ -71,6 +71,7 @@
  * @property {boolean} hasRolled - True if player rolled dice during current turn.
  * @property {boolean} isInputLocked - Block user interaction during transition delays.
  * @property {boolean} showHoverHighlights - Toggle selection/target point highlights.
+ * @property {boolean} turnSwitched - Flag to prevent turn switch from occuring twice.
  */
 
 /**

@@ -198,6 +198,7 @@ export function handleDiceRoll(player) {
       state.activeRoller = player;
       state.isRolling = false;
       state.hasRolled = true;
+      state.turnSwitched = false; // Release turn switch guard
 
       // Disable doubling cube after dice have rolled
       updateCubePositionUI();

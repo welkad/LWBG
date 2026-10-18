@@ -32,13 +32,13 @@ export const state = {
     losingPlayer: null,               // Tracks who lost for post game Y/N prompt
     currentPlayer: null,              // Set dynamically by opening roll
     isResignOffered: false,           // Resignation state
-    resignOfferedBy: null,            // Resigning player
-    // Track Y/N decision for each player
-    playAgainChoices: { black: null, white: null }, 
+    resignOfferedBy: null,            // Resigning player    
+    playAgainChoices: { black: null, white: null }, // Track Y/N decision per player
     awaitingPlayAgainPrompt: false,   // Delay displaying play again prompt
     isInputLocked: false,             // Locking mechanism for player input
 
     openingRolls: { white: null, black: null },
+    turnSwitched: false,              // Boolean to prevent double turn switches
     currentRoll: [],                  // e.g., [5, 3] or [4, 4, 4, 4]
     isDouble: false,                  // Track if current turn started with double dice
     activeRoller: null,
@@ -65,6 +65,7 @@ export function initBoardState() {
     state.isRolling = false;
     state.hasRolled = false;
     state.isDouble = false;
+    state.turnSwitched = false;
 
     // Reset doubling cube and resignation state
     state.cubeValue = 1;
@@ -117,33 +118,37 @@ export function resetGame() {
 
 // Reset hasRolled on Turn Change
 export function switchTurn() {
-    if (state.gamePhase === 'game_over') return;
+  if (state.gamePhase === 'game_over') return;
 
-    // Toggle active player
-    state.currentPlayer = state.currentPlayer === 'black' ? 'white' : 'black';
-    updatePointLabels(state.currentPlayer);
+  // Prevent turn switching from occurring twice during same turn
+  if (state.turnSwitched) return;
+  state.turnSwitched = true;
 
-    // Reset turn flags so new active player can double BEFORE rolling
-    state.hasRolled = false;    // Keep track for doubling situations
-    state.currentRoll = [];
-    state.selectedPoint = null;
-    state.validMoves = [];
-    state.isDouble = false;
-    state.isCubeOffered = false;
-    state.cubeOfferedBy = null;
-    state.isResignOffered = false;
-    state.resignOfferedBy = null;
-    state.isInputLocked = false;  // Allow players to make decisions again
+  // Toggle active player
+  state.currentPlayer = state.currentPlayer === 'black' ? 'white' : 'black';
+  updatePointLabels(state.currentPlayer);
 
-    clearStatusQueue(); // Cancel any queue delays from previous message
-    logStatus(`Turn switched. It is now ${state.currentPlayer}'s turn.`);
+  // Reset turn flags so new active player can double BEFORE rolling
+  state.hasRolled = false;    // Keep track for doubling situations
+  state.currentRoll = [];
+  state.selectedPoint = null;
+  state.validMoves = [];
+  state.isDouble = false;
+  state.isCubeOffered = false;
+  state.cubeOfferedBy = null;
+  state.isResignOffered = false;
+  state.resignOfferedBy = null;
+  state.isInputLocked = false;  // Allow players to make decisions again
 
-    // Clear dice DOM elements, update status, and re-render board
-    updateCubePositionUI(); // Refresh cube UI based on currentPlayer & ownership    
-    updateTurnUI();
-    refreshDiceForNewTurn();
-    updateLegendUI();
-    renderBoard();
+  clearStatusQueue(); // Cancel any queue delays from previous message
+  logStatus(`Turn switched. It is now ${state.currentPlayer}'s turn.`);
+
+  // Clear dice DOM elements, update status, and re-render board
+  updateCubePositionUI(); // Refresh cube UI based on currentPlayer & ownership    
+  updateTurnUI();
+  refreshDiceForNewTurn();
+  updateLegendUI();
+  renderBoard();
 }
 
 /**
