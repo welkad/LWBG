@@ -9,16 +9,24 @@ class DiceLegend extends HTMLElement {
           justify-content: center;
           align-items: center;
           gap: 8px;
-          margin: 16px 0;
+          margin: 16px 0;          
+          width: 100%;
         }
         
         .legend-btn {
           background: none;
-          border: none; /* No borders in normal view */
+          border: none;
           border-radius: 12px;
+          box-sizing: border-box;
+          /* Keep slot width locked at 100px in BOTH views to prevent accordion reflow */
+          flex: 0 0 100px;
+          width: 100px;
+          min-width: 100px;
+          height: 48px;
           display: flex;
           align-items: center;
           justify-content: center;
+          white-space: nowrap;
           cursor: pointer;
           transition: all 0.2s ease;
           padding: 8px 12px;
@@ -26,8 +34,7 @@ class DiceLegend extends HTMLElement {
           color: #fff;
         }
 
-        .legend-btn:hover:not(:disabled) {
-          background: rgba(255, 255, 255, 0.15);
+        .legend-btn:hover:not(:disabled) {          
           transform: translateY(-2px);
         }
         
@@ -48,8 +55,8 @@ class DiceLegend extends HTMLElement {
         /* Icon View Styling (triggered when .icon-view is present on <dice-legend>) */
         :host(.icon-view) .dice-legend,
         .dice-legend.icon-view {
-          gap: 16px;
-          margin: 12px 0 16px 0;
+          gap: 8px;
+          margin: 16px 0;
         }
 
         :host(.icon-view) .key-badge,
@@ -61,41 +68,41 @@ class DiceLegend extends HTMLElement {
 
         :host(.icon-view) .icon-content,
         .dice-legend.icon-view .icon-content {
-          display: inline;
-        }
-
-        :host(.icon-view) .legend-btn,
-        .dice-legend.icon-view .legend-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
           width: 48px;
           height: 48px;
-          padding: 0;
           font-size: 22px;
           border-radius: 12px;
           border: 2px solid rgba(255, 255, 255, 0.2);
+          
+          transition: all 0.2s ease;
         }
 
-        :host(.icon-view) .legend-btn:hover:not(:disabled),
-        .dice-legend.icon-view .legend-btn:hover:not(:disabled) {
+        :host(.icon-view) .legend-btn:hover:not(:disabled) .icon-content,
+        .dice-legend.icon-view .legend-btn:hover:not(:disabled) .icon-content {
           border-color: rgba(255, 255, 255, 0.4);
+          background: rgba(255, 255, 255, 0.15);
         }
 
         /* Specific button accent colors in icon view */
-        :host(.icon-view) #action-done-btn,
-        .dice-legend.icon-view #action-done-btn {
+        :host(.icon-view) #action-done-btn .icon-content,
+        .dice-legend.icon-view #action-done-btn .icon-content {
           border-color: rgba(46, 204, 113, 0.4);
         }
-        :host(.icon-view) #action-done-btn:hover:not(:disabled),
-        .dice-legend.icon-view #action-done-btn:hover:not(:disabled) {
+        :host(.icon-view) #action-done-btn:hover:not(:disabled) .icon-content,
+        .dice-legend.icon-view #action-done-btn:hover:not(:disabled) .icon-content {
           background: rgba(46, 204, 113, 0.2);
           border-color: #2ecc71;
         }
 
-        :host(.icon-view) #action-resign-btn, :host(.icon-view) #action-no-btn,
-        .dice-legend.icon-view #action-resign-btn, .dice-legend.icon-view #action-no-btn {
+        :host(.icon-view) #action-resign-btn .icon-content, :host(.icon-view) #action-no-btn .icon-content,
+        .dice-legend.icon-view #action-resign-btn .icon-content, .dice-legend.icon-view #action-no-btn .icon-content {
           border-color: rgba(231, 76, 60, 0.4);          
         }
-        :host(.icon-view) #action-resign-btn:hover:not(:disabled), :host(.icon-view) #action-no-btn:hover:not(:disabled),
-        .dice-legend.icon-view #action-resign-btn:hover:not(:disabled), .dice-legend.icon-view #action-no-btn:hover:not(:disabled) {
+        :host(.icon-view) #action-resign-btn:hover:not(:disabled) .icon-content, :host(.icon-view) #action-no-btn:hover:not(:disabled) .icon-content,
+        .dice-legend.icon-view #action-resign-btn:hover:not(:disabled) .icon-content, .dice-legend.icon-view #action-no-btn:hover:not(:disabled) .icon-content {
           background: rgba(231, 76, 60, 0.2);
           border-color: #e74c3c;
         }
