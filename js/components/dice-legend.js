@@ -1,4 +1,4 @@
-// js/components/dice-legend.js: Render dynamic icon buttons (Roll, Undo, Done, Resign)
+// js/components/dice-legend.js: Render dynamic action buttons supporting Normal and Icon views
 
 class DiceLegend extends HTMLElement {
   connectedCallback() {
@@ -8,28 +8,26 @@ class DiceLegend extends HTMLElement {
           display: flex;
           justify-content: center;
           align-items: center;
-          gap: 16px;
-          margin: 12px 0 16px 0;
+          gap: 8px;
+          margin: 16px 0;
         }
         
         .legend-btn {
-          background: rgba(255, 255, 255, 0.08);
-          border: 2px solid rgba(255, 255, 255, 0.2);
+          background: none;
+          border: none; /* No borders in normal view */
           border-radius: 12px;
-          width: 50px;
-          height: 50px;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           transition: all 0.2s ease;
-          padding: 0;
-          font-size: 24px;
+          padding: 8px 12px;
+          font-size: 16px;
+          color: #fff;
         }
 
-        .legend-btn:hovernot(:disabled) {
+        .legend-btn:hover:not(:disabled) {
           background: rgba(255, 255, 255, 0.15);
-          border-color: rgba(255, 255, 255, 0.4);
           transform: translateY(-2px);
         }
         
@@ -37,58 +35,113 @@ class DiceLegend extends HTMLElement {
           transform: translateY(0);
         }
 
-        /* Hidden state utility matching existing UI logic */
+        /* Hidden state utility */
         .legend-btn.hidden {
           display: none !important;
         }
 
-        /* Specific icon styling properties */
-        #action-done-btn {
+        /* Default Normal View: Hide icons, show key badges & text labels */
+        .icon-content {
+          display: none;
+        }
+
+        /* Icon View Styling (triggered when .icon-view is present on <dice-legend>) */
+        :host(.icon-view) .dice-legend,
+        .dice-legend.icon-view {
+          gap: 16px;
+          margin: 12px 0 16px 0;
+        }
+
+        :host(.icon-view) .key-badge,
+        :host(.icon-view) .btn-label,
+        .dice-legend.icon-view .key-badge,
+        .dice-legend.icon-view .btn-label {
+          display: none !important;
+        }
+
+        :host(.icon-view) .icon-content,
+        .dice-legend.icon-view .icon-content {
+          display: inline;
+        }
+
+        :host(.icon-view) .legend-btn,
+        .dice-legend.icon-view .legend-btn {
+          width: 48px;
+          height: 48px;
+          padding: 0;
+          font-size: 22px;
+          border-radius: 12px;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        :host(.icon-view) .legend-btn:hover:not(:disabled),
+        .dice-legend.icon-view .legend-btn:hover:not(:disabled) {
+          border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Specific button accent colors in icon view */
+        :host(.icon-view) #action-done-btn,
+        .dice-legend.icon-view #action-done-btn {
           border-color: rgba(46, 204, 113, 0.4);
         }
-        #action-done-btn:hover:not(:disabled) {
+        :host(.icon-view) #action-done-btn:hover:not(:disabled),
+        .dice-legend.icon-view #action-done-btn:hover:not(:disabled) {
           background: rgba(46, 204, 113, 0.2);
           border-color: #2ecc71;
         }
 
-        #action-resign-btn {
+        :host(.icon-view) #action-resign-btn, :host(.icon-view) #action-no-btn,
+        .dice-legend.icon-view #action-resign-btn, .dice-legend.icon-view #action-no-btn {
           border-color: rgba(231, 76, 60, 0.4);          
         }
-        #action-resign-btn:hover:not(:disabled) {
+        :host(.icon-view) #action-resign-btn:hover:not(:disabled), :host(.icon-view) #action-no-btn:hover:not(:disabled),
+        .dice-legend.icon-view #action-resign-btn:hover:not(:disabled), .dice-legend.icon-view #action-no-btn:hover:not(:disabled) {
           background: rgba(231, 76, 60, 0.2);
-          boder-color: #e74c3c;
+          border-color: #e74c3c;
         }
       </style>
 
-      <div id="legend" class="dice-legend">
-        <!-- ROLL (large die emoji) -->
+      <div class="dice-legend">
+        <!-- ROLL -->
         <button id="action-roll-btn" class="legend-btn hidden" title="Roll Dice (R)">
-          🎲
+          <span class="icon-content">🎲</span>
+          <span class="key-badge">R</span>
+          <span class="btn-label">: Roll</span>
         </button>
 
-        <!-- UNDO (reverse arrow) -->
+        <!-- UNDO -->
         <button id="action-undo-btn" class="legend-btn hidden" title="Undo Move (U)">
-          ↩️
+          <span class="icon-content">↩️</span>
+          <span class="key-badge">U</span>
+          <span class="btn-label">: Undo</span>
         </button>
 
-        <!-- DONE (green check mark) -->
+        <!-- DONE -->
         <button id="action-done-btn" class="legend-btn hidden" title="Finish Turn (D)">
-          ✅
+          <span class="icon-content">✅</span>
+          <span class="key-badge">D</span>
+          <span class="btn-label">: Done</span>
         </button>
 
-        <!-- RESIGN (large red x) -->
+        <!-- RESIGN -->
         <button id="action-resign-btn" class="legend-btn hidden" title="Resign Game (Q)">
-          ❌
+          <span class="icon-content">❌</span>
+          <span class="key-badge">Q</span>
+          <span class="btn-label">: Resign</span>
         </button>
 
-        <!-- CONFIRM ✔️ (only used for confirm/cancel prompts)  -->
+        <!-- CONFIRM -->
         <button id="action-yes-btn" class="legend-btn hidden" title="Confirm (Y)">
-          👍
+          <span class="icon-content">👍</span>
+          <span class="key-badge">Y</span>      
+          <span id="label-yes" class="btn-label">: Confirm</span>
         </button>
 
-        <!-- CANCEL ❌ (only used for confirm/cancel prompts) -->
+        <!-- CANCEL -->
         <button id="action-no-btn" class="legend-btn hidden" title="Cancel (N)">
-          👎
+          <span class="icon-content">👎</span>
+          <span class="key-badge">N</span>
+          <span id="label-no" class="btn-label">: Cancel</span>
         </button>
       </div>
     `;

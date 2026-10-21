@@ -49,6 +49,15 @@ export function setupKeyboardListeners() {
     }
 
     switch (key) {
+      // TOGGLE LEGEND VIEW (Normal vs Icon
+      case 'KeyV':
+        event.preventDefault();        
+        const legendEl = document.querySelector('dice-legend .dice-legend');
+        if (legendEl) {
+          legendEl.classList.toggle('icon-view');
+        }
+        break;
+
       // SPACEBAR: Roll, Swap Dice or Complete turn
       case 'Space':      
         event.preventDefault();
@@ -180,6 +189,7 @@ export function setupKeyboardListeners() {
             }
           }
         }
+        break;
 
       default:
         break;
