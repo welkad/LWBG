@@ -38,7 +38,9 @@ class DiceLegend extends HTMLElement {
           justify-content: center;
           white-space: nowrap;
           cursor: pointer;
-          transition: all 0.2s ease;
+
+          transition: border-color 0.2s ease, background-color 0.2s ease;
+
           padding: 8px 12px;
           font-size: 16px;
           color: #fff;
@@ -65,13 +67,17 @@ class DiceLegend extends HTMLElement {
         /* Icon View Styling (triggered when .icon-view is present on <dice-legend>) */
         :host(.icon-view) .dice-legend,
         .dice-legend.icon-view {
-          gap: 8px;
+          gap: 18px;  /* Amount of space between each icon */
           margin: 16px 0;
         }
 
         :host(.icon-view) .legend-btn,
         .dice-legend.icon-view .legend-btn {
-          background: none !important;    
+          flex: 0 0 48px;
+          width: 48px;
+          min-width: 48px;
+          background: none !important;
+          padding: 0;
         }
 
         :host(.icon-view) .legend-btn:hover:not(:disabled),
