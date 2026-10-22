@@ -16,7 +16,8 @@ import { clearHoverHighlights, renderBoard } from './board.js';
  * - Space / D : Complete turn
  * - Q         : Prompt resignation
  * - H         : Toggle move highlighting on or off
- * - Y / N     : Confirm / cancel active prompt (Resign or Doubling Cube) * 
+ * - Y / N     : Confirm / cancel active prompt (Resign or Doubling Cube)
+ * - V         : Toggle visual Icons vs Buttons underneath status bar
  */
 
 export function setupKeyboardListeners() {
