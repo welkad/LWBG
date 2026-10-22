@@ -12,6 +12,16 @@ class DiceLegend extends HTMLElement {
           margin: 16px 0;          
           width: 100%;
         }
+
+        .key-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          box-sizing: border-box;
+          flex-shrink: 0;
+        }
         
         .legend-btn {
           background: none;
@@ -57,6 +67,16 @@ class DiceLegend extends HTMLElement {
         .dice-legend.icon-view {
           gap: 8px;
           margin: 16px 0;
+        }
+
+        :host(.icon-view) .legend-btn,
+        .dice-legend.icon-view .legend-btn {
+          background: none !important;    
+        }
+
+        :host(.icon-view) .legend-btn:hover:not(:disabled),
+        .dice-legend.icon-view .legend-btn:hover:not(:disabled) {
+          background: none !important;
         }
 
         :host(.icon-view) .key-badge,
