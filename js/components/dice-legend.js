@@ -55,7 +55,7 @@ class DiceLegend extends HTMLElement {
           display: flex;
           justify-content: center;
           align-items: center;
-          gap: 8px;
+          gap: 16px; 
           margin: 16px 0;          
           width: 100%;
         }
@@ -71,6 +71,13 @@ class DiceLegend extends HTMLElement {
           height: 32px;
           box-sizing: border-box;
           flex-shrink: 0;
+          font-weight: 500;
+          color: #fff;
+        }
+
+        .btn-label {
+          font-weight: 400;
+          color: #fff;
         }
         
         /* ==========================================
@@ -78,27 +85,27 @@ class DiceLegend extends HTMLElement {
            ========================================== */
         .legend-btn {
           background: none;
-          border: none;
+          border: 1px solid transparent;
           border-radius: 12px;
-          box-sizing: border-box;
-          /* Keep slot width locked at 100px in normal view */
-          flex: 0 0 100px;
-          width: 100px;
-          min-width: 100px;
+          box-sizing: border-box;          
+          flex: 0 1 auto;
+          min-width: 80px;
           height: 48px;
           display: flex;
           align-items: center;
           justify-content: center;
           white-space: nowrap;
           cursor: pointer;
-          transition: border-color 0.2s ease, background-color 0.2s ease;
-          padding: 8px 12px;
+          transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+          padding: 0 16px;
           font-size: 16px;
           color: #fff;
         }
 
-        /* Button hover lift effect for normal view */
+        /* Button hover capsule effect for normal view */
         .legend-btn:hover:not(:disabled) {          
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.2);
           transform: translateY(-2px);
         }
         
@@ -134,6 +141,7 @@ class DiceLegend extends HTMLElement {
           width: 48px;
           min-width: 48px;
           background: none !important;
+          border-color: transparent !important;
           padding: 0;
         }
 
@@ -187,13 +195,17 @@ class DiceLegend extends HTMLElement {
         }
 
         /* Resign & Cancel button border states (Red accent) */
-        :host(.icon-view) #action-resign-btn .icon-content, :host(.icon-view) #action-no-btn .icon-content,
-        .dice-legend.icon-view #action-resign-btn .icon-content, .dice-legend.icon-view #action-no-btn .icon-content {
+        :host(.icon-view) #action-resign-btn .icon-content,
+        :host(.icon-view) #action-no-btn .icon-content,
+        .dice-legend.icon-view #action-resign-btn .icon-content,
+        .dice-legend.icon-view #action-no-btn .icon-content {
           border-color: rgba(231, 76, 60, 0.4);          
         }
         /* Resign & Cancel button hover states (Red accent) */
-        :host(.icon-view) #action-resign-btn:hover:not(:disabled) .icon-content, :host(.icon-view) #action-no-btn:hover:not(:disabled) .icon-content,
-        .dice-legend.icon-view #action-resign-btn:hover:not(:disabled) .icon-content, .dice-legend.icon-view #action-no-btn:hover:not(:disabled) .icon-content {
+        :host(.icon-view) #action-resign-btn:hover:not(:disabled) .icon-content,
+        :host(.icon-view) #action-no-btn:hover:not(:disabled) .icon-content,
+        .dice-legend.icon-view #action-resign-btn:hover:not(:disabled) .icon-content,
+        .dice-legend.icon-view #action-no-btn:hover:not(:disabled) .icon-content {
           background: rgba(231, 76, 60, 0.2);
           border-color: #e74c3c;
         }
