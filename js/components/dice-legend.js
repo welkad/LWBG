@@ -5,21 +5,21 @@ class DiceLegend extends HTMLElement {
     this.innerHTML = `
       <div class="dice-legend">
         <!-- ROLL -->
-        <button id="action-roll-btn" class="legend-btn hidden" title="Roll Dice (R)">
+        <button id="action-roll-btn" class="legend-btn hidden" title="Roll Dice (R)" disabled="">
           <span class="icon-content">🎲</span>
           <span class="key-badge">R</span>
           <span class="btn-label">: Roll</span>
         </button>
 
         <!-- UNDO -->
-        <button id="action-undo-btn" class="legend-btn hidden" title="Undo Move (U)">
+        <button id="action-undo-btn" class="legend-btn hidden" title="Undo Move (U)" disabled="">
           <span class="icon-content">↩️</span>
           <span class="key-badge">U</span>
           <span class="btn-label">: Undo</span>
         </button>
 
         <!-- DONE -->
-        <button id="action-done-btn" class="legend-btn hidden" title="Finish Turn (D)">
+        <button id="action-done-btn" class="legend-btn hidden" title="Finish Turn (D)" disabled="">
           <span class="icon-content">✅</span>
           <span class="key-badge">D</span>
           <span class="btn-label">: Done</span>
@@ -33,36 +33,36 @@ class DiceLegend extends HTMLElement {
         </button>
 
         <!-- CONFIRM -->
-        <button id="action-yes-btn" class="legend-btn hidden" title="Confirm (Y)">
+        <button id="action-yes-btn" class="legend-btn" title="Confirm (Y)">
           <span class="icon-content">👍</span>
           <span class="key-badge">Y</span>      
-          <span id="label-yes" class="btn-label">: Confirm</span>
+          <span id="label-yes" class="btn-label">: Play Again</span>
         </button>
 
         <!-- CANCEL -->
-        <button id="action-no-btn" class="legend-btn hidden" title="Cancel (N)">
+        <button id="action-no-btn" class="legend-btn" title="Cancel (N)">
           <span class="icon-content">👎</span>
           <span class="key-badge">N</span>
-          <span id="label-no" class="btn-label">: Cancel</span>
+          <span id="label-no" class="btn-label">: Decline</span>
         </button>
       </div>
 
       <style>
         /* ==========================================
-           CONTAINER STYLING
-           ========================================== */
+            CONTAINER STYLING
+            ========================================== */
         .dice-legend {
           display: flex;
           justify-content: center;
           align-items: center;
-          gap: 16px; 
+          gap: 16px; /* Increased gap from 8px so buttons have breathing room */
           margin: 16px 0;          
           width: 100%;
         }
 
         /* ==========================================
-           KEY BADGE STYLING (Keyboard shortcuts)
-           ========================================== */
+            KEY BADGE & LABEL STYLING (Normalized)
+            ========================================== */
         .key-badge {
           display: inline-flex;
           align-items: center;
@@ -71,7 +71,7 @@ class DiceLegend extends HTMLElement {
           height: 32px;
           box-sizing: border-box;
           flex-shrink: 0;
-          font-weight: 500;
+          font-weight: 400;
           color: #fff;
         }
 
@@ -81,15 +81,17 @@ class DiceLegend extends HTMLElement {
         }
         
         /* ==========================================
-           DEFAULT BUTTON STYLING (Normal View)
-           ========================================== */
+            DEFAULT BUTTON STYLING (Normal View)
+            ========================================== */
         .legend-btn {
           background: none;
-          border: 1px solid transparent;
+          border: none;
           border-radius: 12px;
-          box-sizing: border-box;          
-          flex: 0 1 auto;
-          min-width: 80px;
+          box-sizing: border-box;
+          /* Keep slot width locked at 100px in normal view */
+          flex: 0 0 100px;
+          width: 100px;
+          min-width: 100px;
           height: 48px;
           display: flex;
           align-items: center;
@@ -97,7 +99,7 @@ class DiceLegend extends HTMLElement {
           white-space: nowrap;
           cursor: pointer;
           transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
-          padding: 0 16px;
+          padding: 8px 12px;
           font-size: 16px;
           color: #fff;
         }
@@ -105,7 +107,6 @@ class DiceLegend extends HTMLElement {
         /* Button hover capsule effect for normal view */
         .legend-btn:hover:not(:disabled) {          
           background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(255, 255, 255, 0.2);
           transform: translateY(-2px);
         }
         
@@ -125,8 +126,8 @@ class DiceLegend extends HTMLElement {
         }
 
         /* ============================================
-           ICON VIEW STYLING (Triggered via .icon-view)
-           ============================================ */
+            ICON VIEW STYLING (Triggered via .icon-view)
+            ============================================ */
         /* Adjust spacing gap between buttons in icon view */
         :host(.icon-view) .dice-legend,
         .dice-legend.icon-view {
@@ -141,7 +142,6 @@ class DiceLegend extends HTMLElement {
           width: 48px;
           min-width: 48px;
           background: none !important;
-          border-color: transparent !important;
           padding: 0;
         }
 
@@ -181,8 +181,8 @@ class DiceLegend extends HTMLElement {
         }
 
         /* =============================================
-           ACCENT BUTTON COLORS (Done / Resign / Cancel)
-           ============================================= */
+            ACCENT BUTTON COLORS (Done / Resign / Cancel)
+            ============================================= */
         /* Done button border and hover states (Green accent) */
         :host(.icon-view) #action-done-btn .icon-content,
         .dice-legend.icon-view #action-done-btn .icon-content {
@@ -195,17 +195,13 @@ class DiceLegend extends HTMLElement {
         }
 
         /* Resign & Cancel button border states (Red accent) */
-        :host(.icon-view) #action-resign-btn .icon-content,
-        :host(.icon-view) #action-no-btn .icon-content,
-        .dice-legend.icon-view #action-resign-btn .icon-content,
-        .dice-legend.icon-view #action-no-btn .icon-content {
+        :host(.icon-view) #action-resign-btn .icon-content, :host(.icon-view) #action-no-btn .icon-content,
+        .dice-legend.icon-view #action-resign-btn .icon-content, .dice-legend.icon-view #action-no-btn .icon-content {
           border-color: rgba(231, 76, 60, 0.4);          
         }
         /* Resign & Cancel button hover states (Red accent) */
-        :host(.icon-view) #action-resign-btn:hover:not(:disabled) .icon-content,
-        :host(.icon-view) #action-no-btn:hover:not(:disabled) .icon-content,
-        .dice-legend.icon-view #action-resign-btn:hover:not(:disabled) .icon-content,
-        .dice-legend.icon-view #action-no-btn:hover:not(:disabled) .icon-content {
+        :host(.icon-view) #action-resign-btn:hover:not(:disabled) .icon-content, :host(.icon-view) #action-no-btn:hover:not(:disabled) .icon-content,
+        .dice-legend.icon-view #action-resign-btn:hover:not(:disabled) .icon-content, .dice-legend.icon-view #action-no-btn:hover:not(:disabled) .icon-content {
           background: rgba(231, 76, 60, 0.2);
           border-color: #e74c3c;
         }
