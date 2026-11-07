@@ -198,6 +198,9 @@ export function executeMove(fromIndex, toIndex) {
   // --- POST-MOVE: END OF TURN CHECK ---  
   // Check if player ran out of dice or has zero valid moves remaining
   setTimeout(() => {
+    // Do not invoke end of turn check if game already won
+    if (state.borneOff[player] === 15) return;
+
     // Delay check slightly so checker moves first
     if (state.currentRoll.length === 0) {
       // Normal turn completion: all dice used        
