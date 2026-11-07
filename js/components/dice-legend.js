@@ -88,11 +88,6 @@ class DiceLegend extends HTMLElement {
           border: none;
           border-radius: 12px;
           box-sizing: border-box;
-          /* Keep slot width locked at 100px in normal view */
-          flex: 0 0 100px;
-          width: 100px;
-          min-width: 100px;
-          height: 48px;
           display: flex;
           align-items: center;
           justify-content: center;
