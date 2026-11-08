@@ -3,7 +3,7 @@ import { logStatus } from '../ui.js';
 import { state } from '../state.js';
 
 class GameModeToggle extends HTMLElement {
-  connectedCallBack() {
+  connectedCallback() {
     this.render();
     this.initInternalController();
   }
@@ -13,19 +13,16 @@ class GameModeToggle extends HTMLElement {
       <div class="mode-toggle-container">
         <!-- SINGLE GAME -->
         <button class="mode-btn active" data-mode="single" title="Single Game">
-          <span class="radio-indicator">[x]</span>
           <span class="mode-label">Single</span>
         </button>
 
         <!-- MATCH PLAY -->
         <button class="mode-btn" data-mode="match" title="Match Play">
-          <span class="radio-indicator">[ ]</span>
           <span class="mode-label">Match</span>
         </button>
 
         <!-- MONEY PLAY -->
         <button class="mode-btn" data-mode="money" title="Money Play">
-          <span class="radio-indicator">[ ]</span>
           <span class="mode-label">Money</span>
         </button>
       </div>
@@ -38,8 +35,8 @@ class GameModeToggle extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          margin-top: 6px;
+          gap: 12px;
+          margin-top: 8px;
         }
 
         /* ==========================================
@@ -58,7 +55,7 @@ class GameModeToggle extends HTMLElement {
           align-items: center;
           gap: 6px;
           white-space: nowrap;
-          transistion:
+          transition:
             background-color 0.2s ease,
             border-color 0.2s ease,
             color 0.2s ease;
@@ -116,7 +113,7 @@ class GameModeToggle extends HTMLElement {
         this.setActiveMode(state.gameMode, state.matchTarget);
         logStatus(`Mode set to: ${state.gameMode.toUpperCase()}`
           + (state.gameMode === 'match' ? ` (${state.matchTarget} Points)`
-              : '' ), 3000);
+              : '' ), 2000);
 
         // Optionally dispatch event for other listeners if needed
         this.dispatchEvent(new CustomEvent('mode-changed', {
@@ -134,19 +131,14 @@ class GameModeToggle extends HTMLElement {
    * @param {number|null} matchTarget - Target score if mode === 'match'
    */
   setActiveMode(activeMode, matchTarget = null) {
-    this.querySelectorAll('mode-btn').forEach(btn => {
+    this.querySelectorAll('.mode-btn').forEach(btn => {
       const htmlBtn = /** @type {HTMLElement} */ (btn);
       const isSelected = htmlBtn.dataset.mode === activeMode;
       btn.classList.toggle('active', isSelected);
 
-      const indicator = btn.querySelector('.radio-indicator');
-      if (indicator) {
-        indicator.textContent = isSelected ? '[x]' : '[ ]';
-      }
-
       // Dynamically display match target points on the Match button label
       if (htmlBtn.dataset.mode === 'match') {
-        const label = btn.querySelector('mode-label');
+        const label = btn.querySelector('.mode-label');
         if (label) {
           label.textContent = isSelected && matchTarget
             ? `Match (${matchTarget}pt)` : 'Match';
