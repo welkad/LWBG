@@ -9,6 +9,7 @@
       </svg>">
   <title>BGammonLite</title>
   <link rel="stylesheet" href="style.css?v=1.1">
+  <script type="module" src="js/components/game-mode-toggle.js"></script>
   <script type="module" src="js/components/dice-legend.js"></script>
   <script type="module" src="js/main.js"></script>
 </head>
@@ -20,7 +21,12 @@
         <div class="score-line">Score: <span id="score-black">0</span></div>
       </div>
     </div>
-    <h1>Backgammon</h1>
+
+    <div class="title-container">
+      <h1>Backgammon</h1>
+      <game-mode-toggle id="mode-toggle"></game-mode-toggle>
+    </div>
+    
     <div class="scoreboard" id="scoreboard-white">
       <div class="score-info">
         <div class="score-line">White: <span id="pip-white">167</span></div>

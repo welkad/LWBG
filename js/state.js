@@ -23,6 +23,8 @@ export const state = {
     validMoves: [],                   // Target indices (0-23 or 'off') for checkers
     moveHistory:[],                   // Holds snapshots of boardState, bar, currentRoll
     showHoverHighlights: false,       // Turn on/off selection/targets - press 'H' key
+    gameMode: 'single',               // Mode can be 'single' | 'match' | 'money'
+    matchTarget: null,                // Target points needed to win Match
 
     cubeValue: 1,                     // Default starting multiplier
     cubeOwner: 'center',              // 'center', 'white', of 'black'

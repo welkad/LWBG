@@ -249,6 +249,12 @@ body {
     line-height: 1.3;
 }
 
+.title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* =====================================
    CENTER BAR LAYOUT
    ===================================== */

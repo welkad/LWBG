@@ -72,6 +72,8 @@
  * @property {boolean} isInputLocked - Block user interaction during transition delays.
  * @property {boolean} showHoverHighlights - Toggle selection/target point highlights.
  * @property {boolean} turnSwitched - Flag to prevent turn switch from occuring twice.
+ * @property {string} gameMode - Game mode can be 'single' | 'match' | 'money'
+ * @property {number | null} matchTarget - Target points needed to win Match
  */
 
 /**

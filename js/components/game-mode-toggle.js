@@ -1,8 +1,11 @@
 // js/components/game-mode-toggle.js: Horizontal 3-button mode toggle component
+import { logStatus } from '../ui.js';
+import { state } from '../state.js';
 
 class GameModeToggle extends HTMLElement {
   connectedCallBack() {
     this.render();
+    this.initInternalController();
   }
 
   render() {
@@ -86,14 +89,38 @@ class GameModeToggle extends HTMLElement {
         }
       </style>
     `;
+  }
+    
+  initInternalController() {
+    // Sync initial state if already set
+    if (state.gameMode) {
+      this.setActiveMode(state.gameMode, state.matchTarget);
+    }
 
     // Attach click listeners to emit mode selection
     this.querySelectorAll('.mode-btn').forEach(btn => {
       const htmlBtn = /** @type {HTMLElement} */ (btn);
-      htmlBtn.addEventListener('click', (e) => {
-        const mode = htmlBtn.dataset.mode;
+      htmlBtn.addEventListener('click', () => {
+        const selectedMode = htmlBtn.dataset.mode;
+        if (!selectedMode) return;
+
+        state.gameMode = selectedMode;
+    
+        if (selectedMode === 'match') {
+          const input = window.prompt(`Enter Match length (e.g. 3, 5, 7):`,
+            String(state.matchTarget));
+          const target = input ? parseInt(input, 10) : 3;
+          state.matchTarget = !isNaN(target) && target > 0 ? target : 3;
+        }
+
+        this.setActiveMode(state.gameMode, state.matchTarget);
+        logStatus(`Mode set to: ${state.gameMode.toUpperCase()}`
+          + (state.gameMode === 'match' ? ` (${state.matchTarget} Points)`
+              : '' ), 3000);
+
+        // Optionally dispatch event for other listeners if needed
         this.dispatchEvent(new CustomEvent('mode-changed', {
-          detail: { mode },
+          detail: { mode: state.gameMode, matchTarget: state.matchTarget },
           bubbles: true,
           composed: true
         }));
