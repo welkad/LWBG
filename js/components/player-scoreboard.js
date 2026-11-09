@@ -23,11 +23,10 @@ class PlayerScoreboard extends HTMLElement {
     this.innerHTML = `
       <div class="scoreboard-panel ${align}">
         <div class="player-badge">
-          <div class="mini-checker ${player}"></div>
-          <span class="player-name">${playerName}</span>
+          <div class="mini-checker ${player}"></div>          
         </div>
         <div class="score-info">
-          <div class="score-line">Pips: 
+          <div class="score-line">${playerName}:
             <span class="pip-count" id="pip-${player}">${pip}</span></div>
           <div class="score-line">Score: 
             <span class="score-count" id="score-${player}">${score}</span></div>
@@ -42,25 +41,29 @@ class PlayerScoreboard extends HTMLElement {
           background: rgba(255, 255, 255, 0.04);
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 12px;
-          padding: 6px 14px;
-          font-size: 0.95rem;
+          margin-top: 10px;          
+          padding: 12px 22px;
+          font-size: 1rem;
           color: #d4d4d4;
           box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
         }
 
         .scoreboard-panel.left {
-          flex-direction: row;
+          flex-direction: row-reverse;
+          text-align: left;
+          margin-left: 20px;
         }
 
         .scoreboard-panel.right {
-          flex-direction: row-reverse;
+          flex-direction: row;
           text-align: right;
+          margin-right: 20px;
         }
 
         /* Mini checker indicator */
         .mini-checker {
-          width: 22px;
-          height: 22px;
+          width: 38px;
+          height: 38px;
           border-radius: 50%;
           box-shadow: 0 2px 4px rgba(0,0,0,0.5),
            inset 0 2px 3px rgba(255,255,255,0.2);
@@ -75,7 +78,7 @@ class PlayerScoreboard extends HTMLElement {
 
         .mini-checker.white {
           background: radial-gradient(
-            circle at 35% 35%, #fff 0%, #e0e0e0 60%, #b8b8b8 100%
+            circle at 35% 35%, #d4d4d4 0%, #e0e0e0 60%, #b8b8b8 100%
           );
           border: 1px solid #999;
         }

@@ -10,29 +10,24 @@
   <title>BGammonLite</title>
   <link rel="stylesheet" href="style.css?v=1.1">
   <script type="module" src="js/components/game-mode-toggle.js"></script>
+  <script type="module" src="js/components/player-scoreboard.js"></script>
   <script type="module" src="js/components/dice-legend.js"></script>
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
   <header class="header-container">
-    <div class="scoreboard" id="scoreboard-black">
-      <div class="score-info">
-        <div class="score-line">Black: <span id="pip-black">167</span></div>
-        <div class="score-line">Score: <span id="score-black">0</span></div>
-      </div>
-    </div>
+    <player-scoreboard
+      id="scoreboard-black" player="black" align="left" pip="167" score="0">
+    </player-scoreboard>
 
     <div class="title-container">
       <h1>Backgammon</h1>
       <game-mode-toggle id="mode-toggle"></game-mode-toggle>
     </div>
     
-    <div class="scoreboard" id="scoreboard-white">
-      <div class="score-info">
-        <div class="score-line">White: <span id="pip-white">167</span></div>
-        <div class="score-line">Score: <span id="score-white">0</span></div>
-      </div>
-    </div>
+    <player-scoreboard
+      id="scoreboard-white" player="white" align="right" pip="167" score="0">
+    </player-scoreboard>  
   </header>  
 
   <div class="master-board">
