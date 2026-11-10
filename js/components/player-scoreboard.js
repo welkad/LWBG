@@ -6,6 +6,7 @@ class PlayerScoreboard extends HTMLElement {
     const defaultPip = this.getAttribute('pip') || '167';
     const defaultScore = this.getAttribute('score') || '0';
     const align = this.getAttribute('align') || 'left';
+    const theme = this.getAttribute('theme') || 'floating'; // 'floating' or 'card'
 
     this.render(player, defaultPip, defaultScore, align);
   }
@@ -26,7 +27,7 @@ class PlayerScoreboard extends HTMLElement {
           <div class="mini-checker ${player}"></div>          
         </div>
         <div class="score-info">
-          <div class="score-line">${playerName}:
+          <div class="score-line">Pips:
             <span class="pip-count" id="pip-${player}">${pip}</span></div>
           <div class="score-line">Score: 
             <span class="score-count" id="score-${player}">${score}</span></div>
@@ -37,15 +38,18 @@ class PlayerScoreboard extends HTMLElement {
         .scoreboard-panel {
           display: flex;
           align-items: center;
-          gap: 12px;
+          justify-content: space-between;          
+          width: 170px;
+          height: 70px;
           background: rgba(255, 255, 255, 0.04);
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 12px;
           margin-top: 10px;          
-          padding: 12px 22px;
+          padding: 12px 12px;
           font-size: 1rem;
           color: #d4d4d4;
           box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+          box-sizing: border-box;
         }
 
         .scoreboard-panel.left {
@@ -78,29 +82,31 @@ class PlayerScoreboard extends HTMLElement {
 
         .mini-checker.white {
           background: radial-gradient(
-            circle at 35% 35%, #d4d4d4 0%, #e0e0e0 60%, #b8b8b8 100%
+            circle at 35% 35%, #ffffff 0%, #d1d1d1 60%, #8a8a8a 100%
           );
-          border: 1px solid #999;
+          border: 1px solid #666;
         }
 
         .player-badge {
           display: flex;
           flex-direction: column;
-          align-items: center;
-          gap: 2px;
-          font-weight: bold;
-          font-size: 0.8rem;
-          color: #f1d779;
+          align-items: center;          
         }
 
         .score-info {
           display: flex;
           flex-direction: column;
+          gap: 2px;
+          min-width: 75px;
         }
 
         .score-line {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
           line-height: 1.3;
           font-weight: 600;
+          
         }
       </style>
     `;
