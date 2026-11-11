@@ -54,12 +54,19 @@ export function setupKeyboardListeners() {
       // TOGGLE SCOREBOARD THEME
       case 'KeyT':
         event.preventDefault();
-        const scoreboards = document.querySelectorAll('player-scoreboard');
-        scoreboards.forEach(sb => {
-          const currentTheme = sb.getAttribute('theme') || 'card';
-          const newTheme = currentTheme === 'floating' ? 'card' : 'floating';
-          sb.setAttribute('theme', newTheme);
-        });
+
+        // Toggle header container theme class
+        const headerEl = document.querySelector('.header-container');
+        if (headerEl) {
+          headerEl.classList.toggle('card');
+          const isCard = headerEl.classList.contains('card');
+
+          // Sync both scoreboards to match
+          const scoreboards = document.querySelectorAll('player-scoreboard');
+          scoreboards.forEach(sb => {                        
+            sb.setAttribute('theme', isCard ? 'card' : 'floating');
+          });
+        }
         break;
 
       // TOGGLE LEGEND VIEW (Normal vs Icon)

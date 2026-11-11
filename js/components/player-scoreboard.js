@@ -27,7 +27,7 @@ class PlayerScoreboard extends HTMLElement {
       const pip = this.getAttribute('pip') || '167';
       const score = this.getAttribute('score') || '0';
       const align = this.getAttribute('align') || 'left';
-      const theme = this.getAttribute('theme') || 'floating';
+      const theme = this.getAttribute('theme') || 'card';
 
       this.render(player, pip, score, align, theme);
     }
@@ -66,9 +66,8 @@ class PlayerScoreboard extends HTMLElement {
           width: 170px;
           height: 70px;
           background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          border-radius: 12px;
-          margin-top: 10px;          
+          border: 2px solid rgba(255, 255, 255, 0.12);
+          border-radius: 12px;          
           padding: 12px 12px;
           font-size: 1rem;
           color: #d4d4d4;
@@ -79,37 +78,38 @@ class PlayerScoreboard extends HTMLElement {
         .scoreboard-panel.left {
           flex-direction: row-reverse;
           text-align: left;
-          margin-left: 20px;
+          margin-left: -5px;
         }
 
         .scoreboard-panel.right {
           flex-direction: row;
           text-align: right;
-          margin-right: 20px;
+          margin-right: -5px;
         }
 
         /* --- THEME: CARD --- */
         .scoreboard-panel.card {
-          background: #3a2a1e;  /* Solid wood tone */
+          background: #4a3728; /* Solid wood tone */            
           border: 2px solid #2d2016;  /* Deep dark border */
-          border-radius: 8px;
+          border-radius: 12px;          
           box-shadow:
             0 4px 10px rgba(0, 0, 0, 0.5),
             inset 0 1px 2px rgba(255, 255, 255, 0.1);
-          padding: 8px 14px;
-          color: #f1d779;          
+          padding: 12px 12px;
+          box-sizing: border-box;
+          color: #f1d779;              
         }
 
         .scoreboard-panel.card.left {
           flex-direction: row-reverse;
-          padding-left: 14px;
-          padding-right: 12px;
+          text-align: left;
+          margin-left: -5px;          
         }
 
         .scoreboard-panel.card.right {
           flex-direction: row;
-          padding-left: 12px;
-          padding-right: 14px;
+          text-align: right;
+          margin-right: -5px;    
         }
 
         .scoreboard-panel.card .score-line {
