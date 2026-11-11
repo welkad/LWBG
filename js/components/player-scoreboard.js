@@ -6,9 +6,31 @@ class PlayerScoreboard extends HTMLElement {
     const defaultPip = this.getAttribute('pip') || '167';
     const defaultScore = this.getAttribute('score') || '0';
     const align = this.getAttribute('align') || 'left';
-    const theme = this.getAttribute('theme') || 'floating'; // 'floating' or 'card'
+    const theme = this.getAttribute('theme') || 'card'; // 'floating' or 'card'
 
-    this.render(player, defaultPip, defaultScore, align);
+    this.render(player, defaultPip, defaultScore, align, theme);
+  }
+
+  // Static getter function to tell browser wich attributes to watch
+  static get observedAttributes() {
+    return ['theme', 'pip', 'score'];
+  }
+
+  /** Callback function to handle updates when attributes change dynamically
+   * @param {string} name
+   * @param {string} oldValue
+   * @param {string} newValue
+   */
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      const player = this.getAttribute('player') || 'black';
+      const pip = this.getAttribute('pip') || '167';
+      const score = this.getAttribute('score') || '0';
+      const align = this.getAttribute('align') || 'left';
+      const theme = this.getAttribute('theme') || 'floating';
+
+      this.render(player, pip, score, align, theme);
+    }
   }
 
   /**
@@ -16,13 +38,14 @@ class PlayerScoreboard extends HTMLElement {
    * @param {string} pip
    * @param {string} score
    * @param {string} align
+   * @param {string} theme
    */
-  render(player, pip, score, align) {
+  render(player, pip, score, align, theme) {
     const isBlack = player === 'black';
     const playerName = isBlack ? 'Black' : 'White';
 
     this.innerHTML = `
-      <div class="scoreboard-panel ${align}">
+      <div class="scoreboard-panel ${align} ${theme}">
         <div class="player-badge">
           <div class="mini-checker ${player}"></div>          
         </div>
@@ -35,6 +58,7 @@ class PlayerScoreboard extends HTMLElement {
       </div>
 
       <style>
+        /* --- THEME: FLOATING (default) --- */
         .scoreboard-panel {
           display: flex;
           align-items: center;
@@ -64,6 +88,34 @@ class PlayerScoreboard extends HTMLElement {
           margin-right: 20px;
         }
 
+        /* --- THEME: CARD --- */
+        .scoreboard-panel.card {
+          background: #3a2a1e;  /* Solid wood tone */
+          border: 2px solid #2d2016;  /* Deep dark border */
+          border-radius: 8px;
+          box-shadow:
+            0 4px 10px rgba(0, 0, 0, 0.5),
+            inset 0 1px 2px rgba(255, 255, 255, 0.1);
+          padding: 8px 14px;
+          color: #f1d779;          
+        }
+
+        .scoreboard-panel.card.left {
+          flex-direction: row-reverse;
+          padding-left: 14px;
+          padding-right: 12px;
+        }
+
+        .scoreboard-panel.card.right {
+          flex-direction: row;
+          padding-left: 12px;
+          padding-right: 14px;
+        }
+
+        .scoreboard-panel.card .score-line {
+          font-weight: 600;
+        }
+
         /* Mini checker indicator */
         .mini-checker {
           width: 38px;
@@ -91,6 +143,10 @@ class PlayerScoreboard extends HTMLElement {
           display: flex;
           flex-direction: column;
           align-items: center;          
+        }
+
+        .score-count {
+          padding-right: 2px;
         }
 
         .score-info {

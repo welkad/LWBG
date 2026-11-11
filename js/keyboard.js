@@ -18,6 +18,7 @@ import { clearHoverHighlights, renderBoard } from './board.js';
  * - H         : Toggle move highlighting on or off
  * - Y / N     : Confirm / cancel active prompt (Resign or Doubling Cube)
  * - V         : Toggle visual Icons vs Buttons underneath status bar
+ * - T         : Toggle scoreboard theme (floating vs card)
  */
 
 export function setupKeyboardListeners() {
@@ -50,7 +51,18 @@ export function setupKeyboardListeners() {
     }
 
     switch (key) {
-      // TOGGLE LEGEND VIEW (Normal vs Icon
+      // TOGGLE SCOREBOARD THEME
+      case 'KeyT':
+        event.preventDefault();
+        const scoreboards = document.querySelectorAll('player-scoreboard');
+        scoreboards.forEach(sb => {
+          const currentTheme = sb.getAttribute('theme') || 'card';
+          const newTheme = currentTheme === 'floating' ? 'card' : 'floating';
+          sb.setAttribute('theme', newTheme);
+        });
+        break;
+
+      // TOGGLE LEGEND VIEW (Normal vs Icon)
       case 'KeyV':
         event.preventDefault();        
         const legendEl = document.querySelector('dice-legend .dice-legend');
