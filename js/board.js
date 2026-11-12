@@ -37,15 +37,33 @@ export function renderBoard() {
 
 // Refresh scoreboard elements in DOM when invoking renderBoard()
 export function updateScoreBoardUI() {
+  const blackPipCount = calculatePipCount('black');
+  const whitePipCount = calculatePipCount('white');
+  const blackScore = state.scores.black;
+  const whiteScore = state.scores.white;
+
+  // Update inner text elements directly
   const blackPipEl = document.getElementById('pip-black');
   const whitePipEl = document.getElementById('pip-white');
   const blackScoreEl = document.getElementById('score-black');
   const whiteScoreEl = document.getElementById('score-white');
 
-  if (blackPipEl) blackPipEl.textContent = `${calculatePipCount('black')}`;
-  if (whitePipEl) whitePipEl.textContent = `${calculatePipCount('white')}`;
-  if (blackScoreEl) blackScoreEl.textContent = `${state.scores.black}`;
-  if (whiteScoreEl) whiteScoreEl.textContent = `${state.scores.white}`;
+  if (blackPipEl) blackPipEl.textContent = `${blackPipCount}`;
+  if (whitePipEl) whitePipEl.textContent = `${whitePipCount}`;
+  if (blackScoreEl) blackScoreEl.textContent = `${blackScore}`;
+  if (whiteScoreEl) whiteScoreEl.textContent = `${whiteScore}`;
+
+  // Keep custom elements synced
+  const blackBoard = document.getElementById('scoreboard-black');
+  const whiteBoard = document.getElementById('scoreboard-white');
+  if (blackBoard) {
+    blackBoard.setAttribute('pip', String(blackPipCount));
+    blackBoard.setAttribute('score', String(blackScore));
+  }
+  if (whiteBoard) {
+    whiteBoard.setAttribute('pip', String(whitePipCount));
+    whiteBoard.setAttribute('score', String(whiteScore));
+  }
 }
 
 /**

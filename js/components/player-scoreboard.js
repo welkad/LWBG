@@ -13,7 +13,7 @@ class PlayerScoreboard extends HTMLElement {
 
   // Static getter function to tell browser wich attributes to watch
   static get observedAttributes() {
-    return ['theme', 'pip', 'score'];
+    return ['theme', 'pip', 'score', 'player', 'align'];
   }
 
   /** Callback function to handle updates when attributes change dynamically
@@ -22,16 +22,43 @@ class PlayerScoreboard extends HTMLElement {
    * @param {string} newValue
    */
   attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      const player = this.getAttribute('player') || 'black';
-      const pip = this.getAttribute('pip') || '167';
-      const score = this.getAttribute('score') || '0';
-      const align = this.getAttribute('align') || 'left';
-      const theme = this.getAttribute('theme') || 'card';
-
-      this.render(player, pip, score, align, theme);
+    if (oldValue === newValue) return;
+    const player = this.getAttribute('player') || 'black';
+    if (name === 'pip') {
+      const pipEl = this.querySelector(`#pip-${player}`);
+      if (pipEl) {
+        pipEl.textContent = newValue;
+      } else {
+        this.renderAll(); // Fallback if not yet rendered
+      }
+    } else if (name === 'score') {
+      const scoreEl = this.querySelector(`#score-${player}`);
+      if (scoreEl) {
+        scoreEl.textContent = newValue;
+      } else {
+        this.renderAll();
+      }
+    } else if (name === 'theme') {
+      const panel = this.querySelector('.scoreboard-panel');
+      if (panel) {
+        panel.classList.toggle('card', newValue === 'card');
+      } else {
+        this.renderAll();
+      }
+    } else if (name === 'player' || name === 'align') {
+      this.renderAll(); // Structural attributes require full re-render
     }
   }
+  // Helper to bundle initial render arguments
+  renderAll () {
+    const player = this.getAttribute('player') || 'black';
+    const pip = this.getAttribute('pip') || '167';
+    const score = this.getAttribute('score') || '0';
+    const align = this.getAttribute('align') || 'left';
+    const theme = this.getAttribute('theme') || 'card';
+
+    this.render(player, pip, score, align, theme);
+  }  
 
   /**
    * @param {string} player
