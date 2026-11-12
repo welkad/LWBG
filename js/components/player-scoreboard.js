@@ -6,7 +6,7 @@ class PlayerScoreboard extends HTMLElement {
     const defaultPip = this.getAttribute('pip') || '167';
     const defaultScore = this.getAttribute('score') || '0';
     const align = this.getAttribute('align') || 'left';
-    const theme = this.getAttribute('theme') || 'card'; // 'floating' or 'card'
+    const theme = this.getAttribute('theme') || 'floating'; // 'floating' or 'card'
 
     this.render(player, defaultPip, defaultScore, align, theme);
   }
