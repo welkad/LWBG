@@ -180,7 +180,7 @@ class PlayerScoreboard extends HTMLElement {
           display: flex;
           flex-direction: column;
           gap: 2px;
-          min-width: 75px;
+          min-width: 95px;
         }
 
         .score-line {

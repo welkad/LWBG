@@ -74,6 +74,10 @@
  * @property {boolean} turnSwitched - Flag to prevent turn switch from occuring twice.
  * @property {string} gameMode - Game mode can be 'single' | 'match' | 'money'
  * @property {number | null} matchTarget - Target points needed to win Match
+ * @property {{ black: number, white: number }} bankRolls - Kitty for 'money' mode
+ * @property {number} moneyAnte - Dollar stake per point/game
+ * @property {boolean} useCrawfordRule - Match play option
+ * @property {boolean} useJacobyRule - Money play option
  */
 
 /**

@@ -39,8 +39,22 @@ export function renderBoard() {
 export function updateScoreBoardUI() {
   const blackPipCount = calculatePipCount('black');
   const whitePipCount = calculatePipCount('white');
-  const blackScore = state.scores.black;
-  const whiteScore = state.scores.white;
+
+  // Format score string based on active game mode
+  let blackScoreDisplay = `${state.scores.black}`;
+  let whiteScoreDisplay = `${state.scores.white}`;
+
+  if (state.gameMode === 'match') {
+    const target = state.matchTarget || 3;
+    blackScoreDisplay = `${state.scores.black} / ${target}`;
+    whiteScoreDisplay = `${state.scores.white} / ${target}`;
+  } else if (state.gameMode === 'money') {
+    // Tracks amount in dollars
+    const blackCash = state.bankRolls?.black ?? 100;
+    const whiteCash = state.bankRolls?.white ?? 100;
+    blackScoreDisplay = `$${blackCash}`;
+    whiteScoreDisplay = `$${whiteCash}`;
+  }
 
   // Update inner text elements directly
   const blackPipEl = document.getElementById('pip-black');
@@ -50,19 +64,19 @@ export function updateScoreBoardUI() {
 
   if (blackPipEl) blackPipEl.textContent = `${blackPipCount}`;
   if (whitePipEl) whitePipEl.textContent = `${whitePipCount}`;
-  if (blackScoreEl) blackScoreEl.textContent = `${blackScore}`;
-  if (whiteScoreEl) whiteScoreEl.textContent = `${whiteScore}`;
+  if (blackScoreEl) blackScoreEl.textContent = `${blackScoreDisplay}`;
+  if (whiteScoreEl) whiteScoreEl.textContent = `${whiteScoreDisplay}`;
 
   // Keep custom elements synced
   const blackBoard = document.getElementById('scoreboard-black');
   const whiteBoard = document.getElementById('scoreboard-white');
   if (blackBoard) {
     blackBoard.setAttribute('pip', String(blackPipCount));
-    blackBoard.setAttribute('score', String(blackScore));
+    blackBoard.setAttribute('score', String(blackScoreDisplay));
   }
   if (whiteBoard) {
     whiteBoard.setAttribute('pip', String(whitePipCount));
-    whiteBoard.setAttribute('score', String(whiteScore));
+    whiteBoard.setAttribute('score', String(whiteScoreDisplay));
   }
 }
 

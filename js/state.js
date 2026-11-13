@@ -1,7 +1,7 @@
 // ==========================================
 // GAME STATE MANAGEMENT
 // ==========================================
-// js/state.js - Centralizes all global mutable game state in one place
+// js/state.js - Centralizes all global mutable game states into one place
 // so modules can import and modify it predictably.
 
 import { updateTurnUI, refreshDiceForNewTurn } from './dice.js';
@@ -9,7 +9,7 @@ import { renderBoard, updatePointLabels, updateScoreBoardUI } from './board.js';
 import { logStatus, clearStatusQueue, updateLegendUI } from './ui.js';
 import { updateCubePositionUI } from './doubling-cube.js';
 import { calculateGameOutcome } from './rules.js';
-import { renderDiceUI } from './dice-renderer.js';
+import { renderDiceUI, setDieValue } from './dice-renderer.js';
 
 let GAME_OVER_BANNER_DURATION_MS = 3000;  // Display victory message duration
 
@@ -23,8 +23,14 @@ export const state = {
     validMoves: [],                   // Target indices (0-23 or 'off') for checkers
     moveHistory:[],                   // Holds snapshots of boardState, bar, currentRoll
     showHoverHighlights: false,       // Turn on/off selection/targets - press 'H' key
-    gameMode: 'single',               // Mode can be 'single' | 'match' | 'money'
-    matchTarget: 3,                   // Default points to win if game set to Match mode
+    gameMode: 'single',               // 'single' | 'match' | 'money'
+    matchTarget: 3,                   // Target points for 'match' mode
+    bankRolls: {                      // Starting kitty for 'money' mode
+      black: 100,
+      white: 100 },
+    moneyAnte: 10,                    // Base dollar stake per <point />
+    useCrawfordRule: true,            // Match play option
+    useJacobyRule: true,              // Money play option
 
     cubeValue: 1,                     // Default starting multiplier
     cubeOwner: 'center',              // 'center', 'white', of 'black'
@@ -185,9 +191,28 @@ export function calculatePipCount(player) {
  * @param {'black'|'white'|null} [resigningPlayer = null] - The resigning player.
  */
 export function handleGameEnd(winner, resigningPlayer = null) {
-  // Calculate points won (defaults to cube value <- expand for Gammon/Backgammon)
+  const loser = resigningPlayer || (winner === 'black' ? 'white' : 'black');
   const { winType, pointsWon} = calculateGameOutcome(winner, resigningPlayer);
-  state.scores[winner] += pointsWon;
+
+  let sessionOver = false;
+  let moneyPayoutAmount = 0;
+
+  // Handle scoring/bankrolls based on active game mode
+  if (state.gameMode === 'money') {
+    const payoutResult = applyMoneyPayout(winner, loser, pointsWon);
+    moneyPayoutAmount = payoutResult.actualPayout;
+    sessionOver = payoutResult.isSessionOver;
+  } else {
+    // Single or Match mode point accumulation
+    state.scores[winner] += pointsWon;
+
+    if (state.gameMode === 'match') {
+      const target = state.matchTarget || 3;
+      if (state.scores[winner] >= target) {
+        sessionOver = true;
+      }
+    }
+  }
 
   // Add phase class to body to scope CSS
   document.body.classList.add('game-over-phase');
@@ -198,7 +223,7 @@ export function handleGameEnd(winner, resigningPlayer = null) {
   state.selectedPoint = null; // Clear active selection highlight
   state.validMoves = [];      // Clear target destination highlight
 
-  state.losingPlayer = resigningPlayer || (winner === 'black' ? 'white' : 'black');
+  state.losingPlayer = loser;
   state.isResignOffered = false;
   state.resignOfferedBy = null;
   state.hasRolled = false;
@@ -206,19 +231,25 @@ export function handleGameEnd(winner, resigningPlayer = null) {
 
   clearStatusQueue(); // Clear any pending messages
 
-  // Craft victory status message incorporating Gammon / Backgammon situations  
+  // Craft victory status message based on mode
   let message = pointsWon > 1 ? `${pointsWon} points` : 'the game';  
   if (winType === 'Gammon' || winType === 'Backgammon') {
     message = `a ${winType} and ${message}`;
   }
-  let winMessage = '';
-  if (resigningPlayer) {
-    winMessage = `${resigningPlayer} resigned.`;
-  } else {
-    winMessage = `${winner} bore off all checkers.`;
-  }
+  let winMessage = resigningPlayer ? `${resigningPlayer} resigned.`
+    : `${winner} bore off all checkers.`;
+  
   // Concat winMessage (who won) with message (how many points)
-  winMessage = `${winMessage}` + ' ' + `${winner} wins ${message}!`;
+  if (state.gameMode === 'money') {
+    winMessage = `${winMessage} ${winner} wins $${moneyPayoutAmount} (${message})!`;
+  } else {
+    winMessage = `${winMessage} ${winner} wins ${message}!`;
+  }
+
+  if (sessionOver) {
+    winMessage += ` 🎉 ${winner} wins `
+      + `${state.gameMode === 'match' ? 'the Match' : 'all of the Money'}!`;
+  }
 
   if (!resigningPlayer) {
     GAME_OVER_BANNER_DURATION_MS += 2000; // Increase banner time for a 'normal' win!
@@ -241,10 +272,44 @@ export function handleGameEnd(winner, resigningPlayer = null) {
 
     state.awaitingPlayAgainPrompt = false;  // Allow Y/N choice dice to render
     clearStatusQueue();
-    logStatus(
-      "The score is now Black: " + state.scores.black +
-      " and White: " + state.scores.white + ". Play again?"
-    );
+
+    let scoreStatusText = "";
+    if (state.gameMode === 'money') {
+      scoreStatusText = `Bankrolls are now Black: $${state.bankRolls.black} ` 
+        + `and White: $${state.bankRolls.white}.`;
+    } else if (state.gameMode === 'match') {
+      scoreStatusText = `Match score is Black: ${state.scores.black}/${state.matchTarget}`
+        + ` and White: ${state.scores.white}/${state.matchTarget}.`;
+    } else {
+      scoreStatusText = `Score is Black: ${state.scores.black} `
+        + `and White: ${state.scores.white}.`;
+    }
+
+    logStatus(`${scoreStatusText} Play again?`);
     renderDiceUI(); // Display Y/N dice and update legend
   }, GAME_OVER_BANNER_DURATION_MS);  // Wait until Victory message is finished
+}
+
+/**
+ * Transfers wagered funds from loser to winner in Money mode,
+ * capping the payout at the loser's remaining bankroll. * 
+ * @param {Player} winner
+ * @param {Player} loser
+ * @param {number} pointsWon - Base points * cube multiplier (e.g. 1, 2, 4...)
+ * @returns {{ actualPayout: number, isSessionOver: boolean }}
+ */
+export function applyMoneyPayout(winner, loser, pointsWon) {
+  const rawWager = pointsWon * (state.moneyAnte || 10);
+  const actualPayout = Math.min(rawWager, state.bankRolls[loser]);
+
+  state.bankRolls[loser] -= actualPayout;
+  state.bankRolls[winner] += actualPayout;
+
+  const isSessionOver = state.bankRolls[loser] <= 0;
+  return { actualPayout, isSessionOver };
+}
+
+export function resetBankRolls(startingAmount = 100) {
+  state.bankRolls.black = startingAmount;
+  state.bankRolls.white = startingAmount;
 }

@@ -1,4 +1,5 @@
 // js/components/game-mode-toggle.js: Horizontal 3-button mode toggle component
+import { updateScoreBoardUI } from '../board.js';
 import { logStatus } from '../ui.js';
 import { state } from '../state.js';
 
@@ -91,7 +92,7 @@ class GameModeToggle extends HTMLElement {
   initInternalController() {
     // Sync initial state if already set
     if (state.gameMode) {
-      this.setActiveMode(state.gameMode, state.matchTarget);
+      this.setActiveMode(state.gameMode);
     }
 
     // Attach click listeners to emit mode selection
@@ -110,9 +111,12 @@ class GameModeToggle extends HTMLElement {
           state.matchTarget = !isNaN(target) && target > 0 ? target : 3;
         }
 
-        this.setActiveMode(state.gameMode, state.matchTarget);
-        logStatus(`Mode set to: ${state.gameMode.toUpperCase()}`
-          + (state.gameMode === 'match' ? ` (${state.matchTarget} Points)`
+        this.setActiveMode(state.gameMode);
+        updateScoreBoardUI(); // Refresh scoreboard format
+
+        logStatus(`Mode set to: ${selectedMode.toUpperCase()}`
+          + (state.gameMode === 'match'
+              ? ` (${state.matchTarget} Points)`
               : '' ), 2000);
 
         // Optionally dispatch event for other listeners if needed
@@ -128,22 +132,12 @@ class GameModeToggle extends HTMLElement {
   /**
    * Helper method to programmatically set the active mode button visual state
    * @param {string} activeMode - 'single' | 'match' | 'money'
-   * @param {number|null} matchTarget - Target score if mode === 'match'
    */
-  setActiveMode(activeMode, matchTarget = null) {
+  setActiveMode(activeMode) {
     this.querySelectorAll('.mode-btn').forEach(btn => {
       const htmlBtn = /** @type {HTMLElement} */ (btn);
       const isSelected = htmlBtn.dataset.mode === activeMode;
       btn.classList.toggle('active', isSelected);
-
-      // Dynamically display match target points on the Match button label
-      if (htmlBtn.dataset.mode === 'match') {
-        const label = btn.querySelector('.mode-label');
-        if (label) {
-          label.textContent = isSelected && matchTarget
-            ? `Match (${matchTarget}pt)` : 'Match';
-        }
-      }
     });
   }
 }
