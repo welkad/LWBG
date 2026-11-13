@@ -43,17 +43,20 @@ export function updateScoreBoardUI() {
   // Format score string based on active game mode
   let blackScoreDisplay = `${state.scores.black}`;
   let whiteScoreDisplay = `${state.scores.white}`;
+  let modeLabel = 'Score';
 
   if (state.gameMode === 'match') {
     const target = state.matchTarget || 3;
     blackScoreDisplay = `${state.scores.black} / ${target}`;
     whiteScoreDisplay = `${state.scores.white} / ${target}`;
+    modeLabel = 'Points';
   } else if (state.gameMode === 'money') {
     // Tracks amount in dollars
     const blackCash = state.bankRolls?.black ?? 100;
     const whiteCash = state.bankRolls?.white ?? 100;
     blackScoreDisplay = `$${blackCash}`;
     whiteScoreDisplay = `$${whiteCash}`;
+    modeLabel = 'Bank';
   }
 
   // Update inner text elements directly
@@ -64,8 +67,8 @@ export function updateScoreBoardUI() {
 
   if (blackPipEl) blackPipEl.textContent = `${blackPipCount}`;
   if (whitePipEl) whitePipEl.textContent = `${whitePipCount}`;
-  if (blackScoreEl) blackScoreEl.textContent = `${blackScoreDisplay}`;
-  if (whiteScoreEl) whiteScoreEl.textContent = `${whiteScoreDisplay}`;
+  if (blackScoreEl) blackScoreEl.textContent = blackScoreDisplay;
+  if (whiteScoreEl) whiteScoreEl.textContent = whiteScoreDisplay;
 
   // Keep custom elements synced
   const blackBoard = document.getElementById('scoreboard-black');
@@ -73,10 +76,12 @@ export function updateScoreBoardUI() {
   if (blackBoard) {
     blackBoard.setAttribute('pip', String(blackPipCount));
     blackBoard.setAttribute('score', String(blackScoreDisplay));
+    blackBoard.setAttribute('label', modeLabel);
   }
   if (whiteBoard) {
     whiteBoard.setAttribute('pip', String(whitePipCount));
     whiteBoard.setAttribute('score', String(whiteScoreDisplay));
+    whiteBoard.setAttribute('label', modeLabel);
   }
 }
 

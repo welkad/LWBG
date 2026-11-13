@@ -7,13 +7,14 @@ class PlayerScoreboard extends HTMLElement {
     const defaultScore = this.getAttribute('score') || '0';
     const align = this.getAttribute('align') || 'left';
     const theme = this.getAttribute('theme') || 'floating'; // 'floating' or 'card'
+    const label = this.getAttribute('label') || 'Score';
 
-    this.render(player, defaultPip, defaultScore, align, theme);
+    this.render(player, defaultPip, defaultScore, align, theme, label);
   }
 
   // Static getter function to tell browser wich attributes to watch
   static get observedAttributes() {
-    return ['theme', 'pip', 'score', 'player', 'align'];
+    return ['theme', 'pip', 'score', 'player', 'align', 'label'];
   }
 
   /** Callback function to handle updates when attributes change dynamically
@@ -26,25 +27,20 @@ class PlayerScoreboard extends HTMLElement {
     const player = this.getAttribute('player') || 'black';
     if (name === 'pip') {
       const pipEl = this.querySelector(`#pip-${player}`);
-      if (pipEl) {
-        pipEl.textContent = newValue;
-      } else {
-        this.renderAll(); // Fallback if not yet rendered
-      }
+      if (pipEl) pipEl.textContent = newValue;
+      else this.renderAll(); // Fallback if not yet rendered      
     } else if (name === 'score') {
       const scoreEl = this.querySelector(`#score-${player}`);
-      if (scoreEl) {
-        scoreEl.textContent = newValue;
-      } else {
-        this.renderAll();
-      }
+      if (scoreEl) scoreEl.textContent = newValue;
+      else this.renderAll();
+    } else if (name === 'label') {
+      const labelEl = this.querySelector(`#label-${player}`);
+      if (labelEl) labelEl.textContent = newValue + ':';
+      else this.renderAll();
     } else if (name === 'theme') {
       const panel = this.querySelector('.scoreboard-panel');
-      if (panel) {
-        panel.classList.toggle('card', newValue === 'card');
-      } else {
-        this.renderAll();
-      }
+      if (panel) panel.classList.toggle('card', newValue === 'card');
+      else this.renderAll();      
     } else if (name === 'player' || name === 'align') {
       this.renderAll(); // Structural attributes require full re-render
     }
@@ -55,9 +51,10 @@ class PlayerScoreboard extends HTMLElement {
     const pip = this.getAttribute('pip') || '167';
     const score = this.getAttribute('score') || '0';
     const align = this.getAttribute('align') || 'left';
-    const theme = this.getAttribute('theme') || 'card';
+    const theme = this.getAttribute('theme') || 'floating';
+    const label = this.getAttribute('label') || 'Score';
 
-    this.render(player, pip, score, align, theme);
+    this.render(player, pip, score, align, theme, label);
   }  
 
   /**
@@ -66,8 +63,9 @@ class PlayerScoreboard extends HTMLElement {
    * @param {string} score
    * @param {string} align
    * @param {string} theme
+   * @param {string} label
    */
-  render(player, pip, score, align, theme) {
+  render(player, pip, score, align, theme, label) {
     const isBlack = player === 'black';
     const playerName = isBlack ? 'Black' : 'White';
 
@@ -79,7 +77,7 @@ class PlayerScoreboard extends HTMLElement {
         <div class="score-info">
           <div class="score-line">Pips:
             <span class="pip-count" id="pip-${player}">${pip}</span></div>
-          <div class="score-line">Score: 
+          <div class="score-line"><span id="label-${player}">${label}:</span>
             <span class="score-count" id="score-${player}">${score}</span></div>
         </div>
       </div>
