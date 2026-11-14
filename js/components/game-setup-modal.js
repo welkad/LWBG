@@ -92,12 +92,31 @@ class GameSetupModal extends HTMLElement {
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
         }
 
+        .modal-card.floating .modal-btn.primary {
+          background: rgba(255, 255, 255, 0.9);
+          color: #111;
+        }
+
+        .modal-card.floating .modal-btn.primary:hover {
+          background: #888888;
+        }
+
         /* Card Theme */
         .modal-card.card {
           background: #4a3728;
           border: 2px solid #2d2016;
           color: #f1d779;
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-card.card .modal-btn.primary {
+          background: #d4a373;
+          color: #111111;
+          border: 1px solid #b88655;
+        }
+
+        .modal-card.card .modal-btn.primary:hover {
+          background: #e6b988;
         }
 
         .modal-card h2 {
@@ -109,29 +128,33 @@ class GameSetupModal extends HTMLElement {
           font-size: 0.85rem;
           opacity: 0.9;
           margin: 0 0 20px 0;
-          line-height: 1.4;
+          line-height: 1.4;          
         }
 
         .modal-input-group {
           display: flex;
           flex-direction: column;
+          justify-content: center;
+          align-items: center;
           gap: 6px;
-          margin-bottom: 24px;
+          margin-bottom: 10px;       
         }
 
         .modal-input-group label {
           font-size: 0.9rem;
-          font-weight: 600;
+          font-weight: 600;        
         }
 
         .modal-input-group input {
-          padding: 10px 12px;
+          width: 170px;
+          padding: 12px 12px;
           border-radius: 8px;
           border: 1px solid rgba(255, 255, 255, 0.2);
           background: rgba(0, 0, 0, 0.2);
           color: inherit;
           font-size: 1rem;
           font-family: inherit;
+          text-align: center;          
           outline: none;
         }
 
@@ -146,7 +169,7 @@ class GameSetupModal extends HTMLElement {
         }
 
         .modal-btn {
-          padding: 8px 16px;
+          padding: 8px 18px;
           border-radius: 8px;
           font-size: 0.9rem;
           font-family: inherit;
@@ -156,14 +179,7 @@ class GameSetupModal extends HTMLElement {
         }
 
         .modal-btn.primary {
-          background: #d4a373;
-          
-          color: #111;
           font-weight: 600;
-        }
-
-        .modal-btn.primary:hover {
-          background: #e6b988;
         }
 
         .modal-btn.secondary {
