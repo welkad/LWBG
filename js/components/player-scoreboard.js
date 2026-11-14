@@ -102,7 +102,7 @@ class PlayerScoreboard extends HTMLElement {
         }
 
         .scoreboard-panel.left {
-          flex-direction: row-reverse;
+          flex-direction: row;
           text-align: left;
           margin-left: -5px;
         }
@@ -127,7 +127,7 @@ class PlayerScoreboard extends HTMLElement {
         }
 
         .scoreboard-panel.card.left {
-          flex-direction: row-reverse;
+          flex-direction: row;
           text-align: left;
           margin-left: -5px;          
         }
@@ -139,7 +139,7 @@ class PlayerScoreboard extends HTMLElement {
         }
 
         .scoreboard-panel.card .score-line {
-          font-weight: 600;
+          font-weight: 400;
         }
 
         /* Mini checker indicator */
