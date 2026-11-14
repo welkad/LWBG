@@ -4,6 +4,11 @@ import { logStatus } from '../ui.js';
 import { state } from '../state.js';
 
 class GameModeToggle extends HTMLElement {
+  constructor() {
+    super();
+    /** @type {string} */
+    this.previousMode = 'single';
+  }
   connectedCallback() {
     this.render();
     this.initInternalController();
@@ -93,6 +98,7 @@ class GameModeToggle extends HTMLElement {
     // Sync initial state if already set
     if (state.gameMode) {
       this.setActiveMode(state.gameMode);
+      this.previousMode = state.gameMode;
     }
 
     // Attach click listeners to emit mode selection
@@ -104,24 +110,65 @@ class GameModeToggle extends HTMLElement {
 
         state.gameMode = selectedMode;
     
-        if (selectedMode === 'match') {
-          const input = window.prompt(`Enter Match length (e.g. 3, 5, 7):`,
-            String(state.matchTarget));
-          const target = input ? parseInt(input, 10) : 3;
-          state.matchTarget = !isNaN(target) && target > 0 ? target : 3;
+        if (selectedMode === 'match' || selectedMode === 'money') {
+          // Check if modal already exists to prevent duplicates
+          if (document.querySelector('game-setup-modal')) return;
+
+          const modal = document.createElement('game-setup-modal');
+          modal.setAttribute('mode', selectedMode);
+          modal.setAttribute('value', String(selectedMode === 'match'
+            ? (state.matchTarget || 3) : 100));
+          
+          // Match the active header theme if present
+          const headerContainer = document.querySelector('.header-container');
+          if (headerContainer?.classList.contains('card')) {
+            modal.setAttribute('theme', 'card');
+          }
+
+          modal.addEventListener('setup-complete', (e) => {
+            const { mode, value } =  /** @type {CustomEvent} */ (e).detail;
+            if (mode === 'match') {
+              state.matchTarget = value;
+            } else if (mode === 'money') {
+              state.bankRolls = { black: value, white: value };
+            }
+
+            this.setActiveMode(state.gameMode);
+            updateScoreBoardUI();
+
+            logStatus(`Mode set to: ${selectedMode.toUpperCase()}`
+              + (mode === 'match' ? ` (${value} Points)` : ` ($${value} Bankroll)`),
+              2000);
+
+            this.dispatchEvent(new CustomEvent('mode-changed', {
+              detail: {
+                mode: state.gameMode,
+                matchTarget: state.matchTarget,
+                bankRolls: state.bankRolls
+              },
+              bubbles: true,
+              composed: true
+            }));
+          });
+
+          modal.addEventListener('setup-cancelled', () => {
+            // Revert toggle button visual back to previous state if cancelled
+            state.gameMode = this.previousMode;
+            this.setActiveMode(this.previousMode);
+          });
+
+          document.body.appendChild(modal);
+          return; // Wait for modal completion before finishing toggle workflow
+        } else {
+          this.previousMode = selectedMode;
         }
 
         this.setActiveMode(state.gameMode);
-        updateScoreBoardUI(); // Refresh scoreboard format
-
-        logStatus(`Mode set to: ${selectedMode.toUpperCase()}`
-          + (state.gameMode === 'match'
-              ? ` (${state.matchTarget} Points)`
-              : '' ), 2000);
-
+        updateScoreBoardUI();
+        
         // Optionally dispatch event for other listeners if needed
         this.dispatchEvent(new CustomEvent('mode-changed', {
-          detail: { mode: state.gameMode, matchTarget: state.matchTarget },
+          detail: { mode: state.gameMode },
           bubbles: true,
           composed: true
         }));

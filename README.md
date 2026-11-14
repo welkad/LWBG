@@ -5,14 +5,16 @@ A lightweight, vanilla JavaScript implementation of Backgammon designed to run e
 ## File Architecture
 
 /
-├── index.html
-├── style.css
-├── jsconfig.json                 # VS Code configuration enabling strict JSDoc static analysis (checkJs)
-├── README.md
+├── index.html                    # SPA 
+├── style.css                     # CSS entry point
+├── jsconfig.json                 # VS Code configuration enabling strict JSDoc static analysis (checkJS)
+├── README.md                     # This document
+│
 ├── css/
 │   ├── board.css                 # Board layout, wood frame, point geometry, and grid structures
 │   ├── pieces.css                # Checker pieces, bear-off pockets, bar pieces, and piece positioning
 │   └── controls.css              # Dice zones, dice appearance, interactive controls, and doubling cube
+│
 └── js/
     ├── main.js                   # Application entry point; initializes game state, board, dice UI, and event listeners
     ├── state.js                  # Central game state, initial board setup, turn switching, and game-phase management
@@ -24,16 +26,17 @@ A lightweight, vanilla JavaScript implementation of Backgammon designed to run e
     ├── dice-rolling.js           # Dice rolling logic, opening rolls, animated rolling, and generation of roll values
     ├── dice-renderer.js          # Creates and updates dice DOM elements, pip rendering, and dice state display
     ├── doubling-cube.js          # Doubling cube offers, accept/decline handling, cube ownership, and cube positioning    
-    │        
+    │
     ├── ui.js                     # Status messages, game notifications, legend updates, and general UI feedback
     ├── keyboard.js               # Global keyboard shortcuts for game actions
     ├── mouse.js                  # Mouse & drag-and-drop handlers
-    │  
+    │
     ├── types.js                  # Central JSDoc type definitions for state, point data, and custom window objects
     ├── debug.js                  # Developer utilities and trace logging - toggle on or off via keypress ('T')
     ├── test-moves.js             # Automated move-validation test harness
-    │   
+    │
     └── components/
         ├── dice-legend.js        # Dynamic action buttons supporting Normal and Icon views 
         ├── game-mode-toggle.js   # Horizontal 3-button mode toggle component for Single, Match, and Money play
+        ├── game-setup-modal.js   # Custom modal for configuring Match and Money play settings
         └── player-scoreboard.js  # Component to display pips and score for players
