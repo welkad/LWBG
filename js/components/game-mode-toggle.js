@@ -2,6 +2,7 @@
 import { updateScoreBoardUI } from '../board.js';
 import { logStatus } from '../ui.js';
 import { state } from '../state.js';
+import './game-setup-modal.js';
 
 class GameModeToggle extends HTMLElement {
   constructor() {
@@ -133,7 +134,7 @@ class GameModeToggle extends HTMLElement {
               state.bankRolls = { black: value, white: value };
             }
 
-            this.setActiveMode(state.gameMode);
+            this.setActiveMode(state.gameMode);            
             updateScoreBoardUI();
 
             logStatus(`Mode set to: ${selectedMode.toUpperCase()}`
@@ -157,7 +158,18 @@ class GameModeToggle extends HTMLElement {
             this.setActiveMode(this.previousMode);
           });
 
-          document.body.appendChild(modal);
+          // Append to master-board or fallback safely to body
+          const masterBoard = /** @type {HTMLElement | null} */
+            (document.querySelector('.master-board'));
+          if (masterBoard) {
+             // Ensure master-board has relative positioning 
+             if (getComputedStyle(masterBoard).position === 'static') {
+              masterBoard.style.position = 'relative';
+             }
+             masterBoard.appendChild(modal);
+          } else {
+            document.body.appendChild(modal); // Fallback
+          }
           return; // Wait for modal completion before finishing toggle workflow
         } else {
           this.previousMode = selectedMode;

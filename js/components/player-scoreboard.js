@@ -175,7 +175,7 @@ class PlayerScoreboard extends HTMLElement {
         .score-info {
           display: grid;
           grid-template-columns: 54px 44px; /* Col 1: labels, Col 2: numbers */
-          row-gap: 2px;
+          row-gap: 1px;
           column-gap: 3px;
           align-items: center;
           line-height: 1.3;

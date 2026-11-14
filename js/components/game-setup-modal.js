@@ -53,25 +53,26 @@ class GameSetupModal extends HTMLElement {
           </div>
 
           <div class="modal-actions">
-            <button id="modal-cancel" class="modal-btn secondary">Cancel</button>
-            <button id="modal-confirm" class="modal-btn primary">Start Game</button>
+            <button id="modal-confirm" class="modal-btn primary">Confirm</button>
+            <button id="modal-cancel" class="modal-btn secondary">Cancel</button>            
           </div>
         </div>
       </div>
 
       <style>
         .modal-backdrop {
-          position: fixed;
+          position: absolute;
           top: 0;
           left: 0;
-          width: 100vw;
-          height: 100vh;
+          width: 100%;
+          height: 100%;
           background: rgba(0, 0, 0, 0.75);
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 1000;
-          backdrop-filter: blur(3px);
+          backdrop-filter: blur(1px);
+          border-radius: inherit;
         }
 
         .modal-card {
@@ -87,7 +88,7 @@ class GameSetupModal extends HTMLElement {
         .modal-card.floating {
           background: #1e1e1e;
           border: 2px solid rgba(255, 255, 255, 0.15);
-          color: #4d4d4d;
+          color: #f0f0f0;
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
         }
 
@@ -106,7 +107,7 @@ class GameSetupModal extends HTMLElement {
 
         .modal-helper {
           font-size: 0.85rem;
-          opacity: 0.8;
+          opacity: 0.9;
           margin: 0 0 20px 0;
           line-height: 1.4;
         }
@@ -140,7 +141,7 @@ class GameSetupModal extends HTMLElement {
 
         .modal-actions {
           display: flex;
-          justify-content: flex-end;
+          justify-content: center;
           gap: 10px;
         }
 
@@ -156,8 +157,9 @@ class GameSetupModal extends HTMLElement {
 
         .modal-btn.primary {
           background: #d4a373;
+          
           color: #111;
-          font-weight: 600'
+          font-weight: 600;
         }
 
         .modal-btn.primary:hover {
@@ -165,7 +167,7 @@ class GameSetupModal extends HTMLElement {
         }
 
         .modal-btn.secondary {
-          bacground: transparent;
+          background: transparent;
           border-color: rgba(255, 255, 255, 0.2);
           color: inherit;
         }
@@ -176,7 +178,7 @@ class GameSetupModal extends HTMLElement {
 
         @keyframes modalFadeIn {
           from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1, transform: scale(1); }
+          to { opacity: 1; transform: scale(1); }
         }
       </style>
     `;
