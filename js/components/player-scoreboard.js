@@ -75,10 +75,10 @@ class PlayerScoreboard extends HTMLElement {
           <div class="mini-checker ${player}"></div>          
         </div>
         <div class="score-info">
-          <div class="score-line">Pips:
-            <span class="pip-count" id="pip-${player}">${pip}</span></div>
-          <div class="score-line"><span id="label-${player}">${label}:</span>
-            <span class="score-count" id="score-${player}">${score}</span></div>
+            <span class="score-label">Pips:</span>
+            <span class="pip-count" id="pip-${player}">${pip}</span>
+            <span class="score-label" id="label-${player}">${label}:</span>
+            <span class="score-count" id="score-${player}">${score}</span>
         </div>
       </div>
 
@@ -87,8 +87,9 @@ class PlayerScoreboard extends HTMLElement {
         .scoreboard-panel {
           display: flex;
           align-items: center;
-          justify-content: space-between;          
-          width: 170px;
+          justify-content: center;          
+          gap: 14px;
+          width: 185px;
           height: 70px;
           background: rgba(255, 255, 255, 0.04);
           border: 2px solid rgba(255, 255, 255, 0.12);
@@ -145,6 +146,7 @@ class PlayerScoreboard extends HTMLElement {
         .mini-checker {
           width: 38px;
           height: 38px;
+          flex-shrink: 0;
           border-radius: 50%;
           box-shadow: 0 2px 4px rgba(0,0,0,0.5),
            inset 0 2px 3px rgba(255,255,255,0.2);
@@ -170,25 +172,28 @@ class PlayerScoreboard extends HTMLElement {
           align-items: center;          
         }
 
-        .score-count {
-          padding-right: 2px;
-        }
-
         .score-info {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-          min-width: 95px;
-        }
-
-        .score-line {
-          display: flex;
-          justify-content: space-between;
+          display: grid;
+          grid-template-columns: 54px 44px; /* Col 1: labels, Col 2: numbers */
+          row-gap: 2px;
+          column-gap: 3px;
           align-items: center;
           line-height: 1.3;
           font-weight: 600;
-          
+          text-align: left;
         }
+        
+        .pip-count {
+          text-align: left;
+          font-variant-numeric: tabular-nums;
+        }
+        
+        .score-count {
+          text-align: left;
+          padding-left: 3px;
+          font-variant-numeric: tabular-nums;
+        }
+        
       </style>
     `;
   }
