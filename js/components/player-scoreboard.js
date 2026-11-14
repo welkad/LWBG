@@ -190,7 +190,7 @@ class PlayerScoreboard extends HTMLElement {
         
         .score-count {
           text-align: left;
-          padding-left: 3px;
+          padding-left: 2px;
           font-variant-numeric: tabular-nums;
         }
         
