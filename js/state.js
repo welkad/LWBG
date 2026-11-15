@@ -240,15 +240,13 @@ export function handleGameEnd(winner, resigningPlayer = null) {
     : `${winner} bore off all checkers.`;
   
   // Concat winMessage (who won) with message (how many points)
-  if (state.gameMode === 'money') {
-    winMessage = `${winMessage} ${winner} wins $${moneyPayoutAmount} (${message}).`;
-  } else {
-    winMessage = `${winMessage} ${winner} wins ${message}.`;
-  }
-
   if (sessionOver) {
     winMessage += ` 🎉 ${winner} wins `
       + `${state.gameMode === 'match' ? 'the Match' : 'all of the Money'}!`;
+  } else if (state.gameMode === 'money') {
+    winMessage = `${winMessage} ${winner} wins $${moneyPayoutAmount} (${message})!`;
+  } else {
+    winMessage = `${winMessage} ${winner} wins ${message}!`;
   }
 
   if (!resigningPlayer) {
@@ -271,7 +269,8 @@ export function handleGameEnd(winner, resigningPlayer = null) {
     }
 
     // If session still ongoing (i.e. Match target not reached / Bankrolls > 0)
-    if (!sessionOver) {
+    const isOngoingSeries = state.gameMode !== 'single' && !sessionOver;
+    if (isOngoingSeries) {
       let progressText = "";
       if (state.gameMode === 'money') {
         progressText = `Bankrolls - Black: $${state.bankRolls.black}, `
@@ -279,9 +278,6 @@ export function handleGameEnd(winner, resigningPlayer = null) {
       } else if (state.gameMode === 'match') {        
         progressText = `Match score - Black: ${state.scores.black}/${state.matchTarget}, `
           + `White: ${state.scores.white}/${state.matchTarget}. Starting next game...`;
-      } else {
-        progressText = `Score - Black: ${state.scores.black}, `
-          + `White: ${state.scores.white}. Starting next game...`;
       }
       
       // Display progress and auto-reset for next game after brief pause
@@ -298,11 +294,12 @@ export function handleGameEnd(winner, resigningPlayer = null) {
     clearStatusQueue();
 
     if (state.gameMode === 'money') {
-      logStatus(`${winner} wins all of the money. Play for more?`);
+      logStatus(`Play for more money?`);
     } else if (state.gameMode === 'match') {
-      logStatus(`${winner} won the match. Play another match?`);
+      logStatus(`Play another match?`);
     } else {
-      logStatus(`${winner} won the game. Play again?`);
+      logStatus(`Score is Black: ${state.scores.black}, White: ${state.scores.white}.`
+        + ` Play again?`);
     }
 
     renderDiceUI(); // Display Y/N dice and update legend
