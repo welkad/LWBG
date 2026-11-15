@@ -191,8 +191,19 @@ export function initDiceListeners() {
         const outcome = calculateGameOutcome(winningPlayer, state.currentPlayer);        
         const totalPoints = outcome.pointsWon;
 
+        // Check if conceding game also forfeits the Match
+        let concedeTerm = 'the game';
+        if (state.gameMode === 'match') {
+          const projectedWinnerScore = state.scores[winningPlayer] + totalPoints;
+          if (projectedWinnerScore >= (state.matchTarget || 3)) {
+            concedeTerm = 'the Match';
+          }
+        }
+
         // Build dynamic message and display to resigning player
-        const message = totalPoints === 1 ? 'the game' : `${totalPoints} points`;        
+        const message = concedeTerm === 'the Match' ? 'the Match'
+          : (totalPoints === 1 ? 'the game' : `${totalPoints} points`);
+
         logStatus(`Are you sure you want to resign and concede ${message}?`);
         updateCubePositionUI(); // Deactivate cube while pending
         updateLegendUI();
