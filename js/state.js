@@ -270,6 +270,30 @@ export function handleGameEnd(winner, resigningPlayer = null) {
       return;  // Do not display play again prompt if either player declined.
     }
 
+    // If session still ongoing (i.e. Match target not reached / Bankrolls > 0)
+    if (!sessionOver) {
+      let progressText = "";
+      if (state.gameMode === 'money') {
+        progressText = `Bankrolls - Black: $${state.bankRolls.black}, `
+          + `White: $${state.bankRolls.white}. Starting next game...`;
+      } else if (state.gameMode === 'match') {
+        progressText = `Match score - Black: ${state.scores.black}/${state.matchTarget}, `
+          + `White: ${state.scores.white}/${state.matchTarget}. Starting next game...`;
+      } else {
+        progressText = `Score - Black: ${state.scores.black}, `
+          + `White: ${state.scores.white}. Starting next game...`;
+      }
+      
+      // Display progress and auto-reset for next game after brief pause
+      logStatus(progressText, 2500);
+      setTimeout(() => {
+        resetGame();
+      }, 2500);
+
+      return;
+    }
+
+    // If the session is over (i.e. Match or Money) prompt for full series replay
     state.awaitingPlayAgainPrompt = false;  // Allow Y/N choice dice to render
     clearStatusQueue();
 
