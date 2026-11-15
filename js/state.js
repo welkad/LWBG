@@ -313,3 +313,26 @@ export function resetBankRolls(startingAmount = 100) {
   state.bankRolls.black = startingAmount;
   state.bankRolls.white = startingAmount;
 }
+
+/**
+ * Safely change game mode and reset relevant scores or bankrolls.
+ * @param {'single' | 'match' | 'money' } newMode
+ * @param {number} [optionValue] - Target points for match or money amount
+ */
+export function setGameMode(newMode, optionValue = undefined) {
+  state.gameMode = newMode;
+
+  if (newMode === 'match') {
+    state.matchTarget = optionValue || 3;
+    state.scores = { black: 0, white: 0 };
+  } else if (newMode === 'money') {
+    state.moneyAnte = optionValue || 10;
+    resetBankRolls(100); // Reset bankrolls to starting default
+  } else {
+    // Single play mode
+    state.scores = { black: 0, white: 0 };
+  }
+
+  // Trigger a full board and game reset for the  new mode
+  resetGame();
+}
