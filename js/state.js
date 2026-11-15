@@ -121,7 +121,7 @@ export function resetGame() {
   renderDiceUI();       // Render opening 'R' die for both players
   updateLegendUI();     // Update legend back to standard controls  
 
-  logStatus("New game started! Highest roll moves first.");  
+  logStatus("New game started. Highest roll moves first.");  
 }
 
 // Reset hasRolled on Turn Change
