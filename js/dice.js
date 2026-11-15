@@ -355,7 +355,7 @@ export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlaye
     // Check if both players agreed (or single keyboard decision)
     if (state.playAgainChoices.black === 'yes' && state.playAgainChoices.white === 'yes') {
       clearStatusQueue();      
-      logStatus("Both players accepted! Starting a new game...", 2000);
+      logStatus("Both players accepted. Starting a new game...", 2000);
 
       // Disable click interaction on dice to prevent double-clicks
       document.querySelectorAll('.die').forEach(d => {
