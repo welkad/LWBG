@@ -128,6 +128,10 @@ class GameModeToggle extends HTMLElement {
 
           modal.addEventListener('setup-complete', (e) => {
             const { mode, value } =  /** @type {CustomEvent} */ (e).detail;
+
+            // Reset scores/bankrolls when configuring a new series
+            state.scores = { black: 0, white: 0 };
+
             if (mode === 'match') {
               state.matchTarget = value;
             } else if (mode === 'money') {
@@ -173,6 +177,9 @@ class GameModeToggle extends HTMLElement {
           return; // Wait for modal completion before finishing toggle workflow
         } else {
           this.previousMode = selectedMode;
+
+          // Reset scores when switching to single mode
+          state.scores = { black: 0, white: 0};
         }
 
         this.setActiveMode(state.gameMode);
