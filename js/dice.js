@@ -1,5 +1,5 @@
 // js/dice.js - Contains dice rolling logic and turn UI toggling.
-import { handleResignation, resetGame, state, switchTurn } from './state.js';
+import { handleResignation, resetBankRolls, resetGame, state, switchTurn } from './state.js';
 import { handleCubeClick, handleCubeMouseLeave, resolveCubeOffer, updateCubePositionUI } from './doubling-cube.js';
 import { handleDiceRoll, handleOpeningRoll, toggleDiceOrder } from './dice-rolling.js';
 import { renderDiceUI, setDieValue } from './dice-renderer.js';
@@ -374,6 +374,13 @@ export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlaye
         el.style.pointerEvents = 'none'
       });
 
+      // Reset session scores/bankrolls if starting fresh match/money game
+      if (state.gameMode === 'match') {
+        state.scores = { black: 0, white: 0 };
+      } else if (state.gameMode === 'money') {
+        resetBankRolls(100);
+      }
+
       setTimeout(() => {
         resetGame(); // Or initBoardState(); renderBoard(); updateTurnUI();
       }, 2000);  // Briefly delay new game setup
@@ -410,10 +417,6 @@ export function handlePostGameDieClick(eventOrPlayer, choice = null, selectPlaye
       ? `${decliner} declined another game.`
       : 'Another game was declined.';
     logStatus(`${declineMsg} Thank you for playing!`);
-    // const blackPlural = state.scores.black === 1 ? 'point' : 'points';
-    // const whitePlural = state.scores.white === 1 ? 'point' : 'points';
-    // logStatus(`Final Score: Black ${state.scores.black} ${blackPlural}` + ' vs ' 
-    //   + `White ${state.scores.white} ${whitePlural}.`);
 
     // Delay clearing dice elements immediately
     setTimeout(() => {

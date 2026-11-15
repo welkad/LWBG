@@ -241,9 +241,9 @@ export function handleGameEnd(winner, resigningPlayer = null) {
   
   // Concat winMessage (who won) with message (how many points)
   if (state.gameMode === 'money') {
-    winMessage = `${winMessage} ${winner} wins $${moneyPayoutAmount} (${message})!`;
+    winMessage = `${winMessage} ${winner} wins $${moneyPayoutAmount} (${message}).`;
   } else {
-    winMessage = `${winMessage} ${winner} wins ${message}!`;
+    winMessage = `${winMessage} ${winner} wins ${message}.`;
   }
 
   if (sessionOver) {
@@ -276,7 +276,7 @@ export function handleGameEnd(winner, resigningPlayer = null) {
       if (state.gameMode === 'money') {
         progressText = `Bankrolls - Black: $${state.bankRolls.black}, `
           + `White: $${state.bankRolls.white}. Starting next game...`;
-      } else if (state.gameMode === 'match') {
+      } else if (state.gameMode === 'match') {        
         progressText = `Match score - Black: ${state.scores.black}/${state.matchTarget}, `
           + `White: ${state.scores.white}/${state.matchTarget}. Starting next game...`;
       } else {
@@ -297,19 +297,14 @@ export function handleGameEnd(winner, resigningPlayer = null) {
     state.awaitingPlayAgainPrompt = false;  // Allow Y/N choice dice to render
     clearStatusQueue();
 
-    let scoreStatusText = "";
     if (state.gameMode === 'money') {
-      scoreStatusText = `Bankrolls are now Black: $${state.bankRolls.black} ` 
-        + `and White: $${state.bankRolls.white}.`;
+      logStatus(`${winner} wins all of the money. Play for more?`);
     } else if (state.gameMode === 'match') {
-      scoreStatusText = `Match score is Black: ${state.scores.black}/${state.matchTarget}`
-        + ` and White: ${state.scores.white}/${state.matchTarget}.`;
+      logStatus(`${winner} won the match. Play another match?`);
     } else {
-      scoreStatusText = `Score is Black: ${state.scores.black} `
-        + `and White: ${state.scores.white}.`;
+      logStatus(`${winner} won the game. Play again?`);
     }
 
-    logStatus(`${scoreStatusText} Play again?`);
     renderDiceUI(); // Display Y/N dice and update legend
   }, GAME_OVER_BANNER_DURATION_MS);  // Wait until Victory message is finished
 }
