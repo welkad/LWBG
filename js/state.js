@@ -298,7 +298,7 @@ export function handleGameEnd(winner, resigningPlayer = null) {
     } else if (state.gameMode === 'match') {
       logStatus(`Play another match?`);
     } else {
-      logStatus(`Score is Black: ${state.scores.black}, White: ${state.scores.white}.`
+      logStatus(`Score is now Black: ${state.scores.black}, White: ${state.scores.white}.`
         + ` Play again?`);
     }
 

@@ -1,7 +1,7 @@
 // js/components/game-mode-toggle.js: Horizontal 3-button mode toggle component
 import { updateScoreBoardUI } from '../board.js';
+import { state, resetGame } from '../state.js';
 import { logStatus } from '../ui.js';
-import { state } from '../state.js';
 import './game-setup-modal.js';
 
 class GameModeToggle extends HTMLElement {
@@ -140,6 +140,7 @@ class GameModeToggle extends HTMLElement {
 
             this.setActiveMode(state.gameMode);            
             updateScoreBoardUI();
+            resetGame();  // Perform full restart of game
 
             logStatus(`Mode set to: ${selectedMode.toUpperCase()}`
               + (mode === 'match' ? ` (${value} Points)` : ` ($${value} Bankroll)`),
@@ -180,6 +181,7 @@ class GameModeToggle extends HTMLElement {
 
           // Reset scores when switching to single mode
           state.scores = { black: 0, white: 0};
+          resetGame();  // Perform full restart
         }
 
         this.setActiveMode(state.gameMode);
