@@ -27,13 +27,14 @@ class GameSetupModal extends HTMLElement {
     this.initListeners();
   }
 
-  render() {
+  render() {    
     const isMatch = this.mode === 'match';
     const title = isMatch ? 'Configure Match Play' : 'Configure Money Play';
     const label = isMatch ? 'Match Target (Points):' : 'Starting Bankroll / Ante ($):';
     const helper = isMatch
       ? 'First player to reach this score wins the match.'
       : 'Set starting bankroll for each player.';
+    const warningMessage = this.getAttribute('warning');
 
     this.innerHTML = `
       <div class="modal-backdrop">
@@ -56,6 +57,12 @@ class GameSetupModal extends HTMLElement {
             <button id="modal-confirm" class="modal-btn primary">Confirm</button>
             <button id="modal-cancel" class="modal-btn secondary">Cancel</button>            
           </div>
+
+          ${warningMessage ? `
+            <div class="setup-warning-banner">
+              ⚠️ ${warningMessage}
+            </div>
+          ` : ''}
         </div>
       </div>
 
@@ -190,6 +197,17 @@ class GameSetupModal extends HTMLElement {
 
         .modal-btn.secondary:hover {
           background: rgba(255, 255, 255, 0.1);
+        }
+
+        .setup-warning-banner {
+            background: rgba(212, 163, 115, 0.15);
+            border: 1px solid rgba(212, 163, 115, 0.44);
+            color: #d4a373;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 18px;
+            line-height: 1.4;
         }
 
         @keyframes modalFadeIn {

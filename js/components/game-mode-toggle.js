@@ -107,18 +107,29 @@ class GameModeToggle extends HTMLElement {
       const htmlBtn = /** @type {HTMLElement} */ (btn);
       htmlBtn.addEventListener('click', () => {
         const selectedMode = htmlBtn.dataset.mode;
-        if (!selectedMode) return;
+        if (!selectedMode || selectedMode === state.gameMode) return;
 
-        state.gameMode = selectedMode;
-    
+        // Check if modal already exists to prevent duplicates
+        if (document.querySelector('game-setup-modal')) return;
+
+        // Check if there is an active game or ongoing scores/bankrolls
+        const hasActiveProgress = 
+          state.scores.black > 0 || state.scores.white > 0 || state.gamePhase === 'turns';        
+
+        state.gameMode = selectedMode;    
         if (selectedMode === 'match' || selectedMode === 'money') {
-          // Check if modal already exists to prevent duplicates
-          if (document.querySelector('game-setup-modal')) return;
-
           const modal = document.createElement('game-setup-modal');
           modal.setAttribute('mode', selectedMode);
           modal.setAttribute('value', String(selectedMode === 'match'
             ? (state.matchTarget || 3) : 100));
+
+          // Conditionally attach warning attribute if active game in progress
+          if (hasActiveProgress) {
+            modal.setAttribute(
+              'warning',
+              'Switching modes will reset your current game and scores.'
+            );
+          }    
           
           // Match the active header theme if present
           const headerContainer = document.querySelector('.header-container');
