@@ -129,7 +129,7 @@ class GameModeToggle extends HTMLElement {
               'warning',
               'Switching modes will reset your current game and scores.'
             );
-          }    
+          }
           
           // Match the active header theme if present
           const headerContainer = document.querySelector('.header-container');
@@ -155,7 +155,7 @@ class GameModeToggle extends HTMLElement {
 
             logStatus(`Mode set to: ${selectedMode.toUpperCase()}`
               + (mode === 'match' ? ` (${value} Points)` : ` ($${value} Bankroll)`),
-              2000);
+              2500);
 
             this.dispatchEvent(new CustomEvent('mode-changed', {
               detail: {
@@ -188,9 +188,54 @@ class GameModeToggle extends HTMLElement {
           }
           return; // Wait for modal completion before finishing toggle workflow
         } else {
-          this.previousMode = selectedMode;
+          // Switching to Single mode
+          if (hasActiveProgress) {
+            if (document.querySelector('game-setup-modal')) return;
 
-          // Reset scores when switching to single mode
+            const modal = document.createElement('game-setup-modal');
+            modal.setAttribute('mode', 'single');
+
+            const headerContainer = document.querySelector('.header-container');
+            if (headerContainer?.classList.contains('card')) {
+              modal.setAttribute('theme', 'card');
+            }
+
+            modal.addEventListener('setup-complete', () => {
+              this.previousMode = selectedMode;
+              state.scores = { black: 0, white: 0 };
+              this.setActiveMode(state.gameMode);
+              updateScoreBoardUI();
+              resetGame();
+
+              logStatus('Mode set to: SINGLE', 2000);
+
+              this.dispatchEvent(new CustomEvent('mode-changed', {
+                detail: { mode: state.gameMode },
+                bubbles: true,
+                composed: true
+              }));
+            });
+
+            modal.addEventListener('setup-cancelled', () => {
+              state.gameMode = this.previousMode;
+              this.setActiveMode(this.previousMode);
+            });
+
+            const masterBoard = /** @type {HTMLElement | null} */
+              (document.querySelector('.master-board'));
+            if (masterBoard) {
+              if (getComputedStyle(masterBoard).position === 'static') {
+                masterBoard.style.position = 'relative';
+              }
+              masterBoard.appendChild(modal);
+            } else {
+              document.body.appendChild(modal);
+            }
+            return;
+          }    
+
+          // If no active progress, switch immediately
+          this.previousMode = selectedMode;         
           state.scores = { black: 0, white: 0};
           resetGame();  // Perform full restart
         }

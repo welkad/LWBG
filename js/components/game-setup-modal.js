@@ -1,4 +1,4 @@
-// js/components/game-setup-modal.js: Modal for configuring Match and Money play settings
+// js/components/game-setup-modal.js: Modal to configure Match and Money play settings
 
 class GameSetupModal extends HTMLElement {
   connectedCallback() {
@@ -27,13 +27,19 @@ class GameSetupModal extends HTMLElement {
     this.initListeners();
   }
 
-  render() {    
+  render() {
+    const isSingle = this.mode === 'single';
     const isMatch = this.mode === 'match';
-    const title = isMatch ? 'Configure Match Play' : 'Configure Money Play';
-    const label = isMatch ? 'Match Target (Points):' : 'Starting Bankroll / Ante ($):';
-    const helper = isMatch
-      ? 'First player to reach this score wins the match.'
-      : 'Set starting bankroll for each player.';
+
+    const title = isSingle
+      ? 'Switch to Single Game Mode'
+      : (isMatch ? 'Configure Match Play' : 'Configure Money Play');
+    
+    const helper = isSingle
+      ? 'Switching to Single mode will reset your current game and scores.'
+      : (isMatch ? 'First player to reach this score wins the match.'
+          : 'Set starting bankroll for each player.');
+
     const warningMessage = this.getAttribute('warning');
 
     this.innerHTML = `
@@ -42,20 +48,25 @@ class GameSetupModal extends HTMLElement {
           <h2>${title}</h2>
           <p class="modal-helper">${helper}</p>
 
-          <div class="modal-input-group">
-            <label for="setup-input">${label}</label>
-            <input
-              type="number"
-              id="setup-input"
-              value="${this.currentValue}"
-              min="1"
-              max="99"
-            />
+          ${!isSingle ? `
+            <div class="modal-input-group">
+              <label for="setup-input">
+                ${isMatch ? 'Match Target (Points):'
+                    : 'Starting Bankroll - Ante ($):'}
+              </label>
+              <input
+                type="number"
+                id="setup-input"
+                value="${this.currentValue}"
+                min="1"
+                max="99"
+              />
           </div>
+          ` : ''}
 
-          <div class="modal-actions">
+          <div class="modal-actions">            
+            <button id="modal-cancel" class="modal-btn secondary">Cancel</button>
             <button id="modal-confirm" class="modal-btn primary">Confirm</button>
-            <button id="modal-cancel" class="modal-btn secondary">Cancel</button>            
           </div>
 
           ${warningMessage ? `
@@ -163,9 +174,10 @@ class GameSetupModal extends HTMLElement {
           font-family: inherit;
           text-align: center;          
           outline: none;
+          caret-color: transparent; /* Hide blinking cursor */
         }
 
-        .modal-input-group focus {
+        .modal-input-group input:focus {
           border-color: #d4a373;
         }
 
@@ -175,7 +187,7 @@ class GameSetupModal extends HTMLElement {
           gap: 10px;
         }
 
-        .modal-btn {
+        .modal-btn {        
           padding: 8px 18px;
           border-radius: 8px;
           font-size: 0.9rem;
@@ -225,9 +237,12 @@ class GameSetupModal extends HTMLElement {
       (this.querySelector('#modal-confirm'));
     const cancelBtn = /** @type {HTMLInputElement | null} */
       (this.querySelector('#modal-cancel'));
-
-    // Auto-focus input
-    setTimeout(() => input?.focus(), 50);
+    
+    if (input) {  // No input for Single mode confirmation
+      setTimeout(() => {
+        input?.focus();   // Auto-focus input
+      }, 50);
+    }
 
     confirmBtn?.addEventListener('click', () => {
       const val = parseInt(input?.value || '0', 10);
@@ -250,10 +265,16 @@ class GameSetupModal extends HTMLElement {
       this.remove();
     });
 
-    input?.addEventListener('keydown', (e) => {
+    // Keyboard support: Enter to confirm, Escape to cancel
+    this.addEventListener('keydown', (e) => {
       const ke = /** @type {KeyboardEvent} */ (e);
-      if (ke.key === 'Enter') confirmBtn?.click();
-      if (ke.key === 'Escape') cancelBtn?.click();
+      if (ke.key === 'Enter') {
+        ke.preventDefault();
+        confirmBtn?.click();
+      } else if (ke.key === 'Escape') {
+        ke.preventDefault();
+        cancelBtn?.click();
+      }
     });
   }
 }
