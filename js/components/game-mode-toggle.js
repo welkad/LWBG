@@ -109,148 +109,117 @@ class GameModeToggle extends HTMLElement {
         const selectedMode = htmlBtn.dataset.mode;
         if (!selectedMode || selectedMode === state.gameMode) return;
 
-        // Check if modal already exists to prevent duplicates
-        if (document.querySelector('game-setup-modal')) return;
-
         // Check if there is an active game or ongoing scores/bankrolls
-        const hasActiveProgress = 
-          state.scores.black > 0 || state.scores.white > 0 || state.gamePhase === 'turns';        
+        const hasActiveProgress =
+          state.scores.black > 0 ||
+          state.scores.white > 0 ||
+          state.gamePhase === 'turns';
 
-        state.gameMode = selectedMode;    
-        if (selectedMode === 'match' || selectedMode === 'money') {
-          const modal = document.createElement('game-setup-modal');
-          modal.setAttribute('mode', selectedMode);
-          modal.setAttribute('value', String(selectedMode === 'match'
-            ? (state.matchTarget || 3) : 100));
-
-          // Conditionally attach warning attribute if active game in progress
-          if (hasActiveProgress) {
-            modal.setAttribute(
-              'warning',
-              'Switching modes will reset your current game and scores.'
-            );
-          }
-          
-          // Match the active header theme if present
-          const headerContainer = document.querySelector('.header-container');
-          if (headerContainer?.classList.contains('card')) {
-            modal.setAttribute('theme', 'card');
-          }
-
-          modal.addEventListener('setup-complete', (e) => {
-            const { mode, value } =  /** @type {CustomEvent} */ (e).detail;
-
-            // Reset scores/bankrolls when configuring a new series
-            state.scores = { black: 0, white: 0 };
-
-            if (mode === 'match') {
-              state.matchTarget = value;
-            } else if (mode === 'money') {
-              state.bankRolls = { black: value, white: value };
-            }
-
-            this.setActiveMode(state.gameMode);            
-            updateScoreBoardUI();
-            resetGame();  // Perform full restart of game
-
-            logStatus(`Mode set to: ${selectedMode.toUpperCase()}`
-              + (mode === 'match' ? ` (${value} Points)` : ` ($${value} Bankroll)`),
-              2500);
-
-            this.dispatchEvent(new CustomEvent('mode-changed', {
-              detail: {
-                mode: state.gameMode,
-                matchTarget: state.matchTarget,
-                bankRolls: state.bankRolls
-              },
-              bubbles: true,
-              composed: true
-            }));
-          });
-
-          modal.addEventListener('setup-cancelled', () => {
-            // Revert toggle button visual back to previous state if cancelled
-            state.gameMode = this.previousMode;
-            this.setActiveMode(this.previousMode);
-          });
-
-          // Append to master-board or fallback safely to body
-          const masterBoard = /** @type {HTMLElement | null} */
-            (document.querySelector('.master-board'));
-          if (masterBoard) {
-             // Ensure master-board has relative positioning 
-             if (getComputedStyle(masterBoard).position === 'static') {
-              masterBoard.style.position = 'relative';
-             }
-             masterBoard.appendChild(modal);
-          } else {
-            document.body.appendChild(modal); // Fallback
-          }
-          return; // Wait for modal completion before finishing toggle workflow
-        } else {
-          // Switching to Single mode
-          if (hasActiveProgress) {
-            if (document.querySelector('game-setup-modal')) return;
-
-            const modal = document.createElement('game-setup-modal');
-            modal.setAttribute('mode', 'single');
-
-            const headerContainer = document.querySelector('.header-container');
-            if (headerContainer?.classList.contains('card')) {
-              modal.setAttribute('theme', 'card');
-            }
-
-            modal.addEventListener('setup-complete', () => {
-              this.previousMode = selectedMode;
-              state.scores = { black: 0, white: 0 };
-              this.setActiveMode(state.gameMode);
-              updateScoreBoardUI();
-              resetGame();
-
-              logStatus('Mode set to: SINGLE', 2000);
-
-              this.dispatchEvent(new CustomEvent('mode-changed', {
-                detail: { mode: state.gameMode },
-                bubbles: true,
-                composed: true
-              }));
-            });
-
-            modal.addEventListener('setup-cancelled', () => {
-              state.gameMode = this.previousMode;
-              this.setActiveMode(this.previousMode);
-            });
-
-            const masterBoard = /** @type {HTMLElement | null} */
-              (document.querySelector('.master-board'));
-            if (masterBoard) {
-              if (getComputedStyle(masterBoard).position === 'static') {
-                masterBoard.style.position = 'relative';
-              }
-              masterBoard.appendChild(modal);
-            } else {
-              document.body.appendChild(modal);
-            }
-            return;
-          }    
-
-          // If no active progress, switch immediately
-          this.previousMode = selectedMode;         
-          state.scores = { black: 0, white: 0};
-          resetGame();  // Perform full restart
+        // Single mode without active progress switches immediately
+        if (selectedMode === 'single' && !hasActiveProgress) {
+          this.applyModeTransition('single');
+          return;
         }
 
-        this.setActiveMode(state.gameMode);
-        updateScoreBoardUI();
-        
-        // Optionally dispatch event for other listeners if needed
-        this.dispatchEvent(new CustomEvent('mode-changed', {
-          detail: { mode: state.gameMode },
-          bubbles: true,
-          composed: true
-        }));
+        // Match, Money, or Single game with active progress will use the modal
+        this.openSetupModal(selectedMode, hasActiveProgress);
       });
     });
+  }
+
+  /**
+   * Open setup/confirmation modal with shared theme, listeners and mounting logic.
+   * @param {string} selectedMode
+   * @param {boolean} hasActiveProgress
+   */
+  openSetupModal(selectedMode, hasActiveProgress) {
+    if (document.querySelector('game-setup-modal')) return;
+
+    state.gameMode = selectedMode;
+    const modal = document.createElement('game-setup-modal');
+    modal.setAttribute('mode', selectedMode);
+
+    if (selectedMode === 'match' || selectedMode === 'money') {          
+      modal.setAttribute(
+        'value',
+        String(selectedMode === 'match' ? (state.matchTarget || 3) : 100)
+      );
+      
+      // Conditionally attach warning attribute if active game in progress
+      if (hasActiveProgress) {
+        modal.setAttribute(
+          'warning',
+          'Switching modes will reset your current game and scores.'
+        );
+      }
+    }
+          
+    // Match the active header theme if present
+    const headerContainer = document.querySelector('.header-container');
+    if (headerContainer?.classList.contains('card')) {
+      modal.setAttribute('theme', 'card');
+    }
+
+    modal.addEventListener('setup-complete', (e) => {
+      const { mode, value } =  /** @type {CustomEvent} */ (e).detail;
+      this.applyModeTransition(mode, value);
+    });
+
+    modal.addEventListener('setup-cancelled', () => {
+      // Revert toggle button visual back to previous state if cancelled
+      state.gameMode = this.previousMode;
+      this.setActiveMode(this.previousMode);
+    });
+
+    // Append to master-board or fallback safely to body
+    const masterBoard = /** @type {HTMLElement | null} */ (
+      document.querySelector('.master-board')
+    );
+    if (masterBoard) {
+      // Ensure master-board has relative positioning 
+      if (getComputedStyle(masterBoard).position === 'static') {
+        masterBoard.style.position = 'relative';
+      }
+      masterBoard.appendChild(modal);
+    } else {
+      document.body.appendChild(modal); // Fallback
+    }
+  }
+
+  /**
+   * Reset scores/board and apply the new mode configuration uniformly.
+   * @param {string} mode
+   * @param {number} [value]
+   */
+  applyModeTransition(mode, value) {
+    state.gameMode = mode;
+    state.scores = { black: 0, white: 0 };
+
+    if (mode === 'match' && value) {
+      state.matchTarget = value;
+    } else if (mode === 'money' && value) {
+      state.bankRolls = { black: value, white: value };
+    }
+
+    this.previousMode = mode;
+    this.setActiveMode(mode);
+    updateScoreBoardUI();
+    resetGame();
+
+    const suffix = 
+      mode === 'match' ? ` (${value} Points)` :
+      mode === 'money' ? ` ($${value}) Bankroll` : '';
+    logStatus(`Mode set to: ${mode.toUpperCase()}${suffix}`, 2000);
+
+    this.dispatchEvent(new CustomEvent('mode-changed', {
+      detail: {
+        mode: state.gameMode,
+        matchTarget: state.matchTarget,
+        bankRolls: state.bankRolls
+      },
+      bubbles: true,
+      composed: true
+    }));
   }
 
   /**

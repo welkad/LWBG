@@ -32,7 +32,7 @@ class GameSetupModal extends HTMLElement {
     const isMatch = this.mode === 'match';
 
     const title = isSingle
-      ? 'Switch to Single Game Mode'
+      ? 'Switch to Single Game'
       : (isMatch ? 'Configure Match Play' : 'Configure Money Play');
     
     const helper = isSingle
