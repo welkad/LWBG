@@ -18,7 +18,7 @@ import { clearHoverHighlights, renderBoard } from './board.js';
  * - H         : Toggle move highlighting on or off
  * - Y / N     : Confirm / cancel active prompt (Resign or Doubling Cube)
  * - V         : Toggle visual Icons vs Buttons underneath status bar
- * - T         : Toggle scoreboard theme (floating vs card)
+ * - F         : Toggle scoreboard theme (floating vs card)
  */
 
 export function setupKeyboardListeners() {
@@ -52,7 +52,7 @@ export function setupKeyboardListeners() {
 
     switch (key) {
       // TOGGLE SCOREBOARD THEME
-      case 'KeyT':
+      case 'KeyF':
         event.preventDefault();
 
         // Toggle header container theme class
