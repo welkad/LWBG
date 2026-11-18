@@ -87,6 +87,7 @@ export function initBoardState() {
     state.isInputLocked = false;
 
     updateCubePositionUI(); // Update cube position AFTER state resets
+    updateLegendUI();       // Reset legend buttons on board init
 
     // Official Standard Backgammon Starting Setup
     state.boardState[0]  = { player: 'white', count: 2 }; // Point 1
@@ -368,4 +369,6 @@ export function setInputLocked(locked) {
     document.body.classList.remove('input-locked');
     if (legendEl) legendEl.classList.remove('input-locked');
   }
+
+  updateLegendUI(); // Syncrhonize disabled button/cursor states
 }

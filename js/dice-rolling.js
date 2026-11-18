@@ -1,6 +1,6 @@
 // js/dice-rolling.js - opening rolls, animated rolling, and generation of roll values
 import { state, switchTurn } from './state.js';
-import { logStatus, clearStatusQueue } from './ui.js';
+import { logStatus, clearStatusQueue, updateLegendUI } from './ui.js';
 import { renderBoard, updatePointLabels } from './board.js';
 import { renderDiceUI, setDieValue, renderWinnerOpeningDice } from './dice-renderer.js';
 import { updateCubePositionUI } from './doubling-cube.js';
@@ -172,6 +172,7 @@ export function handleDiceRoll(player) {
 
   state.isRolling = true;
   updateCubePositionUI(); // Disable doubling cube while rolling dice
+  updateLegendUI(); // Force Roll button to disable when rolling dice
 
   const die1El = document.getElementById(`${player}-die-1`);
   const die2El = document.getElementById(`${player}-die-2`);

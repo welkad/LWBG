@@ -264,7 +264,7 @@ export function updateLegendUI() {
     undoBtn.classList.remove('hidden');
     doneBtn.classList.remove('hidden');
 
-    rollBtn.disabled = state.hasRolled;
+    rollBtn.disabled = state.hasRolled || state.isRolling;
     const hasMovesLeft = state.currentRoll.length > 0 && hasAnyLegalMoves();
     doneBtn.disabled = !state.hasRolled || state.isRolling || hasMovesLeft;
     undoBtn.disabled = !state.hasRolled || state.moveHistory.length === 0;    
