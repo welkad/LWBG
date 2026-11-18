@@ -18,6 +18,15 @@ body.input-locked .dice-legend {
   transition: filter 0.2s ease, opacity 0.2s ease;
 }
 
+/* Force not-allowed cursor on all dice-legend buttons when body is locked */
+body.input-locked dice-legend button,
+body.input-locked dice-legend .legend-btn,
+body.input-locked dice-legend .legend-btn:hover {
+  cursor: not-allowed !important;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
 /* Master Wood Frame Container */
 .master-board {
     display: flex;

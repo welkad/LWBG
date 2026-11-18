@@ -213,9 +213,11 @@ class DiceLegend extends HTMLElement {
           border-color: #e74c3c;
         }
 
-        /* Locked state styling */
+        /* Locked state styling - force not-allowed cursor on all buttons */
         :host(.input-locked) .legend-btn,
-        .dice-legend.input-locked .legend-btn {
+        .dice-legend.input-locked .legend-btn,
+        :host(.input-locked) .legend-btn:hover,
+        .dice-legend.input-locked .legend-btn:hover {
           cursor: not-allowed !important;
           pointer-events: none;
           opacity: 0.6;
