@@ -61,18 +61,21 @@ class DiceLegend extends HTMLElement {
         }
 
         /* ==========================================
-            KEY BADGE & LABEL STYLING (Normalized)
+            KEY BADGE & LABEL STYLING
             ========================================== */
         .key-badge {
+          background: rgba(255, 255, 255, 0.15);
+          color: #fbfbfb;
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          border-radius: 4px;
+          font-family: monospace;
+          font-size: 0.85rem;
           display: inline-flex;
-          align-items: center;
           justify-content: center;
-          width: 32px;
-          height: 32px;
-          box-sizing: border-box;
-          flex-shrink: 0;
-          font-weight: 400;
-          color: #fff;
+          align-items: center;
+          width: 22px;
+          height: 22px;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
         }
 
         .btn-label {
@@ -84,30 +87,39 @@ class DiceLegend extends HTMLElement {
             DEFAULT BUTTON STYLING (Normal View)
             ========================================== */
         .legend-btn {
-          background: none;
-          border: none;
-          border-radius: 12px;
-          box-sizing: border-box;
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          justify-content: center;
-          white-space: nowrap;
+          gap: 6px;
+          background: transparent;
+          border: none;
+          color: #d4d4d4;
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          font-weight: 600;
           cursor: pointer;
-          transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
-          padding: 8px 12px;
-          font-size: 16px;
-          color: #fff;
+          transition: all 0.15s ease-in-out;
+          user-select: none;
         }
 
         /* Button hover capsule effect for normal view */
-        .legend-btn:hover:not(:disabled) {          
-          background: rgba(255, 255, 255, 0.1);
-          transform: translateY(-2px);
+        .legend-btn:hover:not(:disabled) {
+          background: #3a3a3a;
+          border-color: rgba(255, 255, 255, 0.4);
+          color: #fff;
+          transform: translateY(-1px);
         }
         
         /* Button active/click reset */
         .legend-btn:active:not(:disabled) {
-          transform: translateY(0);
+          transform: translateY(1px);
+        }
+
+        .legend-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          pointer-events: auto;
+          box-shadow: none;
         }
 
         /* Utility class to completely hide buttons */
@@ -199,6 +211,14 @@ class DiceLegend extends HTMLElement {
         .dice-legend.icon-view #action-resign-btn:hover:not(:disabled) .icon-content, .dice-legend.icon-view #action-no-btn:hover:not(:disabled) .icon-content {
           background: rgba(231, 76, 60, 0.2);
           border-color: #e74c3c;
+        }
+
+        /* Locked state styling */
+        :host(.input-locked) .legend-btn,
+        .dice-legend.input-locked .legend-btn {
+          cursor: not-allowed !important;
+          pointer-events: none;
+          opacity: 0.6;
         }
       </style>      
     `;

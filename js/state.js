@@ -352,3 +352,20 @@ export function setGameMode(newMode, optionValue = undefined) {
   // Trigger a full board and game reset for the  new mode
   resetGame();
 }
+
+/**
+ * Set input lock status for pointer events and synchronize CSS for UI blurring
+ * @param {boolean} locked
+ */
+export function setInputLocked(locked) {
+  state.isInputLocked = locked;
+  const legendEl = document.querySelector('dice-legend');
+
+  if (locked) {
+    document.body.classList.add('input-locked');
+    if (legendEl) legendEl.classList.add('input-locked');
+  } else {
+    document.body.classList.remove('input-locked');
+    if (legendEl) legendEl.classList.remove('input-locked');
+  }
+}

@@ -1,6 +1,6 @@
 // js/components/game-mode-toggle.js: Horizontal 3-button mode toggle component
+import { state, resetGame, setInputLocked } from '../state.js';
 import { updateScoreBoardUI } from '../board.js';
-import { state, resetGame } from '../state.js';
 import { logStatus } from '../ui.js';
 import './game-setup-modal.js';
 
@@ -135,7 +135,7 @@ class GameModeToggle extends HTMLElement {
   openSetupModal(selectedMode, hasActiveProgress) {
     if (document.querySelector('game-setup-modal')) return;
 
-    state.isInputLocked = true; // Lock keyboard and & dice inputs for modal
+    setInputLocked(true); // Lock inputs and apply background blur
     state.gameMode = selectedMode;
     const modal = document.createElement('game-setup-modal');
     modal.setAttribute('mode', selectedMode);
@@ -163,12 +163,12 @@ class GameModeToggle extends HTMLElement {
 
     modal.addEventListener('setup-complete', (e) => {
       const { mode, value } =  /** @type {CustomEvent} */ (e).detail;
-      state.isInputLocked = false;  // Unlock inputs when finished
+      setInputLocked(false);  // Unlock inputs and remove blur
       this.applyModeTransition(mode, value);
     });
 
     modal.addEventListener('setup-cancelled', () => {
-      state.isInputLocked = false;  // Unlock inputs on cancellation
+      setInputLocked(false);  // Unlock inputs and remove blur
       // Revert toggle button visual back to previous state if cancelled
       state.gameMode = this.previousMode;
       this.setActiveMode(this.previousMode);
