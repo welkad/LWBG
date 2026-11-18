@@ -264,11 +264,27 @@ export function updateLegendUI() {
     undoBtn.classList.remove('hidden');
     doneBtn.classList.remove('hidden');
 
-    rollBtn.disabled = state.hasRolled || state.isRolling;
+    const isOpeningPhase = state.gamePhase === 'opening_roll';
+
+    // Check if both players have rolled/die animating during opening phase
+    const blackRolledOrAnimating = state.openingRolls.black !==null ||
+      document.getElementById('black-die-1')?.dataset.animating === 'true';
+    const whiteRolledOrAnimating = state.openingRolls.white !==null ||
+      document.getElementById('white-die-1')?.dataset.animating === 'true';
+
+    const isOpeningLocked = isOpeningPhase 
+      && (blackRolledOrAnimating && whiteRolledOrAnimating);
+
+    // Roll button disabled if both players rolled in opening or either in regular play
+    rollBtn.disabled = isOpeningLocked
+      || (!isOpeningPhase && (state.hasRolled || state.isRolling));
+    
     const hasMovesLeft = state.currentRoll.length > 0 && hasAnyLegalMoves();
     doneBtn.disabled = !state.hasRolled || state.isRolling || hasMovesLeft;
-    undoBtn.disabled = !state.hasRolled || state.moveHistory.length === 0;    
-    resignBtn.disabled = state.gamePhase === 'opening_roll';
+    undoBtn.disabled = !state.hasRolled || state.moveHistory.length === 0;
+
+    // Disable resign during opening roll phase OR while dice are actively rolling
+    resignBtn.disabled = state.gamePhase === 'opening_roll' || state.isRolling;
     return;
   }
 }

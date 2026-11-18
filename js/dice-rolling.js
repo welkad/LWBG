@@ -68,6 +68,7 @@ export function handleOpeningRoll(player) {
 
   // Mark die as animating independently
   die1El.dataset.animating = "true";
+  updateLegendUI(); // Roll button stays enabled if oponent hasn't rolled yet
   const finalVal = Math.floor(Math.random() * 6) + 1;
 
   // Pass the element and its intended final value
@@ -91,6 +92,7 @@ export function handleOpeningRoll(player) {
       if (whiteDie?.dataset.animating !== "true"
           && blackDie?.dataset.animating !== "true") {
         evaluateOpeningRoll();
+        updateLegendUI(); // Lock ROLL button once both players have rolled
       }
     } else {
       // Only one player has rolled -> display waiting message
@@ -190,6 +192,13 @@ export function handleDiceRoll(player) {
       { element: die2El, finalValue: finalD2 },
     ],
     () => {
+      // Abort roll if resignation or cube offered during rolling phase
+      if (state.isResignOffered || state.isCubeOffered
+        || state.gamePhase === 'game_over') {
+          state.isRolling = false;
+          return;
+      }
+
       state.isDouble = finalD1 === finalD2;
       // Double rolls generate 4 playable moves in backgammon
       state.currentRoll = state.isDouble
