@@ -12,7 +12,7 @@ body {
 body.input-locked .header-container,
 body.input-locked .status-bar,
 body.input-locked .dice-legend {
-  fliter: blur(1px);
+  filter: blur(1px);
   pointer-events: none;
   opacity: 0.2;
   transition: filter 0.2s ease, opacity 0.2s ease;

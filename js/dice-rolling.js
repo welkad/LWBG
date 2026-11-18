@@ -1,4 +1,4 @@
-// js/dice-rolling.js
+// js/dice-rolling.js - opening rolls, animated rolling, and generation of roll values
 import { state, switchTurn } from './state.js';
 import { logStatus, clearStatusQueue } from './ui.js';
 import { renderBoard, updatePointLabels } from './board.js';
