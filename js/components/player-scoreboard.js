@@ -1,6 +1,106 @@
 // js/components/player-scoreboard.js: Component to display pips and score for players
 
+const CHECKER_THEMES = {
+  black: [
+    {
+      name: 'default',
+      boardBg: '#1c1c1c',
+      boardBorder: '#111111',
+      boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.15)',
+      miniBg: `radial-gradient(
+        circle at 35% 35%, #555 0%, #111 60%, #000 100%
+      )`,
+      miniBorder: '#000',
+
+      dieBg: '#1e1e1e',
+      dieBorder: '#111111',
+      diePip: '#fbfbfb',
+      dieText: '#fbfbfb'
+    },
+    {
+      name: 'cobalt',
+      boardBg: '#1e4b8a',
+      boardBorder: '#122f59',
+      boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.2)',
+      miniBg: `radial-gradient(
+        circle at 35% 35%, #4a7ec7 0%, #1e4b8a 65%, #10284d 100%
+      )`,
+      miniBorder: '#0d2140',
+
+      dieBg: '#1e4b8a',
+      dieBorder: '#122f59',
+      diePip: '#f4f7fb',
+      dieText: '#f4f7fb'
+    },
+    {
+      name: 'burgundy',
+      boardBg: '#7c2329',
+      boardBorder: '#4e1317',
+      boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.18)',
+      miniBg: `radial-gradient(
+        circle at 35% 35%, #b5454d 0%, #7c2329 65%, #420f13 100%
+      )`,
+      miniBorder: '#380c10',
+
+      dieBg: '#7c2329',
+      dieBorder: '#4e1317',
+      diePip: '#fbf5f5',
+      dieText: '#fbf5f5'
+    }
+  ],
+  white: [
+    {
+      name: 'default',
+      boardBg: '#fbfbfb',
+      boardBorder: '#d4d4d4',
+      boardInset: 'inset 0 -3px 4px rgba(0, 0, 0, 0.2)',
+      miniBg: `radial-gradient(
+        circle at 35% 35%, #ffffff 0%, #d1d1d1 60%, #8a8a8a 100%
+      )`,
+      miniBorder: '#666',
+
+      dieBg: '#fbfbfb',
+      dieBorder: '#cccccc',
+      diePip: '#222222',
+      dieText: '#222222'
+    },
+    {
+      name: 'jade',
+      boardBg: '#2f6f54',
+      boardBorder: '#1c4735',
+      boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.18)',
+      miniBg: `radial-gradient(
+        circle at 35% 35%, #58a383 0%, #2f6f54 65%, #173b2c 100%
+      )`,
+      miniBorder: '#123023',
+
+      dieBg: '#2f6f54',
+      dieBorder: '#1c4735',
+      diePip: '#f3faf6',
+      dieText: '#f3faf6'
+    },
+    {
+      name: 'brass',
+      boardBg: '#e6c675',
+      boardBorder: '#9c7d32',
+      boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.25)',
+      miniBg: `radial-gradient(
+        circle at 35% 35%, #fae4a8 0%, #e6c675 65%, #8f7129 100%
+      )`,
+      miniBorder: '#7a6021',
+
+      dieBg: '#e6c675',
+      dieBorder: '#9c7d32',
+      diePip: '#2b2108',
+      dieText: '#2b2108'
+    }
+  ]
+};
 class PlayerScoreboard extends HTMLElement {
+  constructor() {
+    super();
+    this._colorIndex = 0;
+  }
   connectedCallback() {
     const player = this.getAttribute('player') || 'black';
     const defaultPip = this.getAttribute('pip') || '167';
@@ -10,6 +110,7 @@ class PlayerScoreboard extends HTMLElement {
     const label = this.getAttribute('label') || 'Score';
 
     this.render(player, defaultPip, defaultScore, align, theme, label);
+    this._applyCheckerColor(player);
   }
 
   // Static getter function to tell browser wich attributes to watch
@@ -55,7 +156,45 @@ class PlayerScoreboard extends HTMLElement {
     const label = this.getAttribute('label') || 'Score';
 
     this.render(player, pip, score, align, theme, label);
-  }  
+    this._applyCheckerColor(player);
+  }
+
+  /**
+   * Cycle checker color palette for the given player and sync CSS variables
+   * @param {string} player
+   */
+  _applyCheckerColor(player) {
+    const normalizedPlayer = player === 'black' ? 'black' : 'white';
+    const palette = CHECKER_THEMES[normalizedPlayer];
+    const current = palette[this._colorIndex % palette.length];
+    const rootStyle = document.documentElement.style;
+
+    // Checker variables
+    rootStyle.setProperty(`--checker-${normalizedPlayer}-bg`, current.boardBg);
+    rootStyle.setProperty(`--checker-${normalizedPlayer}-border`, current.boardBorder);
+    rootStyle.setProperty(`--checker-${normalizedPlayer}-inset`, current.boardInset);
+
+    // Dice variables
+    rootStyle.setProperty(`--die-${normalizedPlayer}-bg`, current.dieBg);
+    rootStyle.setProperty(`--die-${normalizedPlayer}-border`, current.dieBorder);
+    rootStyle.setProperty(`--die-${normalizedPlayer}-pip`, current.diePip);
+    rootStyle.setProperty(`--die-${normalizedPlayer}-text`, current.dieText);
+
+    const miniEl = /** @type {HTMLElement | null} */
+      (this.querySelector('.mini-checker'));
+    if (miniEl) {
+      miniEl.style.background = current.miniBg;
+      miniEl.style.borderColor = current.miniBorder;
+    }
+
+    const badgeEl = this.querySelector('.player-badge');   
+    if (badgeEl) {
+      badgeEl.setAttribute(
+        'title',
+        `${current.name.charAt(0).toUpperCase() + current.name.slice(1)}`
+      );
+    }
+  }
 
   /**
    * @param {string} player
@@ -71,7 +210,8 @@ class PlayerScoreboard extends HTMLElement {
 
     this.innerHTML = `
       <div class="scoreboard-panel ${align} ${theme}">
-        <div class="player-badge">
+        <div class="player-badge" role="button" tabindex="0"
+          aria-label="Cycle ${playerName} checker color">
           <div class="mini-checker ${player}"></div>          
         </div>
         <div class="score-info">
@@ -196,6 +336,25 @@ class PlayerScoreboard extends HTMLElement {
         
       </style>
     `;
+
+    const badgeEl = /** @type {HTMLElement | null} */
+      (this.querySelector('.player-badge'));
+    if (badgeEl) {
+      badgeEl.addEventListener('click', () => {
+        const currentPlayer = this.getAttribute('player') || 'black';
+        const palette = CHECKER_THEMES[currentPlayer === 'black' ? 'black' : 'white']
+        this._colorIndex = (this._colorIndex + 1) % palette.length;
+        this._applyCheckerColor(currentPlayer);
+      });
+
+      badgeEl.addEventListener('keydown', (event) => {
+        const ke = /** @type {KeyboardEvent} */ (event);
+        if (ke.key === 'Enter' || ke.key === ' ') {
+          ke.preventDefault();
+          badgeEl.click();
+        }
+      });
+    }
   }
 
   /**

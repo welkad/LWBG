@@ -1,5 +1,43 @@
 /* css/pieces.css - Contains styling for checkers, bear-off home pockets, and bar piece placements. */
 
+/* Checker color themes (controlled via player-scoreboard badge click */
+:root {
+    --checker-black-bg: #1c1c1c;
+    --checker-black-border: #111111;
+    --checker-black-inset: inset 0 3px 4px rgba(255, 255, 255 0.15);
+    --checker-black-shadow-y: 4px;
+
+    --checker-white-bg: #fbfbfb;
+    --checker-white-border: #d4d4d4;
+    --checker-white-inset: inset 0 -3px 4px rgba(0, 0, 0, 0.2);
+    --checker-white-shadow-y: 4px;
+}
+
+.black-piece {
+    background: var(--checker-black-bg);
+    border: 2px solid var(--checker-black-border);
+    box-shadow:
+        0 var(--checker-black-shadow-y) 5px rgba(0, 0, 0, 0.5),
+        var(--checker-black-inset);
+}
+
+.white-piece {
+    background: var(--checker-white-bg);
+    border: 2px solid var(--checker-white-border);
+    box-shadow:
+        0 var(--checker-white-shadow-y) 5px rgba(0, 0, 0, 0.4),
+        var(--checker-white-inset);
+}
+
+/* Upper points: cast shadow away from triangle tip */
+.top .point .black-piece {
+    --checker-black-shadow-y: -3px;
+}
+
+.top .point .white-piece {
+    --checker-black-shadow-y: -3px;
+}
+
 /* Game Checkers styling */
 .checker {
     width: 38px;
@@ -22,35 +60,6 @@
 [data-point-index].drag-over {
   outline: 2px solid #e2b04c;
   background-color: rgba(226, 176, 76, 0.2);
-}
-
-.white-piece { 
-    background: #fbfbfb;
-    border: 2px solid #d4d4d4;
-    box-shadow:
-      0 4px 5px rgba(0, 0, 0, 0.4),
-      inset 0 -3px 4px rgba(0,0,0,0.2); 
-}
-
-.black-piece { 
-    background: #1c1c1c;
-    border: 2px solid #111111;
-    box-shadow:
-      0 4px 5px rgba(0, 0, 0, 0.5),
-      inset 0 3px 4px rgba(255,255,255,0.15); 
-}
-
-/* Upper points: cast shadow away from triangle tip */
-.top .point .white-piece {
-    box-shadow:
-        0 -3px 5px rgba(0, 0, 0, 0.4),
-        inset 0 -3px 4px rgba(0,0,0,0.2);
-}
-
-.top .point .black-piece {
-    box-shadow:
-        0 -3px 5px rgba(0, 0, 0, 0.5),
-        inset 0 3px 4px rgba(255,255,255,0.15);
 }
 
 /* =======================================
