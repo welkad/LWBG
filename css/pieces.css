@@ -2,11 +2,13 @@
 
 /* Checker color themes (controlled via player-scoreboard badge click */
 :root {
+    --checker-black-relief: url("../assets/pieces/checker-relief.svg");
     --checker-black-bg: #1c1c1c;
     --checker-black-border: #111111;
     --checker-black-inset: inset 0 3px 4px rgba(255, 255, 255 0.15);
     --checker-black-shadow-y: 4px;
 
+    --checker-white-relief: url("../assets/pieces/checker-relief.svg");
     --checker-white-bg: #fbfbfb;
     --checker-white-border: #d4d4d4;
     --checker-white-inset: inset 0 -3px 4px rgba(0, 0, 0, 0.2);
@@ -14,7 +16,9 @@
 }
 
 .black-piece {
-    background: var(--checker-black-bg);
+    background:
+        var(--checker-black-relief) center / 100% 100% no-repeat,
+        var(--checker-black-bg);
     border: 2px solid var(--checker-black-border);
     box-shadow:
         0 var(--checker-black-shadow-y) 5px rgba(0, 0, 0, 0.5),
@@ -22,7 +26,9 @@
 }
 
 .white-piece {
-    background: var(--checker-white-bg);
+    background:
+        var(--checker-white-relief) center / 100% 100% no-repeat,
+        var(--checker-white-bg);
     border: 2px solid var(--checker-white-border);
     box-shadow:
         0 var(--checker-white-shadow-y) 5px rgba(0, 0, 0, 0.4),
