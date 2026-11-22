@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" aria-hidden="true">
+  <defs>
+    
+    <radialGradient id="pieceSheen" cx="36%" cy="30%" r="68%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22" />
+      <stop offset="55%" stop-color="#ffffff" stop-opacity="0.03" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.28" />
+    </radialGradient>
+
+    
+    <radialGradient id="pipSheen" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25" />
+      <stop offset="70%" stop-color="#000000" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.22" />
+    </radialGradient>
+  </defs>
+
+  
+  <circle cx="50" cy="50" r="48.5" fill="url(#pieceSheen)" />
+  <circle cx="50" cy="50" r="48.5" fill="none" stroke="#000000" stroke-width="2.2" opacity="0.35" />
+
+  
+  <circle cx="50" cy="50" r="31" fill="none" stroke="#000000" stroke-width="2.4" opacity="0.38" />
+  <circle cx="50" cy="50" r="29.3" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.24" />
+
+  
+  <circle cx="50" cy="50" r="14.5" fill="none" stroke="#000000" stroke-width="2.2" opacity="0.42" />
+  <circle cx="50" cy="50" r="13.0" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.26" />
+
+  
+  <circle cx="50" cy="50" r="11.5" fill="url(#pipSheen)" />
+</svg>

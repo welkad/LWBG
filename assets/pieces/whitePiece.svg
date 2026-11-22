@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" aria-hidden="true">
+  <defs>
+    
+    <radialGradient id="whiteBodyGrad" cx="38%" cy="32%" r="68%">
+      <stop offset="0%" stop-color="#efe8be" />
+      <stop offset="58%" stop-color="#dfd59e" />
+      <stop offset="100%" stop-color="#c6ba7d" />
+    </radialGradient>
+
+    
+    <linearGradient id="whiteRimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5efca" />
+      <stop offset="50%" stop-color="#cfc388" />
+      <stop offset="100%" stop-color="#9e925b" />
+    </linearGradient>
+
+    
+    <radialGradient id="whiteCenterGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#f3ecc3" />
+      <stop offset="65%" stop-color="#dcd198" />
+      <stop offset="100%" stop-color="#bfb275" />
+    </radialGradient>
+  </defs>
+
+  
+  <circle cx="50" cy="50" r="48" fill="url(#whiteRimGrad)" />
+  <circle cx="50" cy="50" r="45.5" fill="url(#whiteBodyGrad)" />
+
+  
+  <circle cx="50" cy="50" r="31" fill="none" stroke="#9b8f59" stroke-width="2.2" opacity="0.78" />
+  <circle cx="50" cy="50" r="29.4" fill="none" stroke="#faf5d7" stroke-width="1.3" opacity="0.7" />
+
+  
+  <circle cx="50" cy="50" r="14.5" fill="none" stroke="#968a54" stroke-width="2.1" opacity="0.82" />
+  <circle cx="50" cy="50" r="13.1" fill="none" stroke="#fcf8df" stroke-width="1.2" opacity="0.75" />
+
+  
+  <circle cx="50" cy="50" r="11.5" fill="url(#whiteCenterGrad)" />
+</svg>
