@@ -10,6 +10,10 @@ A lightweight, vanilla JavaScript implementation of Backgammon designed to run e
 ├── jsconfig.json                 # VS Code configuration enabling strict JSDoc static analysis (checkJS)
 ├── README.md                     # This document
 │
+├── assets/
+│   ├── icons/favicon.svg         # Browser tab icon
+│   └── pieces/checker-relief.svg # Concentric turned-ring relief overlay for alternate checker themes                  
+│
 ├── css/
 │   ├── board.css                 # Board layout, wood frame, point geometry, and grid structures
 │   ├── pieces.css                # Checker pieces, bear-off pockets, bar pieces, and piece positioning
