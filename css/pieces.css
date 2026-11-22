@@ -2,13 +2,13 @@
 
 /* Checker color themes (controlled via player-scoreboard badge click */
 :root {
-    --checker-black-relief: url("../assets/pieces/checker-relief.svg");
+    --checker-black-relief: none;
     --checker-black-bg: #1c1c1c;
     --checker-black-border: #111111;
     --checker-black-inset: inset 0 3px 4px rgba(255, 255, 255 0.15);
     --checker-black-shadow-y: 4px;
 
-    --checker-white-relief: url("../assets/pieces/checker-relief.svg");
+    --checker-white-relief: none;
     --checker-white-bg: #fbfbfb;
     --checker-white-border: #d4d4d4;
     --checker-white-inset: inset 0 -3px 4px rgba(0, 0, 0, 0.2);

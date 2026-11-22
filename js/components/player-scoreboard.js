@@ -168,11 +168,16 @@ class PlayerScoreboard extends HTMLElement {
     const palette = CHECKER_THEMES[normalizedPlayer];
     const current = palette[this._colorIndex % palette.length];
     const rootStyle = document.documentElement.style;
+    // Alternate styling not applied to default pieces
+    const isDefault = current.name === 'default';
+    const reliefUrl = isDefault 
+      ? 'none' : 'url("../assets/pieces/checker-relief.svg")';
 
     // Checker variables
     rootStyle.setProperty(`--checker-${normalizedPlayer}-bg`, current.boardBg);
     rootStyle.setProperty(`--checker-${normalizedPlayer}-border`, current.boardBorder);
     rootStyle.setProperty(`--checker-${normalizedPlayer}-inset`, current.boardInset);
+    rootStyle.setProperty(`--checker-${normalizedPlayer}-relief`, reliefUrl);
 
     // Dice variables
     rootStyle.setProperty(`--die-${normalizedPlayer}-bg`, current.dieBg);
@@ -183,7 +188,15 @@ class PlayerScoreboard extends HTMLElement {
     const miniEl = /** @type {HTMLElement | null} */
       (this.querySelector('.mini-checker'));
     if (miniEl) {
-      miniEl.style.background = current.miniBg;
+      if (isDefault) {
+        miniEl.style.background = current.miniBg;
+      } else {
+        miniEl.style.background = `${reliefUrl} center / 100% 100% no-repeat,
+          ${current.miniBg}`;
+      }      
+      miniEl.style.backgroundPosition = 'center';
+      miniEl.style.backgroundSize = '100% 100%';
+      miniEl.style.backgroundRepeat = 'no-repeat';
       miniEl.style.borderColor = current.miniBorder;
     }
 
