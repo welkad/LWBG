@@ -1,0 +1,114 @@
+/* css/modal.css - Shared styles for custom game modals */
+
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(1px);
+  border-radius: inherit;
+}
+
+.modal-card {
+  width: 340px;
+  max-width: 92%;
+  padding: 24px;
+  border-radius: 16px;
+  box-sizing: border-box;
+  font-family: inherit;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+/* Floating Theme (default) */
+.modal-card.floating {
+  background: #1e1e1e;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  color: #f0f0f0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.modal-card.floating .modal-btn.primary {
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
+}
+
+.modal-card.floating .modal-btn.primary:hover {
+  background: #cccccc;
+}
+
+/* Card Theme */
+.modal-card.card {
+  background: #4a3728;
+  border: 2px solid #2d2016;
+  color: #f1d779;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+}
+
+.modal-card.card .modal-btn.primary {
+  background: #d4a373;
+  color: #111111;
+  border: 1px solid #b88655;
+}
+
+.modal-card.card .modal-btn.primary:hover {
+  background: #e6b988;
+}
+
+.modal-card h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+}
+
+.modal-helper {
+  font-size: 0.85rem;
+  opacity: 0.92;
+  margin: 0 0 18px 0;
+  line-height: 1.4;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.modal-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.2s;
+}
+
+.modal-btn.primary {
+  font-weight: 600;
+}
+
+.modal-btn.secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: inherit;
+}
+
+.modal-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

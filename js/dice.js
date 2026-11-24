@@ -6,6 +6,7 @@ import { renderDiceUI, setDieValue } from './dice-renderer.js';
 import { clearStatusQueue, logStatus, restorePreviousStatus, saveCurrentStatus, updateLegendUI } from './ui.js';
 import { undoLastMove } from './moves.js';
 import { calculateGameOutcome } from './rules.js';
+import './components/resign-points-modal.js';
 
 /**
  * @typedef {'black' | 'white' } PlayerColor
@@ -439,8 +440,9 @@ export function handleYesAction() {
 
   if (state.isResignOffered) {
     const resigningPlayer = state.resignOfferedBy || state.currentPlayer;
-    handleResignation(resigningPlayer);
-    renderDiceUI();
+    if (resigningPlayer) {
+      openResignPointsModal(resigningPlayer);
+    }
     return;
   }
 
@@ -475,4 +477,58 @@ export function handleNoAction() {
     const targetValue = state.cubeValue === 1 ? 2 : state.cubeValue * 2;
     resolveCubeOffer(false, targetValue);
   }
+}
+
+/**
+ * Open the resignation points modal so the player can choose 1x, 2x, or 3x cube value.
+ * @param {PlayerColor} resigningPlayer
+ */
+function openResignPointsModal(resigningPlayer) {
+  // Avoid duplicate modals
+  if (document.querySelector('resign-points-modal')) return;
+
+  const winningPlayer = resigningPlayer === 'black' ? 'white' : 'black';
+  const modal = document.createElement('resign-points-modal');
+  modal.setAttribute('player', resigningPlayer);
+  modal.setAttribute('cube-value', String(state.cubeValue || 1));
+  modal.setAttribute('mode', state.gameMode || 'single');
+  modal.setAttribute('ante', String(state.moneyAnte || 10));
+  modal.setAttribute('match-target', String(state.matchTarget || 3));
+  modal.setAttribute('winner-score', String(state.scores?.[winningPlayer] || 0));
+
+  // Match game-setup-modal theme if present on page
+  const setupModal = document.querySelector('game-setup-modal .modal-card');
+  const theme = setupModal?.classList.contains('card') ? 'card' : 'floating';
+  modal.setAttribute('theme', theme);
+
+  modal.addEventListener('resign-confirmed', (event) => {
+    const ce = /** @type {CustomEvent<{ player: PlayerColor, points: number, resignType: string }>} */ (event);
+    const { player, points, resignType } = ce.detail;
+    /** @type {Record<string, string>} */
+    const winTypeMap = {
+      single: 'Single Win',
+      gammon: 'Gammon',
+      backgammon: 'Backgammon'
+    };
+
+    state.isResignOffered = false;
+    state.resignOfferedBy = null;
+    handleResignation(player, points, winTypeMap[resignType] || null);
+    renderDiceUI();
+  });
+
+  modal.addEventListener('resign-cancelled', () => {
+    // Return to the Y/N resign confirmation prompt
+    logStatus('Are you sure you want to resign and concede?');
+    updateLegendUI();
+    updateCubePositionUI();
+    renderDiceUI();
+  });
+
+  const mountTarget =
+    document.querySelector('.master-board') ||
+    document.getElementById('board-container') ||
+    document.querySelector('.game-container') ||
+    document.body;
+  mountTarget.appendChild(modal);
 }

@@ -103,10 +103,14 @@ export function initBoardState() {
 /**
  * Call handleGameEnd function if player resigns
  * @param {PlayerColor} resigningPlayer
+ * @param {number | null} [customPoints=null]
+ * @param {string | null} [customWinType=null]
  */
-export function handleResignation(resigningPlayer) {
+export function handleResignation(
+  resigningPlayer, customPoints = null, customWinType = null
+) {
   const winner = resigningPlayer === 'black' ? 'white' : 'black';
-  handleGameEnd(winner, resigningPlayer);
+  handleGameEnd(winner, resigningPlayer, customPoints, customWinType);
 }
 
 // Reset board for new game but preserve match scores
@@ -188,12 +192,23 @@ export function calculatePipCount(player) {
 
 /**
  * Handle end-of-game state when bearing off all checkers or resigning game.
- * @param {'black'|'white'} winner - The winning player.
- * @param {'black'|'white'|null} [resigningPlayer = null] - The resigning player.
+ * @param {Player} winner - The winning player.
+ * @param {PlayerColor} [resigningPlayer = null] - The resigning player.
+ * @param {number|null} [customPoints = null] - Points conceded on resignation.
+ * @param {string|null} [customWinType = null] - 'single', 'gammon', 'backgammon'
  */
-export function handleGameEnd(winner, resigningPlayer = null) {
+export function handleGameEnd(
+  winner,
+  resigningPlayer = null,
+  customPoints = null,
+  customWinType = null
+) {
   const loser = resigningPlayer || (winner === 'black' ? 'white' : 'black');
-  const { winType, pointsWon} = calculateGameOutcome(winner, resigningPlayer);
+  const calculated = calculateGameOutcome(winner, resigningPlayer);
+  const pointsWon = typeof customPoints === 'number' && customPoints > 0
+    ? customPoints
+    : calculated.pointsWon;
+  const winType = customWinType || calculated.winType;
 
   let sessionOver = false;
   let moneyPayoutAmount = 0;

@@ -29,6 +29,7 @@ body.input-locked dice-legend .legend-btn:hover {
 
 /* Master Wood Frame Container */
 .master-board {
+    position: relative;
     display: flex;
     flex-direction: column;
     background: #4a3728; 
