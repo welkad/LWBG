@@ -4,6 +4,7 @@ const CHECKER_THEMES = {
   black: [
     {
       name: 'default',
+      relief: false,
       boardBg: '#1c1c1c',
       boardBorder: '#111111',
       boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.15)',
@@ -11,7 +12,6 @@ const CHECKER_THEMES = {
         circle at 35% 35%, #555 0%, #111 60%, #000 100%
       )`,
       miniBorder: '#000',
-
       dieBg: '#1e1e1e',
       dieBorder: '#111111',
       diePip: '#fbfbfb',
@@ -19,6 +19,7 @@ const CHECKER_THEMES = {
     },
     {
       name: 'cobalt',
+      relief: true,
       boardBg: '#1e4b8a',
       boardBorder: '#122f59',
       boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.2)',
@@ -26,7 +27,6 @@ const CHECKER_THEMES = {
         circle at 35% 35%, #4a7ec7 0%, #1e4b8a 65%, #10284d 100%
       )`,
       miniBorder: '#0d2140',
-
       dieBg: '#1e4b8a',
       dieBorder: '#122f59',
       diePip: '#f4f7fb',
@@ -34,6 +34,7 @@ const CHECKER_THEMES = {
     },
     {
       name: 'burgundy',
+      relief: true,
       boardBg: '#7c2329',
       boardBorder: '#4e1317',
       boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.18)',
@@ -41,16 +42,31 @@ const CHECKER_THEMES = {
         circle at 35% 35%, #b5454d 0%, #7c2329 65%, #420f13 100%
       )`,
       miniBorder: '#380c10',
-
       dieBg: '#7c2329',
       dieBorder: '#4e1317',
       diePip: '#fbf5f5',
       dieText: '#fbf5f5'
+    },
+    {
+      name: 'default (with relief)',
+      relief: true,
+      boardBg: '#1c1c1c',
+      boardBorder: '#111111',
+      boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.15)',
+      miniBg: `radial-gradient(
+        circle at 35% 35%, #555 0%, #111 60%, #000 100%
+      )`,
+      miniBorder: '#000',
+      dieBg: '#1c1c1c',
+      dieBorder: '#111111',
+      diePip: '#ffffff',
+      dieText: '#ffffff'
     }
   ],
   white: [
     {
       name: 'default',
+      relief: false,
       boardBg: '#fbfbfb',
       boardBorder: '#d4d4d4',
       boardInset: 'inset 0 -3px 4px rgba(0, 0, 0, 0.2)',
@@ -58,7 +74,6 @@ const CHECKER_THEMES = {
         circle at 35% 35%, #ffffff 0%, #d1d1d1 60%, #8a8a8a 100%
       )`,
       miniBorder: '#666',
-
       dieBg: '#fbfbfb',
       dieBorder: '#cccccc',
       diePip: '#222222',
@@ -66,6 +81,7 @@ const CHECKER_THEMES = {
     },
     {
       name: 'jade',
+      relief: true,
       boardBg: '#2f6f54',
       boardBorder: '#1c4735',
       boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.18)',
@@ -73,7 +89,6 @@ const CHECKER_THEMES = {
         circle at 35% 35%, #58a383 0%, #2f6f54 65%, #173b2c 100%
       )`,
       miniBorder: '#123023',
-
       dieBg: '#2f6f54',
       dieBorder: '#1c4735',
       diePip: '#f3faf6',
@@ -81,6 +96,7 @@ const CHECKER_THEMES = {
     },
     {
       name: 'brass',
+      relief: true,
       boardBg: '#e6c675',
       boardBorder: '#9c7d32',
       boardInset: 'inset 0 3px 4px rgba(255, 255, 255, 0.25)',
@@ -88,11 +104,25 @@ const CHECKER_THEMES = {
         circle at 35% 35%, #fae4a8 0%, #e6c675 65%, #8f7129 100%
       )`,
       miniBorder: '#7a6021',
-
       dieBg: '#e6c675',
       dieBorder: '#9c7d32',
       diePip: '#2b2108',
       dieText: '#2b2108'
+    },
+    {
+      name: 'default (with relief)',
+      relief: true,
+      boardBg: '#fbfbfb',
+      boardBorder: '#d4d4d4',
+      boardInset: 'inset 0 -3px 4px rgba(0, 0, 0, 0.2)',
+      miniBg: `radial-gradient(
+        circle at 35% 35%, #ffffff 0%, #d1d1d1 60%, #8a8a8a 100%
+      )`,
+      miniBorder: '#666',
+      dieBg: '#fbfbfb',
+      dieBorder: '#d4d4d4',
+      diePip: '#1c1c1',
+      dieText: '#1c1c1c'
     }
   ]
 };
@@ -169,13 +199,14 @@ class PlayerScoreboard extends HTMLElement {
     const current = palette[this._colorIndex % palette.length];
     const rootStyle = document.documentElement.style;
     // Alternate styling not applied to default pieces
-    const isDefault = current.name === 'default';
-    const reliefUrl = isDefault 
-      ? 'none' : 'url("../assets/pieces/checker-relief.svg")';
+    const hasRelief = Boolean(current.relief);
+    const reliefUrl = hasRelief 
+      ? 'url("../assets/pieces/checker-relief.svg")' : 'none';
 
     // Checker variables
     rootStyle.setProperty(`--checker-${normalizedPlayer}-bg`, current.boardBg);
-    rootStyle.setProperty(`--checker-${normalizedPlayer}-border`, current.boardBorder);
+    rootStyle.setProperty(`--checker-${normalizedPlayer}-border`,
+      current.boardBorder);
     rootStyle.setProperty(`--checker-${normalizedPlayer}-inset`, current.boardInset);
     rootStyle.setProperty(`--checker-${normalizedPlayer}-relief`, reliefUrl);
 
@@ -188,11 +219,11 @@ class PlayerScoreboard extends HTMLElement {
     const miniEl = /** @type {HTMLElement | null} */
       (this.querySelector('.mini-checker'));
     if (miniEl) {
-      if (isDefault) {
-        miniEl.style.background = current.miniBg;
-      } else {
+      if (hasRelief) {
         miniEl.style.background = `${reliefUrl} center / 100% 100% no-repeat,
-          ${current.miniBg}`;
+        ${current.miniBg}`;
+      } else {
+        miniEl.style.background = current.miniBg;
       }      
       miniEl.style.backgroundPosition = 'center';
       miniEl.style.backgroundSize = '100% 100%';
