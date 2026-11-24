@@ -48,7 +48,7 @@ const CHECKER_THEMES = {
       dieText: '#fbf5f5'
     },
     {
-      name: 'default (with relief)',
+      name: 'default (w/relief)',
       relief: true,
       boardBg: '#1c1c1c',
       boardBorder: '#111111',
@@ -110,7 +110,7 @@ const CHECKER_THEMES = {
       dieText: '#2b2108'
     },
     {
-      name: 'default (with relief)',
+      name: 'default (w/relief)',
       relief: true,
       boardBg: '#fbfbfb',
       boardBorder: '#d4d4d4',
